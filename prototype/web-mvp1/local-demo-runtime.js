@@ -13,7 +13,12 @@
     zuri: [{id:'rather_raise',a:"My credit score, a monstera named Denzel, and a 401(k) that's finally doing its job."},{id:'dink_vacation',a:'December in Accra, then Lisbon just because we can. Zero car seats to check at the gate.'}],
     amara: [{id:'reunion_shirt',a:'"The Childfree Ones: Ask Us About Our Quiet Weekends." Front and back. Auntie gets an XL.'},{id:'college_fund',a:'A passport full of stamps, a paid-off car, and an emergency fund that is an actual fund.'}]
   };
-  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:humor[name.toLowerCase()],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
+  const basics = {
+    malik: {orientation:'Straight',education:"Bachelor's degree",industry:'Tech',politics:'Moderate',beliefs:['Pro-Black / Pan-African','Progressive'],social:'Ambivert',pets:['Dog parent']},
+    zuri: {orientation:'Bisexual',education:"Master's degree",industry:'Healthcare',politics:'Liberal',beliefs:['Spiritual, not religious'],social:'Always outside',pets:['Cat parent'],hidden:['orientation']},
+    amara: {orientation:'Straight',education:"Master's degree",industry:'Creative',politics:'Liberal',beliefs:['Pro-Black / Pan-African'],social:'Strict homebody',pets:['Pet-free home']}
+  };
+  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:humor[name.toLowerCase()],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums'],...basics[name.toLowerCase()]},lastActive:stamp});
   function fixtures(fresh = false) {
     const seeded = new Map();
     seeded.set('profiles/malik', profile('Malik','Man'));

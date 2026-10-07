@@ -155,6 +155,15 @@ img:not([src]){visibility:hidden}
 .fgroup h3{margin:0 0 4px}
 .strict{display:flex;align-items:center;gap:10px;font-weight:500;font-size:14px;margin:10px 0 0;color:var(--muted)}
 .strict input{width:20px;height:20px;accent-color:var(--berry)}
+.fsection{border-top:1px solid var(--line);margin-top:8px}
+.fsection h2{margin:22px 0 0}
+.fsection .fgroup:first-of-type{border-top:0}
+.fsection.dim .strict{opacity:.45}
+.values-strict{margin:2px 0 14px;color:var(--text);font-weight:600}
+.showall{border-top:0}
+.showall .strict{color:var(--text);font-weight:600}
+input.fsearch{display:block;width:100%;margin:10px 0 2px;font:inherit;font-size:14.5px;padding:10px 14px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);color:var(--text)}
+input.fsearch:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
 .fcount{position:sticky;top:0;z-index:2;background:var(--paper);padding:10px 0;font-weight:600;border-bottom:1px solid var(--line)}
 .savebar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));z-index:6}
 .savebar .in{max-width:480px;margin:0 auto;display:flex;gap:10px}
@@ -455,10 +464,22 @@ const VENUE_TAGS = ["Black-owned","Quiet enough to talk","Outdoor seating","Roof
 const AREAS = ["Midtown","Downtown","Old Fourth Ward","Inman Park","West End","Westside","Decatur","East Atlanta","Buckhead","College Park","South Atlanta","Sandy Springs","Other"];
 const priceStr = n => "$".repeat(Math.max(1, Math.min(4, +n || 1)));
 const safeUrl = u => /^https?:\/\/[^\s]+$/i.test(String(u||"").trim()) ? String(u).trim() : "";
+const INDUSTRIES = ["Tech","Healthcare","Creative","Finance","Education","Trades","Entrepreneur",
+  "Accounting","Agriculture","Architecture","Aviation","Beauty and wellness","Construction","Consulting","Customer service",
+  "Engineering","Fashion","Fitness","Government","Hospitality","Human resources","Insurance","Law","Logistics",
+  "Manufacturing","Marketing","Media","Military","Music and entertainment","Nonprofit","Real estate","Retail",
+  "Sales","Science and research","Social work","Sports","Transportation","Student","Other"];
+const COMMON_INDUSTRIES = 7;
+// [key, label, options, {multi, max, privacy}] — multi values are stored as arrays.
 const DETAILS = [
+  ["orientation","Sexual identity",["Straight","Bisexual","Pansexual","Queer","Lesbian","Gay"],{privacy:true}],
+  ["education","Education",["High school","Trade or vocational school","Some college","Bachelor's degree","Master's degree","Doctorate"]],
+  ["industry","Industry",INDUSTRIES],
+  ["politics","Politics",["Liberal","Moderate","Conservative","Radical / Leftist","Not political"],{privacy:true}],
   ["faith","Faith",["Christian","Muslim","Jewish","Spiritual, not religious","Agnostic","Atheist","Other"]],
-  ["politics","Politics",["Liberal","Moderate","Conservative","Not political"]],
-  ["education","Education",["High school","Trade or technical school","Some college","Bachelor's degree","Graduate degree"]],
+  ["beliefs","Core beliefs & culture",["Faith-centered","Pro-Black / Pan-African","Traditional","Progressive","Spiritual, not religious"],{multi:true,max:3}],
+  ["social","Social vibe",["Strict homebody","Ambivert","Always outside"]],
+  ["pets","Pets",["Dog parent","Cat parent","Other pets","Pet-free home"],{multi:true,max:3,solo:"Pet-free home"}],
   ["drinking","Drinking",["Never","Socially","Regularly"]],
   ["smoking","Smoking",["Never","Sometimes","Regularly"]],
   ["cannabis","Cannabis",["Never","Sometimes","Regularly"]]
@@ -467,15 +488,34 @@ const GENDERS = ["Woman","Man","Non-binary"];
 const GOALS = ["A committed relationship","A life partner"];
 const MARRIAGE = ["","I want to marry","I'm open to marriage","I don't plan to marry"];
 const FILTER_CATS = DETAILS.concat([["goal","Relationship goal",GOALS],["marriage","Marriage",MARRIAGE.filter(Boolean)]]);
+const FILTER_SECTIONS = [
+  ["Sexual identity",["orientation"]],
+  ["Education & career",["education","industry"]],
+  ["Values & worldview",["politics","faith","beliefs"]],
+  ["Lifestyle & energy",["social","pets","drinking","smoking","cannabis"]],
+  ["Relationship",["goal","marriage"]]
+];
+const VALUE_KEYS = ["politics","faith","beliefs"];
+const detailMeta = k => (DETAILS.find(c => c[0] === k) || [])[3] || {};
+// A multi-pick answer matches when any of its picks is wanted.
+const matchesVal = (v, vals) => Array.isArray(v) ? v.some(x => vals.includes(x)) : vals.includes(v);
+const isHidden = (p, k) => ((p.details||{}).hidden||[]).includes(k);
+const shownVal = v => Array.isArray(v) ? v.join(", ") : v;
 function valOf(p, k){
   if (k === "goal" || k === "marriage") return p[k] || "";
   if (k === "height") return (p.details||{}).height || 0;
-  return (p.details||{})[k] || "";
+  const v = (p.details||{})[k];
+  return Array.isArray(v) ? (v.length ? v : "") : (v || "");
 }
 function cleanDetails(d){
   const out = {};
   if (HEIGHTS.includes(+d.height)) out.height = +d.height;
-  DETAILS.forEach(([k,,opts]) => { if (opts.includes(d[k])) out[k] = d[k]; });
+  DETAILS.forEach(([k,,opts,meta]) => {
+    if (meta && meta.multi){ let vs = opts.filter(o => (d[k]||[]).includes(o)).slice(0, meta.max); if (meta.solo && vs.length > 1) vs = vs.filter(o => o !== meta.solo); if (vs.length) out[k] = vs; }
+    else if (opts.includes(d[k])) out[k] = d[k];
+  });
+  const hidden = (d.hidden||[]).filter(k => detailMeta(k).privacy && out[k]);
+  if (hidden.length) out.hidden = hidden;
   const ints = (d.interests||[]).filter(x => INTERESTS.includes(x)).slice(0, MAX_INTERESTS);
   if (ints.length) out.interests = ints;
   return out;
@@ -574,12 +614,14 @@ const myFilters = () => S.priv.filters || {};
 // Dealbreakers remove people. Everything else only changes the order people appear in.
 function passesFilters(id, F){
   F = F || myFilters();
+  // "Show me all compatible matches": only the two-way age and gender fit applies; picks still set the order.
+  if (F.showAll) return true;
   const p = S.profiles[id], blankOk = F.includeBlank !== false;
   for (const [k] of FILTER_CATS){
     const f = F[k]; if (!f || !f.strict || !(f.vals||[]).length) continue;
     const v = valOf(p, k);
     if (!v){ if (!blankOk) return false; continue; }
-    if (!f.vals.includes(v)) return false;
+    if (!matchesVal(v, f.vals)) return false;
   }
   const h = F.height;
   if (h && h.strict && (h.min || h.max)){
@@ -596,7 +638,7 @@ function sharedInterests(id){
 }
 function softScore(id){
   const F = myFilters(), p = S.profiles[id]; let n = 0;
-  for (const [k] of FILTER_CATS){ const f = F[k]; if (f && !f.strict && (f.vals||[]).includes(valOf(p,k))) n++; }
+  for (const [k] of FILTER_CATS){ const f = F[k]; if (f && !f.strict && (f.vals||[]).length && matchesVal(valOf(p,k), f.vals)) n++; }
   const h = F.height, v = valOf(p, "height");
   if (h && !h.strict && v && (h.min || h.max) && (!h.min || v >= h.min) && (!h.max || v <= h.max)) n++;
   return n + Math.min(3, sharedInterests(id).length) * 0.5;
@@ -668,6 +710,7 @@ function activeFilterCount(){
 }
 function strictCount(){
   const F = myFilters(); let n = 0;
+  if (F.showAll) return 0;
   FILTER_CATS.forEach(([k]) => { if (F[k] && F[k].strict && (F[k].vals||[]).length) n++; });
   if (F.height && F.height.strict && (F.height.min || F.height.max)) n++;
   if (F.activeOnly) n++;
@@ -701,7 +744,7 @@ function reasons(id){
     const F = myFilters();
     const si = sharedInterests(id);
     if (si.length) out.push(si.length === 1 ? `You both love ${si[0].toLowerCase()}` : `${si.length} shared passions`);
-    DETAILS.forEach(([k,label]) => { const v = valOf(p,k); if (v && F[k] && (F[k].vals||[]).includes(v) && out.length < 5) out.push(`${label}: ${v}`); });
+    DETAILS.forEach(([k,label]) => { const v = valOf(p,k); if (v && !isHidden(p,k) && F[k] && (F[k].vals||[]).length && matchesVal(v, F[k].vals) && out.length < 5) out.push(`${label}: ${shownVal(Array.isArray(v) ? v.filter(x => F[k].vals.includes(x)) : v)}`); });
   }
   return out;
 }
@@ -1036,7 +1079,9 @@ function card(id, likeable){
 function basicsRow(p){
   const d = p.details || {}, items = [];
   if (d.height) items.push(ftin(d.height));
-  ["faith","politics","education"].forEach(k => { if (d[k]) items.push(d[k]); });
+  ["orientation","education","industry","politics","faith"].forEach(k => { if (d[k] && !isHidden(p,k)) items.push(d[k]); });
+  ["beliefs","pets"].forEach(k => { (d[k]||[]).forEach(x => items.push(x)); });
+  if (d.social) items.push(d.social);
   if (d.drinking) items.push(d.drinking === "Never" ? "Doesn't drink" : `Drinks ${d.drinking.toLowerCase()}`);
   if (d.smoking) items.push(d.smoking === "Never" ? "Doesn't smoke" : `Smokes ${d.smoking.toLowerCase()}`);
   if (d.cannabis) items.push(d.cannabis === "Never" ? "No cannabis" : `Cannabis ${d.cannabis.toLowerCase()}`);
@@ -1052,9 +1097,12 @@ function detailsFields(D){
   return `
   <label for="d-height">Height</label>
   <select id="d-height" data-f="d:height"><option value="">Prefer not to say</option>${HEIGHTS.map(h => `<option value="${h}" ${+d.height===h?"selected":""}>${ftin(h)}</option>`).join("")}</select>
-  ${DETAILS.map(([k,label,opts]) => `
+  ${DETAILS.map(([k,label,opts,meta]) => meta && meta.multi ? `
+    <label>${label} <span class="tiny muted">· pick up to ${meta.max}</span></label>
+    <div class="pick" role="group" aria-label="${label}">${opts.map(o => `<label><input type="checkbox" data-dm="${k}" value="${esc(o)}" ${(d[k]||[]).includes(o)?"checked":""}><span>${esc(o)}</span></label>`).join("")}</div>` : `
     <label for="d-${k}">${label}</label>
-    <select id="d-${k}" data-f="d:${k}"><option value="">Prefer not to say</option>${opts.map(o => `<option value="${esc(o)}" ${d[k]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`).join("")}`;
+    <select id="d-${k}" data-f="d:${k}"><option value="">Prefer not to say</option>${opts.map(o => `<option value="${esc(o)}" ${d[k]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>
+    ${meta && meta.privacy ? `<label class="strict"><input type="checkbox" data-dh="${k}" ${(d.hidden||[]).includes(k)?"":"checked"}> Show on my profile <span class="tiny">(still used for matching either way)</span></label>` : ""}`).join("")}`;
 }
 function renderDots(){
   const im = document.querySelector(".card-photo img"), el = $("#dots"); if (!im || !el) return;
@@ -1125,15 +1173,23 @@ VIEWS.discover = () => {
 VIEWS.filters = () => {
   const F = S.f, A2 = S.fAge;
   const strictBox = (k, on) => `<label class="strict"><input type="checkbox" data-fs="${k}" ${on?"checked":""}> Dealbreaker: only show people who match</label>`;
-  const group = ([k,label,opts]) => { const f = F[k] || {}; return `
-    <div class="fgroup"><h3>${label}</h3>
-      <div class="pick" role="group" aria-label="${label}">${opts.map(o => `<label><input type="checkbox" data-fl="${k}" value="${esc(o)}" ${(f.vals||[]).includes(o)?"checked":""}><span>${esc(o)}</span></label>`).join("")}</div>
+  const group = ([k,label,opts], title) => { const f = F[k] || {}, search = k === "industry"; return `
+    <div class="fgroup">${label === title ? "" : `<h3>${label}</h3>`}
+      <div class="pick" role="group" aria-label="${label}">${opts.map((o,i) => `<label class="${search && i >= COMMON_INDUSTRIES && !(f.vals||[]).includes(o) ? "hide" : ""}"><input type="checkbox" data-fl="${k}" value="${esc(o)}" ${(f.vals||[]).includes(o)?"checked":""}><span>${esc(o)}</span></label>`).join("")}</div>
+      ${search ? `<input type="search" class="fsearch" data-fsearch="industry" placeholder="Search all ${opts.length} industries" aria-label="Search industries">` : ""}
       ${strictBox(k, f.strict)}</div>`; };
+  const cat = k => FILTER_CATS.find(c => c[0] === k);
+  const valuesStrict = VALUE_KEYS.every(k => (F[k]||{}).strict);
+  const section = ([title, keys]) => `<section class="fsection${F.showAll?" dim":""}"><h2>${title}</h2>
+    ${keys.map(k => group(cat(k), title)).join("")}
+    ${title === "Values & worldview" ? `<label class="strict values-strict"><input type="checkbox" data-fv ${valuesStrict?"checked":""}> Make all values dealbreakers</label>` : ""}</section>`;
   const h = F.height || {};
   return `<button class="btn-link" data-act="go" data-r="discover">Back to Discover</button>
     <h1>Filters</h1>
     <p class="muted">Pick what you're looking for. By default these are preferences: matching people are shown first, and others still appear. Turn on a dealbreaker to only see people who match.</p>
     <div class="fcount" id="fcount" aria-live="polite"></div>
+    <div class="fgroup showall"><label class="strict"><input type="checkbox" data-fx="showAll" ${F.showAll?"checked":""}> Show me all compatible matches</label>
+      <p class="tiny muted" style="margin:6px 0 0">Turns off every dealbreaker below. Your picks still decide who you see first. Age and who you want to meet always apply.</p></div>
     <div class="fgroup"><h3>Age</h3>
       <div class="row"><div><label for="fa-min" style="margin-top:4px">From</label><input type="number" id="fa-min" min="18" max="99" data-fa="min" value="${A2.min}"></div>
       <div><label for="fa-max" style="margin-top:4px">To</label><input type="number" id="fa-max" min="18" max="99" data-fa="max" value="${A2.max}"></div></div>
@@ -1143,7 +1199,7 @@ VIEWS.filters = () => {
         <div><label for="fh-min" style="margin-top:4px">From</label><select id="fh-min" data-fh="min"><option value="">Any</option>${HEIGHTS.map(x=>`<option value="${x}" ${h.min===x?"selected":""}>${ftin(x)}</option>`).join("")}</select></div>
         <div><label for="fh-max" style="margin-top:4px">To</label><select id="fh-max" data-fh="max"><option value="">Any</option>${HEIGHTS.map(x=>`<option value="${x}" ${h.max===x?"selected":""}>${ftin(x)}</option>`).join("")}</select></div>
       </div>${strictBox("height", h.strict)}</div>
-    ${FILTER_CATS.map(group).join("")}
+    ${FILTER_SECTIONS.map(section).join("")}
     <div class="fgroup"><h3>More</h3>
       <div class="checks"><label><input type="checkbox" data-fx="activeOnly" ${F.activeOnly?"checked":""}> Only people active in the last 7 days</label>
       <label><input type="checkbox" data-fx="includeBlank" ${F.includeBlank!==false?"checked":""}> Include people who didn't answer a dealbreaker question</label></div></div>
@@ -2045,6 +2101,10 @@ document.addEventListener("input", e => {
   if (t.dataset.e === "code" && S.elig) S.elig.code = t.value.toUpperCase().replace(/[^A-Z0-9]/g,"");
   if (t.dataset.fa && S.f) filterChanged(t);
   if (t.id === "compose") setTyping(!!t.value.trim());
+  if (t.dataset.fsearch){
+    const q = t.value.trim().toLowerCase(), g = t.closest(".fgroup");
+    g.querySelectorAll(".pick label").forEach((l,i) => { const on = l.querySelector("input").checked; l.classList.toggle("hide", !on && (q ? !l.textContent.toLowerCase().includes(q) : i >= COMMON_INDUSTRIES)); });
+  }
   if (t.id === "psearch"){
     const q = t.value.trim().toLowerCase(); let any = false;
     document.querySelectorAll("[data-group]").forEach(g => {
@@ -2076,8 +2136,24 @@ document.addEventListener("change", e => {
     if (t.checked && set.size >= MAX_INTERESTS){ t.checked = false; toast(`You can pick up to ${MAX_INTERESTS} interests.`); return; }
     t.checked ? set.add(t.value) : set.delete(t.value);
     d.interests = INTERESTS.filter(x => set.has(x)); draftChanged();
+  } else if (t.dataset.dm !== undefined && S.draft){
+    const k = t.dataset.dm, meta = detailMeta(k), d = S.draft.details = S.draft.details || {}, set = new Set(d[k] || []);
+    if (t.checked && set.size >= meta.max){ t.checked = false; toast(`You can pick up to ${meta.max}.`); return; }
+    t.checked ? set.add(t.value) : set.delete(t.value);
+    // "Pet-free home" can't be combined with having pets.
+    const solo = meta.solo && t.checked && (t.value === meta.solo ? [...set].filter(x => x !== meta.solo) : set.has(meta.solo) ? [meta.solo] : []);
+    (solo || []).forEach(x => { set.delete(x); const b = document.querySelector(`[data-dm="${k}"][value="${CSS.escape(x)}"]`); if (b) b.checked = false; });
+    d[k] = (DETAILS.find(c => c[0] === k)[2]).filter(o => set.has(o)); draftChanged();
+  } else if (t.dataset.dh !== undefined && S.draft){
+    const d = S.draft.details = S.draft.details || {}, set = new Set(d.hidden || []);
+    t.checked ? set.delete(t.dataset.dh) : set.add(t.dataset.dh);
+    d.hidden = [...set]; draftChanged();
   } else if (t.dataset.f && S.draft){ setDraft(t.dataset.f, t.value); draftChanged(); }
-  if (t.dataset.fl || t.dataset.fs || t.dataset.fh || t.dataset.fx || t.dataset.fa) filterChanged(t);
+  if (t.dataset.fv !== undefined && S.f){
+    VALUE_KEYS.forEach(k => { S.f[k] = S.f[k] || {vals:[]}; S.f[k].strict = t.checked; const b = document.querySelector(`[data-fs="${k}"]`); if (b) b.checked = t.checked; });
+  }
+  if (t.dataset.fx === "showAll") document.querySelectorAll(".fsection").forEach(x => x.classList.toggle("dim", t.checked));
+  if (t.dataset.fl || t.dataset.fs || t.dataset.fh || t.dataset.fx || t.dataset.fa || t.dataset.fv !== undefined) filterChanged(t);
   if (t.dataset.e === "q" && S.elig) S.elig.a[+t.dataset.i] = t.value;
   if (t.id === "pledge-check"){ S.pledgeChecked = t.checked; const b = document.querySelector('[data-act="accept-pledge"]'); if (b) b.disabled = !t.checked; }
   if (t.dataset.pv !== undefined && S.pp) S.pp.vibe = t.value;
