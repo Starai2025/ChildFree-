@@ -1,0 +1,2562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Black Childfree — interactive demo</title>
+<style>
+:root{
+  --ink:#222328; --paper:#FFFFFF; --surface:#FFFFFF; --mist:#F2F3F6; --slate:#6F727A;
+  --marigold:#FFE2D2; --berry:#CB4708; --berry-ink:#FFFFFF; --ok:#287447; --warn:#9A5B00; --bad:#BC3434;
+  --text:#222328; --muted:#71747D; --line:#EBEDF1; --chip:#F3F4F7;
+  --serif:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-sizing:border-box;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100%;background:var(--paper);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;overflow-x:clip}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px}
+.wordmark{font-family:var(--serif);font-size:21px;letter-spacing:-.01em;color:var(--text)}
+.wordmark small{display:block;font-family:var(--sans);font-size:12px;color:var(--muted);letter-spacing:0}
+main{flex:1;padding:6px 20px 120px}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(30px,8vw,40px);line-height:1.12;letter-spacing:-.015em;margin:18px 0 14px}
+h2{font-family:var(--serif);font-weight:400;font-size:24px;line-height:1.2;margin:26px 0 10px}
+h3{font-size:16px;font-weight:600;margin:20px 0 8px}
+p{margin:0 0 12px}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.tiny{font-size:12.5px}
+a{color:var(--berry)}
+button,.btn{font:inherit;cursor:pointer;border-radius:14px;border:1.5px solid var(--text);background:transparent;color:var(--text);padding:12px 18px;font-weight:600;min-height:48px}
+.btn-primary{background:var(--berry);border-color:var(--berry);color:var(--berry-ink)}
+.btn-block{display:block;width:100%}
+.btn-quiet{border-color:var(--line);font-weight:500}
+.btn-link{border:0;padding:6px 0;min-height:0;color:var(--berry);font-weight:600;background:none}
+.btn-danger{border-color:var(--bad);color:var(--bad)}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
+label{display:block;font-weight:600;font-size:15px;margin:16px 0 6px}
+.hint{font-weight:400;color:var(--muted);font-size:13.5px}
+input[type=text],input[type=date],input[type=number],select,textarea{width:100%;font:inherit;color:var(--text);background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px 14px}
+textarea{min-height:88px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--text);outline:none}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0}
+.q{padding:14px 0;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0}
+.q-text{font-weight:500;margin-bottom:10px}
+.seg{display:flex;gap:8px}
+.seg label{margin:0;flex:1;font-weight:500;font-size:15px;border:1.5px solid var(--line);border-radius:12px;padding:10px;text-align:center;cursor:pointer;background:var(--surface)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input:checked+span{font-weight:700}
+.seg label:has(input:checked){border-color:var(--text);background:var(--chip)}
+.seg label:has(input:focus-visible){outline:3px solid var(--marigold);outline-offset:2px}
+.checks label{display:flex;align-items:center;gap:10px;font-weight:500;margin:8px 0}
+.checks input{width:22px;height:22px;accent-color:var(--berry)}
+.counter{font-size:12.5px;color:var(--muted);text-align:right;margin-top:4px}
+.counter.bad{color:var(--bad)}
+.errors{border:1.5px solid var(--bad);color:var(--bad);border-radius:12px;padding:12px 14px;margin:16px 0;font-size:14.5px}
+.errors ul{margin:6px 0 0;padding-left:18px}
+.pledge{font-family:var(--serif);font-size:20px;line-height:1.5}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.ph{position:relative;aspect-ratio:4/5;border-radius:14px;overflow:hidden;background:var(--chip);border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .x{position:absolute;top:6px;right:6px;min-height:0;padding:4px 9px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13px}
+.ph .n{position:absolute;left:8px;bottom:6px;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.ph button.add{border:0;width:100%;height:100%;border-radius:0;color:var(--muted);font-weight:600}
+/* Card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin:8px 0 14px}
+.card-photo{position:relative;aspect-ratio:4/5;background:var(--chip)}
+.card-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.card-photo .nav{position:absolute;top:0;bottom:0;width:40%;border:0;background:transparent;border-radius:0;min-height:0;padding:0}
+.card-photo .nav.prev{left:0}.card-photo .nav.next{right:0}
+.dots{position:absolute;top:10px;left:12px;right:12px;display:flex;gap:5px}
+.dots i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.45)}
+.dots i.on{background:#fff}
+.card-body{padding:18px 20px 8px}
+.card-name{font-family:var(--serif);font-size:30px;line-height:1.1;margin:0}
+.card-sub{color:var(--muted);margin:4px 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.chip{background:var(--chip);border-radius:999px;padding:5px 11px;font-size:13px;font-weight:500}
+.prompt{padding:16px 0;border-top:1px solid var(--line)}
+.prompt .pq{font-size:13.5px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.prompt .pa{font-family:var(--serif);font-size:23px;line-height:1.35}
+.bio{padding:14px 0;border-top:1px solid var(--line)}
+.card-actions{display:flex;gap:10px;padding:14px 20px 18px;border-top:1px solid var(--line)}
+.card-actions .like{flex:1.4}
+.card-actions .pass{flex:1}
+.under{display:flex;justify-content:center;gap:22px;margin:6px 0 10px}
+.under button{border:0;min-height:0;padding:6px;font-weight:500;color:var(--muted);font-size:14px}
+.status{border-left:4px solid var(--marigold);padding:4px 0 4px 16px;margin:20px 0}
+.status.ok{border-color:var(--ok)}.status.bad{border-color:var(--bad)}
+/* Lists */
+.list{list-style:none;margin:0;padding:0}
+.item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-top:0;border-radius:0;text-align:left;font-weight:400;min-height:0}
+.avatar{width:54px;height:54px;border-radius:50%;object-fit:cover;background:var(--chip);flex:none}
+.item .t{font-weight:600}
+.item .s{color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .grow{flex:1;min-width:0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--berry);flex:none}
+.newm{display:flex;gap:14px;overflow-x:auto;padding:4px 0 10px}
+.newm button{border:0;padding:0;min-height:0;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:500;font-size:14px;width:72px;flex:none}
+.newm img{width:68px;height:68px;border-radius:50%;object-fit:cover;background:var(--chip);border:2px solid var(--marigold)}
+/* Chat */
+.chat-head{display:flex;align-items:center;gap:12px;padding:6px 0 12px;border-bottom:1px solid var(--line)}
+.chat-head .grow{flex:1}
+.msgs{display:flex;flex-direction:column;gap:6px;padding:16px 0 150px}
+.b{max-width:78%;padding:10px 14px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+.b.me{align-self:flex-end;background:var(--berry);color:var(--berry-ink);border-bottom-right-radius:6px}
+.b.them{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:6px}
+.when{font-size:11.5px;color:var(--muted);margin:2px 4px 6px}
+.when.me{align-self:flex-end}
+.composer{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.composer .in{max-width:520px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+.composer textarea{min-height:48px;max-height:140px}
+/* Nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav.tabs .in{max-width:520px;margin:0 auto;display:flex}
+nav.tabs button{flex:1 1 0;min-width:0;padding:0 2px;border:0;border-radius:0;min-height:58px;font-weight:500;font-size:13.5px;color:var(--muted);position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:380px){nav.tabs button{font-size:12.5px}}
+nav.tabs button[aria-current=page]{color:var(--text);font-weight:700}
+nav.tabs button[aria-current=page]::before{content:"";position:absolute;top:0;left:28%;right:28%;height:3px;border-radius:0 0 3px 3px;background:var(--marigold)}
+nav.tabs .badge{display:inline-block;min-width:8px;height:8px;border-radius:50%;background:var(--berry);margin-left:5px;vertical-align:middle}
+/* Modal + toast */
+.scrim{position:fixed;inset:0;background:rgba(10,12,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:var(--paper);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px));max-height:90%;overflow:auto}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--text);color:var(--paper);padding:11px 16px;border-radius:12px;font-size:14.5px;z-index:30;max-width:90%}
+.match{position:fixed;inset:0;background:var(--berry);color:#fff;z-index:25;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+.match h1{color:#fff;font-size:44px}
+.match button{border-color:#fff;color:#fff;margin:6px;min-width:220px}
+.match .btn-primary{background:#fff;color:var(--berry)}
+.tabs-inline{display:flex;gap:6px;margin:10px 0 4px;flex-wrap:wrap}
+.tabs-inline button{min-height:38px;padding:7px 14px;border-color:var(--line);font-weight:500}
+.tabs-inline button[aria-pressed=true]{border-color:var(--text);background:var(--chip);font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat b{display:block;font-family:var(--serif);font-size:26px;font-weight:400}
+.stat span{font-size:12.5px;color:var(--muted)}
+.review-photos{display:flex;gap:8px;overflow-x:auto;margin:10px 0}
+.review-photos img{height:150px;border-radius:10px}
+img:not([src]){visibility:hidden}
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.pick label{margin:0;display:inline-flex;align-items:center;font-weight:500;font-size:14.5px;border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;background:var(--surface)}
+.pick input{position:absolute;opacity:0;pointer-events:none}
+.pick label:has(input:checked){border-color:var(--text);background:var(--chip);font-weight:700}
+.pick label:has(input:focus-visible){outline:3px solid var(--marigold);outline-offset:2px}
+.fgroup{padding:16px 0;border-top:1px solid var(--line)}
+.fgroup:first-of-type{border-top:0}
+.fgroup h3{margin:0 0 4px}
+.strict{display:flex;align-items:center;gap:10px;font-weight:500;font-size:14px;margin:10px 0 0;color:var(--muted)}
+.strict input{width:20px;height:20px;accent-color:var(--berry)}
+.fcount{position:sticky;top:0;z-index:2;background:var(--paper);padding:10px 0;font-weight:600;border-bottom:1px solid var(--line)}
+.savebar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));z-index:6}
+.savebar .in{max-width:480px;margin:0 auto;display:flex;gap:10px}
+.basics{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.basics span{border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
+.disc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0}
+.disc-top button{min-height:40px;padding:8px 14px}
+.likeon{float:right;min-height:0;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);font-size:13.5px;font-weight:600;margin:-4px 0 6px 10px;background:var(--surface)}
+.likeon:hover{border-color:var(--berry);color:var(--berry)}
+.photo-like{position:absolute;right:12px;bottom:12px;min-height:0;padding:8px 14px;border-radius:999px;background:var(--surface);border:0;font-size:14px;box-shadow:0 1px 6px rgba(0,0,0,.25)}
+.liked-you{background:var(--chip);border-left:4px solid var(--berry);border-radius:12px;padding:12px 14px;margin:10px 0 12px}
+.liked-you b{display:block;margin-bottom:2px}
+.liked-you q{font-family:var(--serif);font-size:18px}
+.ctx{align-self:center;max-width:90%;text-align:center;font-size:14px;color:var(--muted);background:var(--chip);border-radius:14px;padding:10px 14px;margin:4px 0 10px}
+.ctx q{display:block;font-family:var(--serif);font-size:17px;color:var(--text);margin-top:4px}
+.newm .lk img{border-color:var(--berry)}
+.card[data-swipe]{touch-action:pan-y;user-select:none;-webkit-user-select:none;will-change:transform}
+.card.dragging{transition:none}
+.card.settle{transition:transform .25s ease}
+.card.fly{transition:transform .28s ease-in,opacity .28s ease-in;opacity:0}
+.stamp{position:absolute;top:28px;padding:6px 16px;border-radius:10px;border:3px solid;font-weight:700;font-size:26px;background:rgba(255,255,255,.85);opacity:0;pointer-events:none;z-index:2}
+.stamp.like{left:20px;color:#9C2F5E;border-color:#9C2F5E;transform:rotate(-12deg)}
+.stamp.pass{right:20px;color:#3A4060;border-color:#3A4060;transform:rotate(12deg)}
+.swipe-hint{text-align:center;font-size:13px;color:var(--muted);margin:2px 0 0}
+@media (prefers-reduced-motion:reduce){.card.settle,.card.fly{transition:none}}
+.b.img{padding:4px;background:transparent;border:0}
+.b.img img{display:block;max-width:220px;max-height:280px;border-radius:14px;background:var(--chip);min-width:120px;min-height:120px;object-fit:cover}
+.typing{font-size:13px;color:var(--muted);margin:2px 4px;min-height:18px}
+.seen{font-size:11.5px;color:var(--muted);align-self:flex-end;margin:-2px 4px 6px}
+.composer .ph-btn{padding:10px 12px;border-color:var(--line);font-weight:500}
+.interests{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.interests span{background:var(--chip);border-radius:999px;padding:4px 10px;font-size:13px}
+.interests span.shared{background:var(--marigold);color:#1B2350;font-weight:600}
+.toppick{display:flex;align-items:center;gap:10px;background:var(--marigold);color:#1B2350;border-radius:14px;padding:10px 14px;margin:8px 0 0;font-weight:600}
+.toppick small{display:block;font-weight:500;font-size:13px}
+.gaps{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+.gaps th,.gaps td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+.gaps th:first-child,.gaps td:first-child{text-align:left}
+.gaps td.short{background:rgba(233,161,43,.22);font-weight:700}
+.tablewrap{overflow-x:auto}
+.announce{position:relative;background:var(--ink);color:var(--paper);border-radius:14px;padding:12px 44px 12px 14px;margin:8px 0;font-size:14.5px}
+.announce b{display:block;font-size:12.5px;opacity:.8;font-weight:600}
+.announce button{position:absolute;top:6px;right:6px;min-height:0;padding:6px 10px;border:0;color:var(--paper);font-size:13px}
+.event{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin:12px 0}
+.event .date{font-weight:700;color:var(--berry);font-size:14px}
+.event h2{margin:4px 0 6px}
+.event .meta{color:var(--muted);font-size:14px;margin-bottom:10px}
+.event .going{font-size:14px;font-weight:600;margin:10px 0}
+.pgroup{margin:18px 0 4px}
+.pgroup h3{margin:0 0 6px}
+.pcount{position:sticky;top:0;z-index:2;background:var(--paper);padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pcount b{font-size:15px}
+.pick label.hide{display:none}
+.match .pair{display:flex;justify-content:center;margin-bottom:22px}
+.match .av{position:relative;width:112px;height:112px;border-radius:50%;border:4px solid #fff;background:#C24A7D;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:44px;color:#fff}
+.match .av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.match .av + .av{margin-left:-22px}
+.match .shared{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:4px 0 14px;max-width:360px}
+.match .shared span{background:rgba(255,255,255,.18);border-radius:999px;padding:5px 12px;font-size:14px}
+.match .note{font-family:var(--serif);font-size:19px;max-width:340px;margin:0 0 18px;opacity:.95}
+.match .actions{display:flex;flex-direction:column;align-items:center;margin-top:8px}
+.planner{position:fixed;inset:0;z-index:22;background:#0A0A0A;color:#F5F5F5;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 20px calc(120px + env(safe-area-inset-bottom,0px))}
+.planner .pin{max-width:480px;margin:0 auto}
+.planner .phead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.planner .phead button{border:0;color:#F5F5F5;min-height:40px;padding:6px 0;font-weight:500;background:none}
+.planner .phead b{font-size:16px}
+.planner h2{color:#F5F5F5;font-size:22px;margin:22px 0 10px}
+.planner h1{color:#FFB800}
+.planner p{color:#F5F5F5}
+.planner .pm{color:#8E8E93}
+.planner select,.planner input[type=text],.planner input[type=time],.planner input[type=datetime-local]{background:#1C1C1E;color:#F5F5F5;border:1px solid #333333}
+.planner label{color:#F5F5F5}
+.planner .errors{border-color:#E31C25;color:#FF6B72}
+.pchips{display:flex;gap:8px}
+.pchips button{flex:1;border:1px solid #333333;color:#F5F5F5;background:#1C1C1E;min-height:46px}
+.pchips button[aria-pressed=true]{background:#00A859;border-color:#00A859;color:#0A0A0A}
+.days{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scroll-snap-type:x proximity}
+.days button{flex:none;width:62px;min-height:74px;border:1px solid #333333;background:#1C1C1E;color:#F5F5F5;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:600;padding:6px;scroll-snap-align:start}
+.days button b{font-size:22px;font-weight:600}
+.days button[aria-pressed=true]{background:#00A859;border-color:#00A859;color:#0A0A0A}
+.opt{display:flex;align-items:center;gap:10px;background:#1C1C1E;border-radius:14px;padding:10px 12px;margin:8px 0}
+.opt .grow{flex:1;font-weight:600;font-size:15px}
+.opt input[type=time]{width:auto;padding:8px;min-height:40px}
+.opt button{border:0;color:#8E8E93;min-height:0;padding:6px;font-weight:500;background:none}
+.opt.add{border:1px dashed #333333;background:transparent;color:#8E8E93;justify-content:center;font-weight:500}
+.btn-go{background:#00A859;border-color:#00A859;color:#0A0A0A}
+.btn-gold{background:#FFB800;border-color:#FFB800;color:#0A0A0A}
+.btn-ghost{border:1px solid #333333;background:#1C1C1E;color:#F5F5F5}
+.btn-red{border:1.5px solid #E31C25;color:#E31C25;background:transparent}
+.btn-mute{border:0;background:none;color:#8E8E93;min-height:0;padding:10px 0;font-weight:500}
+.pbar{position:fixed;left:0;right:0;bottom:0;background:#0A0A0A;border-top:1px solid #1C1C1E;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));z-index:23}
+.pbar .pin{display:flex;gap:10px}
+.card.vcard{background:#1C1C1E;border:0;color:#F5F5F5;margin-top:14px}
+.vcard .vphoto{position:relative;aspect-ratio:4/3;background:linear-gradient(135deg,#2C2C30,#1C1C1E);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:30px;color:#FFB800;text-align:center;padding:20px}
+.vcard .vphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vcard .vbody{padding:16px 18px 18px}
+.vcard h3{font-family:var(--serif);font-weight:400;font-size:26px;margin:0 0 4px;color:#F5F5F5}
+.vmeta{color:#8E8E93;font-size:14px;margin:2px 0}
+.vtags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.vtags span{border:1px solid #333333;border-radius:999px;padding:3px 10px;font-size:13px}
+.vcard a{color:#FFB800;font-weight:600}
+.vprog{color:#8E8E93;font-size:13.5px;margin-top:6px}
+.vact{display:flex;gap:10px;margin-top:14px}
+.vact .vpass{flex:1;border:1.5px solid #E31C25;color:#E31C25;background:transparent}
+.vact .vlike{flex:1.3;background:#00A859;border-color:#00A859;color:#0A0A0A}
+.topt label{display:block;background:#1C1C1E;border:1px solid #333333;border-radius:14px;padding:15px 16px;margin:8px 0;font-weight:600;cursor:pointer}
+.topt input{position:absolute;opacity:0;pointer-events:none}
+.topt label:has(input:checked){background:#00A859;color:#0A0A0A;border-color:#00A859}
+.topt label:has(input:focus-visible){outline:3px solid #FFB800;outline-offset:2px}
+.dblock{background:#1C1C1E;color:#F5F5F5;border:1px solid #333333;border-radius:16px;padding:16px;margin:6px 0 12px;align-self:stretch}
+.dblock.gold{border-color:#FFB800}
+.dblock .lbl{color:#FFB800;font-weight:700;font-size:14px;margin-bottom:6px}
+.dblock .lbl.ok{color:#00A859}
+.dblock p{margin:0 0 8px;color:#F5F5F5}
+.dblock .sub{color:#8E8E93;font-size:14.5px}
+.dblock .row{margin-top:10px}
+.dblock button{min-height:44px}
+.dblock .big{font-family:var(--serif);font-size:20px;margin:2px 0}
+.dblock a{color:#FFB800;font-weight:600}
+.dpin{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;background:#1C1C1E;color:#F5F5F5;border:1px solid #FFB800;border-radius:12px;padding:8px 12px;margin:8px 0 0;font-size:14px}
+.dpin b{color:#FFB800;font-weight:700}
+.dpin .grow{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dpin button{border:0;color:#FFB800;min-height:0;padding:4px 0;font-weight:600;background:none}
+.ditem{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:#1C1C1E;color:#F5F5F5;border:1px solid #333333;border-radius:16px;padding:14px;margin:10px 0;font-weight:400;min-height:0}
+.ditem .t{font-weight:700}
+.ditem .s{color:#C7C7CC;font-size:14px}
+.ditem .st{font-size:13px;font-weight:700;margin-top:3px}
+.ditem .avatar{width:50px;height:50px}
+.sep{height:1px;background:var(--line);margin:22px 0}
+@media (prefers-reduced-motion:no-preference){
+  .match{animation:pop .35s ease-out}
+  @keyframes pop{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
+}
+
+/* October 2026 redesign — supplied LOML screenshot reference. */
+html{background:#F4F5F7;scroll-padding-top:90px}
+body{background:#F4F5F7;font-size:14px;line-height:1.6;letter-spacing:-.015em}
+.app{max-width:480px;background:var(--paper);min-height:100dvh;box-shadow:0 0 0 1px #EBEDF1}
+header.top{position:sticky;top:0;z-index:10;min-height:76px;padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px;background:var(--berry);color:#fff;gap:12px}
+.wordmark{color:#fff;font-family:var(--sans);font-size:20px;font-weight:800;letter-spacing:-.8px;line-height:1.2}
+.wordmark small{font-size:10px;font-weight:500;letter-spacing:.5px;color:#fff;opacity:.92;margin-top:5px}
+.brand-heart{display:inline-block;margin-left:3px;vertical-align:-2px}
+#hdr button{border:1px solid #fff;color:var(--berry);background:#fff;border-radius:10px;font-size:12px}
+main{padding:20px 20px 115px}
+main:focus{outline:none}
+h1{font-family:var(--sans);font-weight:750;font-size:27px;line-height:1.25;letter-spacing:-1px;margin:6px 0 12px}
+h2{font-family:var(--sans);font-weight:700;font-size:20px;letter-spacing:-.6px;margin:24px 0 10px}
+h3{font-size:14px;font-weight:700;margin:22px 0 10px}
+p{margin-bottom:12px}
+.small{font-size:13px}.tiny{font-size:11px;line-height:1.6}
+button,.btn{border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13px;min-height:46px;padding:11px 16px;font-weight:600;transition:background .15s,box-shadow .15s,transform .15s}
+button:hover{background:#F7F8FA}button:active{transform:translateY(1px)}
+.btn-primary{background:var(--berry);border-color:var(--berry);color:#fff;box-shadow:0 3px 9px #D84B0818}
+.btn-primary:hover{background:#C74100;border-color:#C74100}
+.btn-quiet{background:#F5F6F9;border-color:transparent;color:#555B66}
+.btn-quiet:hover{background:#EAEDF2}
+.btn-link{background:none;border:0;color:var(--berry);padding:6px 0;min-height:32px}
+.btn-link:hover{background:none;text-decoration:underline}
+.btn-danger{color:var(--bad);border-color:#F2DADA;background:#FFF8F8}
+:focus-visible{outline:3px solid #2474D6;outline-offset:3px}
+input[type=text],input[type=date],input[type=number],select,textarea{background:#F3F5F9;border:1px solid transparent;border-radius:9px;font-size:14px;padding:13px 14px;min-height:46px}
+input:focus,select:focus,textarea:focus{background:#fff;border-color:#F5651C;outline:3px solid #FFE2D2}
+label{font-size:13px;margin:17px 0 7px}.hint{font-size:11px;display:block;margin-top:3px}
+.panel{border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 3px 14px #20232B04}
+.q{padding:18px 0}.q-text{font-size:13px;line-height:1.55}
+.seg label{font-size:12px;border:1px solid var(--line);border-radius:9px;padding:11px;background:#F8F9FB}
+.seg label:has(input:checked),.pick label:has(input:checked){background:#FFF0E8;color:#B43D06;border-color:#FAB18D}
+.pick label{font-size:12px;min-height:40px;padding:9px 13px;border-radius:24px;border-width:1px}
+.checks label{font-size:13px}.pledge{font-size:16px;line-height:1.85;font-weight:500}
+.errors{border:1px solid #E9B1B1;background:#FFF5F5;font-size:13px}
+.ph{border-radius:12px;background:#F3F5F9;border-color:#D7DCE5}
+.ph button.add{font-size:12px;color:#71747D}
+.ph .x{font-size:10px}.photos{gap:9px}
+.card{border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px #171B2408;margin:12px 0 16px}
+.card-photo{aspect-ratio:3/4;max-height:500px;background:#F1F2F5}
+.card-photo::after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.65));pointer-events:none}
+.photo-identity{position:absolute;bottom:20px;left:20px;right:74px;color:#fff;z-index:1;pointer-events:none}
+.photo-identity h2{font-size:28px;letter-spacing:-.8px;line-height:1.2;color:#fff;margin:0 0 5px}
+.photo-identity p{font-size:11px;color:#fff;margin:0;opacity:.95}
+.photo-identity .intent-label{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.4px;margin-bottom:7px;padding:4px 8px;border-radius:5px;background:#ffffff26;backdrop-filter:blur(6px)}
+.dots{top:12px;left:12px;right:12px;z-index:1}.dots i{height:3px}
+.card-photo .nav{z-index:1}
+.photo-like{display:flex;align-items:center;justify-content:center;width:44px;height:44px;right:16px;bottom:22px;padding:0;border-radius:50%;color:var(--berry);z-index:2;box-shadow:0 3px 12px #0002}
+.card-body{padding:18px 18px 8px}.card-sub{font-size:12px;margin:0 0 13px;color:var(--muted)}
+.card-name{font-size:26px}.basics,.interests,.chips{gap:6px}
+.basics span,.interests span,.chip{font-size:10px;line-height:1.4;padding:6px 10px;border-radius:6px;border:0;background:#F1F3F8;color:#626A79}
+.interests span.shared{background:#FFF0E8;color:#AB3A08;font-weight:600}
+.prompt{padding:18px 0}.prompt .pq{font-size:11px;font-weight:500;color:#848994;margin-bottom:8px}
+.prompt .pa{font-size:18px;line-height:1.5;font-weight:600;letter-spacing:-.4px}
+.likeon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;padding:0;background:#FFF0E8;border:0;color:var(--berry);margin:0 0 4px 10px}
+.bio{font-size:13px;color:#646A74;line-height:1.8}
+.discover-heading{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
+.discover-heading h1{font-size:24px;margin:0 0 4px}.discover-heading p{font-size:11px;color:var(--muted);margin:0}
+.section-kicker{text-transform:uppercase;letter-spacing:1.5px;font-weight:600;font-size:9px;color:var(--berry);margin-bottom:6px}
+.disc-top{margin:10px 0;gap:8px}.disc-top button{min-height:36px;font-size:11px;padding:7px 12px;border-radius:8px}.disc-top .small{font-size:11px}
+.toppick{background:#FFF3EB;color:#A13A0D;border-radius:9px;padding:10px 12px;font-size:12px;border:1px solid #FFE5D5;margin:10px 0}.toppick small{font-size:10px;color:#A56F57;font-weight:400;margin-top:2px}
+.toppick::before{content:"✦";font-size:20px;line-height:1}
+body[data-route=discover] .card-actions,body[data-route=view] .card-actions{position:fixed;bottom:calc(76px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:min(440px,calc(100% - 40px));z-index:9;padding:9px!important;background:#ffffffed;border-radius:14px;box-shadow:0 4px 24px #20232B1A;backdrop-filter:blur(12px);gap:10px}
+.card-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-size:13px}.card-actions .pass{background:#F1F3F7;border:0;color:#6D7584}.card-actions .like{flex:1.2}
+body[data-route=discover] main,body[data-route=view] main{padding-bottom:175px}
+body[data-route=discover] .card-photo,body[data-route=view] .card-photo{height:clamp(200px,calc(100svh - 450px),460px);aspect-ratio:auto}
+.under{gap:24px}.under button{font-size:11px}.swipe-hint{font-size:10px;line-height:1.6}
+.list{margin-top:8px}.item{padding:15px 0;gap:12px;border-bottom:1px solid #F1F2F5;background:transparent;font-size:13px}.item:hover{background:#FAFBFD}
+.item .t{font-size:13px;font-weight:600;margin-bottom:4px}.item .s{font-size:11px;max-width:100%;color:#9297A2}.item .tiny{font-size:9px}
+.avatar{width:52px;height:52px;border-radius:50%;background:#F0F2F6}.dot{width:8px;height:8px;background:var(--berry)}
+.newm{gap:17px;padding:8px 0 16px}.newm button{width:62px;font-size:10px;gap:8px;background:transparent;overflow:visible}.newm img{width:58px;height:58px;border:2px solid #F5651C;outline:3px solid #FFF2EB;outline-offset:2px}.newm .lk img{border-color:#F5651C}
+nav.tabs{left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:480px;box-shadow:0 -3px 18px #20232B05;border-top:1px solid var(--line);background:#fff;padding-top:5px}
+nav.tabs .in{max-width:480px}nav.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:66px;font-size:9px;line-height:1;color:#8D929D;background:transparent;overflow:visible}
+nav.tabs button svg{width:22px;height:22px}nav.tabs button[aria-current=page]{color:var(--berry);font-weight:600}nav.tabs button[aria-current=page]::before{display:none}
+nav.tabs .badge{position:absolute;right:calc(50% - 16px);top:8px;width:7px;min-width:7px;height:7px;border:2px solid #fff;box-sizing:content-box;background:var(--berry);margin:0}
+.scrim{background:#161A2866;backdrop-filter:blur(3px)}.sheet{max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px))}.sheet h2{font-size:22px}.sheet .row{flex-wrap:wrap}.sheet .row>*{min-width:100px}
+.toast{font-size:12px;background:#272A32;color:#fff;box-shadow:0 6px 24px #0002;border-radius:10px}
+.tabs-inline{padding:4px;background:#F3F5F8;border-radius:10px;gap:4px}.tabs-inline button{border:0;background:transparent;min-height:36px;font-size:11px;border-radius:7px}.tabs-inline button[aria-pressed=true]{background:#fff;color:var(--berry);box-shadow:0 2px 7px #20232B08}
+.stat{background:#F9FAFC;border-color:var(--line);border-radius:12px}.stat b{font-size:25px;font-weight:700}.stat span{font-size:10px}
+.fcount,.pcount{background:#fff;border-bottom:1px solid var(--line);top:76px;font-size:12px}.pcount b{font-size:12px}
+.savebar{background:#ffffffed;backdrop-filter:blur(12px);max-width:480px;left:50%;right:auto;transform:translateX(-50%);width:100%}.savebar .in{max-width:440px}
+.status{padding:20px;background:#FFF6F0;border:1px solid #FFE5D5;border-radius:12px;margin:12px 0}.status.bad{background:#FFF6F6;border-color:#F2DADA}
+.announce{background:#FFF3EB;color:#8E3D18;border-radius:10px;border:1px solid #FFE5D5;font-size:12px}.announce b{font-size:10px}.announce button{color:#8E3D18;font-size:10px}
+.liked-you,.ctx{background:#F5F6F9;border:0;border-radius:10px;font-size:11px;color:#838996}.ctx q{font-size:14px;color:#515765}.liked-you q{font-size:14px}
+.event{border-radius:12px;box-shadow:none}.event .date{font-size:11px}.event h2{font-size:18px}.event .meta{font-size:12px}
+body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding-top:0;background:#fff;min-height:100dvh}
+.chat-head{position:sticky;top:0;z-index:10;min-height:78px;margin:0 -20px;padding:calc(13px + env(safe-area-inset-top,0px)) 15px 13px;background:var(--berry);border:0;color:#fff;gap:10px}
+.chat-head .avatar{width:40px;height:40px;border:2px solid #ffffff60}.chat-head .tiny{color:#fff;font-size:10px;opacity:.9}.chat-head .grow>div:first-child{font-size:15px!important;font-weight:700;line-height:1.4}
+.chat-head button{padding:8px!important;background:transparent;color:#fff;border:0;min-width:32px}.chat-head .btn-link{font-size:22px}.chat-head .btn-quiet{font-size:22px;line-height:1}
+.msgs{padding:24px 0 150px;gap:7px}.b{max-width:80%;font-size:13px;line-height:1.65;padding:12px 14px;border-radius:12px}.b.me{background:#FFF0E7;border:1px solid #FFE3D2;color:#674330;border-bottom-right-radius:3px}.b.them{background:#F2F4F8;color:#454C57;border:0;border-bottom-left-radius:3px}.when{font-size:9px;color:#A1A6AF}.seen{font-size:9px}.typing{font-size:10px;min-height:12px}
+.composer{left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #EDF0F4;padding:9px 14px calc(14px + env(safe-area-inset-bottom,0px));z-index:12}.composer textarea{background:#F1F3F7;border:0;height:44px;min-height:44px;padding:12px 14px;border-radius:24px;font-size:12px;resize:none}.composer .ph-btn,.composer .btn-primary{flex:none;width:44px;height:44px;min-height:44px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center}.composer .ph-btn{background:#F4F6F9;border:0;color:#9198A5}.composer .btn-primary{background:var(--berry);color:#fff;border:0;box-shadow:none}
+.match{background:linear-gradient(150deg,#CB4708,#AE3504);padding:28px;overflow-y:auto}.match h1{font-size:38px;font-weight:800}.match .pair{margin-bottom:30px}.match .av{width:116px;height:116px;border:5px solid #fff;box-shadow:0 10px 35px #8A280F33;background:#FD9972}.match .note{font-size:16px}.match .shared span{font-size:11px}.match .actions{width:100%;max-width:320px}.match .actions button{width:100%;border-radius:12px;font-size:13px}.match .btn-primary{color:#C74100;background:#fff}.match .actions button:last-child{border-color:#ffffff50;background:transparent}
+.welcome{padding:14px 0}.welcome-art{height:176px;background:#FFF3EB;border-radius:22px;display:flex;align-items:center;justify-content:center;margin-bottom:30px;position:relative;overflow:hidden}.welcome-art::before,.welcome-art::after{content:"";position:absolute;border:1px solid #F9D3BF;border-radius:50%;width:230px;height:230px;left:-125px;top:-80px}.welcome-art::after{left:auto;right:-130px;top:60px}.welcome-art svg{width:80px;height:80px;color:#F5651C;stroke-width:1.2}.welcome h1{font-size:34px;letter-spacing:-1.3px;max-width:310px}.welcome>p{font-size:13px;line-height:1.85;color:var(--muted)}.welcome .welcome-note{font-size:10px;line-height:1.8;color:#71747D;padding:14px 0}.welcome-facts{display:flex;gap:7px;margin:20px 0}.welcome-facts span{flex:1;text-align:center;background:#F7F8FA;border-radius:8px;padding:10px 5px;font-size:10px;color:#747B88}.welcome .btn-primary{margin-top:10px!important}
+/* The date planner uses the same white/orange system as the rest of the app. */
+.planner{background:#fff;color:var(--text);max-width:480px;left:50%;right:auto;transform:translateX(-50%);width:100%;padding-top:calc(20px + env(safe-area-inset-top,0px))}.planner .phead button{color:var(--berry)}.planner h1{color:var(--text);font-size:28px}.planner h2,.planner p,.planner label{color:var(--text)}.planner .pm{color:var(--muted)}.planner select,.planner input[type=text],.planner input[type=time],.planner input[type=datetime-local]{background:#F3F5F9;color:var(--text);border:1px solid var(--line)}
+.pchips button,.days button{background:#F7F8FA;color:var(--text);border-color:var(--line);font-size:12px}.pchips button[aria-pressed=true],.days button[aria-pressed=true],.topt label:has(input:checked){background:#FFF0E8;border-color:#F8B998;color:#B43D06}.days button b{font-size:20px}.opt{background:#F3F5F9;color:var(--text)}.opt input[type=time]{background:#fff}.opt button,.opt.add{color:var(--muted)}.opt.add{border-color:#D7DCE5}
+.btn-go,.btn-gold{background:var(--berry);border-color:var(--berry);color:#fff}.btn-ghost{background:#F6F7F9;border-color:var(--line);color:var(--text)}.btn-mute{color:var(--muted)}.pbar{max-width:480px;width:100%;left:50%;right:auto;transform:translateX(-50%);background:#fff;border-color:var(--line)}
+.card.vcard{background:#fff;color:var(--text);border:1px solid var(--line)}.vcard .vphoto{background:#FFF3EB;color:var(--berry)}.vcard h3{color:var(--text);font-size:22px;font-weight:700}.vmeta,.vprog{color:var(--muted);font-size:12px}.vtags span{border-color:var(--line);font-size:10px;background:#F5F6F9}.vcard a{color:var(--berry)}.vact .vlike{background:var(--berry);color:#fff;border-color:var(--berry)}.vact .vpass{border-color:#F2DADA;background:#FFF8F8;color:var(--bad)}
+.topt label,.dblock,.ditem{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px}.dblock.gold{border-color:#F9C8AE;background:#FFF8F3}.dblock .lbl,.dblock a{color:var(--berry)}.dblock p{color:var(--text)}.dblock .sub,.ditem .s{color:var(--muted)}.dblock .big{font-size:18px;font-weight:600}.dpin{background:#FFF4EC;color:#704F3D;border-color:#FFD7BF;font-size:11px}.dpin b,.dpin button{color:var(--berry)}.topt input:focus-visible+span{outline:3px solid #2474D6}.topt label:has(input:focus-visible){outline-color:#2474D6}
+@media(max-width:360px){main{padding-left:16px;padding-right:16px}.chat-head{margin-left:-16px;margin-right:-16px}.card-photo{aspect-ratio:3/4}.wordmark{font-size:18px}.photo-identity h2{font-size:24px}.card-actions button{font-size:12px}nav.tabs button{font-size:8px}.newm{gap:12px}}
+@media(prefers-reduced-motion:reduce){button,.btn{transition:none}}
+</style>
+<style>body{padding-top:38px}header.top,.chat-head{top:38px}.fcount,.pcount{top:114px}#demo-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:38px;background:#262A32;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:4px 16px;z-index:50;gap:10px}#demo-status{font-size:8px;font-weight:600;letter-spacing:.3px;line-height:1.5}#demo-bar button{font-size:10px;min-height:28px;padding:4px 10px;background:#ffffff12;border:1px solid #ffffff50;color:#fff;border-radius:7px}#demo-panel{position:fixed;top:44px;left:50%;transform:translateX(-50%);width:min(440px,calc(100% - 24px));padding:18px;background:#fff;border:1px solid #E3E6ED;box-shadow:0 10px 50px #0003;border-radius:14px;z-index:51}#demo-panel[hidden]{display:none}#demo-panel p{font-size:12px;color:#71747D}#demo-panel button{display:block;width:100%;margin:8px 0}#demo-panel [data-demo=reply]{display:none}body[data-route=chat] #demo-panel [data-demo=reply]{display:block}body[data-route=discover] .card-photo,body[data-route=view] .card-photo{height:clamp(180px,calc(100svh - 488px),422px)}.planner{padding-top:calc(58px + env(safe-area-inset-top,0px))}.match{padding-top:68px}.chat-head .tiny::after{content:' · synthetic member'}</style></head>
+<body><aside id="demo-bar" aria-label="Synthetic demo controls"><span id="demo-status">DEMO · SYNTHETIC PEOPLE<br>SAVED ONLY ON THIS DEVICE</span><button data-demo="menu">Demo controls</button></aside><section id="demo-panel" hidden aria-label="Demo controls"><p>Try the working interface using invented details. You are viewing a local simulation, with no real account, other users, verification or administration.</p><button data-demo="fresh">Start a new demo profile</button><button data-demo="reply">Simulate a reply</button><button data-demo="reset">Reset demo</button><button data-demo="close">Close controls</button></section>
+<div class="app">
+  <header class="top">
+    <div class="wordmark">black childfree <svg class="brand-heart" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg><small>ATLANTA · SYNTHETIC DEMO</small></div>
+    <div id="hdr"></div>
+  </header>
+  <main id="main" tabindex="-1"><p class="muted" style="margin-top:40px">Loading…</p></main>
+</div>
+<nav class="tabs" id="tabs" hidden></nav>
+<div id="layer"></div>
+<script>window.__LOCAL_DEMO_PORTRAITS__={"amara":"preview-assets/synthetic-amara.png","malik":"preview-assets/synthetic-malik.png"};
+// Standalone DEMO ONLY: local synthetic data, no authentication or providers.
+// The builder injects this into demo.html, never into the Claude index.html.
+(() => {
+  'use strict';
+  const KEY = 'blackchildfree.claude-browser-demo.v1';
+  const images = window.__LOCAL_DEMO_PORTRAITS__;
+  delete window.__LOCAL_DEMO_PORTRAITS__;
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const listeners = new Map();
+  const stamp = Date.now();
+  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:[{id:'ordinary_sunday',a:'Coffee, the farmers market, and a long walk with nowhere to rush.'},{id:'partnership',a:'Choosing each other. Being kind, being honest, and making room to grow.'}],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
+  function fixtures(fresh = false) {
+    const seeded = new Map();
+    seeded.set('profiles/malik', profile('Malik','Man'));
+    seeded.set('profiles/zuri', profile('Zuri','Woman'));
+    seeded.set('approvals/malik', {status:'approved',revision:1,note:'Synthetic demo approval'});
+    seeded.set('reactions/malik', {r:{amara:{k:'like',at:stamp-60000}}});
+    if (!fresh) {
+      seeded.set('profiles/amara', profile('Amara','Woman'));
+      seeded.set('approvals/amara', {status:'approved',revision:1,note:'Synthetic demo approval'});
+      seeded.set('data/users/amara/private', {elig:{dob:'1994-01-01',result:'eligible',answers:Array(6).fill('yes'),v:1},pledge:{v:1,at:stamp},matchSeen:{},lastRead:{}});
+    }
+    for (const id of ['amara','malik','zuri']) for (let i=0;i<2;i++) seeded.set(`photos/${id}/p/${i}`, {img:images[id==='malik'?'malik':'amara'],i,rev:1});
+    if (fresh) for (let i=0;i<2;i++) seeded.set(`data/users/amara/photo${i}`, {img:images.amara});
+    const venues = [
+      ['cafe','Demo Grove Café','Midtown','Coffee & conversation'],
+      ['garden','Demo Garden Patio','Decatur','Outdoors & walks'],
+      ['gallery','Demo Art House','West End','Art & museums']
+    ];
+    for (const [id,name,area,vibe] of venues) seeded.set(`venues/${id}`,{name,area,address:'Fictional preview venue — no real address',vibes:[vibe,'Coffee & conversation'],tags:['Quiet enough to talk'],price:1,blurb:'A fictional venue for trying the date planner.',at:stamp});
+    return seeded;
+  }
+  function encode(value) {
+    return JSON.stringify({version:1,entries:[...value]},(key,item)=> {
+      if (key==='img') for (const [name,image] of Object.entries(images)) if (item===image) return `@demo-portrait:${name}`;
+      return item;
+    });
+  }
+  function decode(raw) {
+    const value = JSON.parse(raw,(key,item)=>key==='img' && typeof item==='string' && item.startsWith('@demo-portrait:') ? images[item.slice(15)] : item);
+    if (value.version!==1 || !Array.isArray(value.entries) || value.entries.length>2000 || !value.entries.every(entry=>Array.isArray(entry)&&entry.length===2&&typeof entry[0]==='string'&&entry[1]&&typeof entry[1]==='object')) throw new Error('Unsupported demo state');
+    return new Map(value.entries);
+  }
+  let docs;
+  try {const saved=localStorage.getItem(KEY);docs=saved?decode(saved):fixtures();}
+  catch {docs=fixtures();document.querySelector('#demo-status').textContent='DEMO · Saved data unavailable; fresh fixtures loaded';}
+  const snapshot = path => ({exists:docs.has(path),data:()=>clone(docs.get(path))});
+  const collection = path => ({docs:[...docs].filter(([key])=>key.startsWith(path+'/')&&!key.slice(path.length+1).includes('/')).map(([key,value])=>({id:key.slice(path.length+1),data:()=>clone(value)}))});
+  function notify(path) {
+    for (const key of [path,path.slice(0,path.lastIndexOf('/'))]) for (const callback of listeners.get(key)||[]) queueMicrotask(callback);
+  }
+  function subscribe(path, callback, read) {
+    const deliver=()=>callback(read(path));
+    if (!listeners.has(path)) listeners.set(path,new Set());
+    listeners.get(path).add(deliver);queueMicrotask(deliver);
+    return ()=>listeners.get(path).delete(deliver);
+  }
+  function mutate(path,value,remove=false) {
+    const next=new Map(docs);
+    if (remove) next.delete(path);else next.set(path,clone(value));
+    try {localStorage.setItem(KEY,encode(next));}
+    catch {throw new Error('Demo progress could not be saved. Browser storage may be full or blocked.');}
+    docs=next;notify(path);
+  }
+  const db={
+    doc:path=>({get:async()=>snapshot(path),set:async value=>mutate(path,value),update:async patch=>mutate(path,{...docs.get(path),...clone(patch)}),delete:async()=>mutate(path,null,true),onSnapshot:callback=>subscribe(path,callback,snapshot)}),
+    collection:path=>({get:async()=>collection(path),onSnapshot:callback=>subscribe(path,callback,collection)})
+  };
+  // Compatibility adapter for this isolated local demo. It is not a real session.
+  window.claude={use:async name=>name==='db'?db:name==='user'?{id:async()=> 'amara',isOwner:async()=>true,can:async()=>true}:{join:async()=>({leave:async()=>{},presence:async()=>{},onPeers:()=>()=>{}})}};
+  document.addEventListener('click',async event=> {
+    const button=event.target.closest('[data-demo]');if (!button) return;
+    const panel=document.querySelector('#demo-panel');
+    try {
+      if (button.dataset.demo==='menu') {panel.hidden=!panel.hidden;return;}
+      if (button.dataset.demo==='close') {panel.hidden=true;return;}
+      if (button.dataset.demo==='reset' || button.dataset.demo==='fresh') {
+        const fresh=button.dataset.demo==='fresh';
+        if (!confirm(fresh?'Start a new synthetic profile? This resets your local demo progress.':'Reset all synthetic demo progress on this device?')) return;
+        localStorage.setItem(KEY,encode(fixtures(fresh)));location.reload();return;
+      }
+      if (button.dataset.demo==='reply') {
+        const target=document.querySelector('[data-act="chat-menu"]')?.dataset.id;
+        if (!target) {document.querySelector('#demo-status').textContent='DEMO · Open a conversation to simulate a reply';return;}
+        const pair=['amara',target].sort().join('__');
+        const path=`msgs/${target}/c/${pair}`;
+        const previous=docs.get(path)||{to:'amara',list:[]};
+        await db.doc(path).set({...previous,list:[...previous.list,{id:`demo-reply-${Date.now()}`,t:'Simulated reply: That sounds like my kind of Sunday. Coffee this weekend?',at:Date.now()}]});
+        panel.hidden=true;
+      }
+    } catch (error) {document.querySelector('#demo-status').textContent=`DEMO · ${error.message}`;}
+  });
+})();
+</script>
+<script>
+(() => {
+"use strict";
+// ---------- Config ----------
+const DAILY_LIMIT = 5;
+const ELIG_V = 1, PLEDGE_V = 1;
+const SUPPORT_EMAIL = "";
+const APP_URL = location.href.split("#")[0]; // set to the founding team's support address
+const ELIG_QS = [
+  "I identify as Black, including multiracial Black.",
+  "I have never been legally married.",
+  "I have no biological or adopted children.",
+  "I don't currently have a parental or stepparental role.",
+  "I never want to become a parent.",
+  "I'm looking for Black partners."
+];
+const PLEDGE_TEXT = "I will be truthful about my identity, relationship history and decision not to become a parent. I will respect other members' boundaries and accept a no. I will not pressure anyone to change their childfree choice. I will not harass, threaten, discriminate, impersonate others, solicit money or send sexual content. I will use reporting when something is wrong and understand that violations can lead to removal.";
+const CATALOG = [
+  ["life_together","A life together without parenthood would include…"],
+  ["tradition","The tradition I'd bring into our relationship is…"],
+  ["cared_for","I feel most cared for when…"],
+  ["ordinary_sunday","An ordinary Sunday with me looks like…"],
+  ["building","The life I want to build with someone is…"],
+  ["culture","A part of my culture I'd love to share is…"],
+  ["partnership","A strong partnership means…"],
+  ["joy","Something that always brings me joy is…"]
+];
+const PROMPT = Object.fromEntries(CATALOG);
+const HEIGHTS = Array.from({length:27}, (_,i) => 58 + i); // 4'10" to 7'0"
+const ftin = n => `${Math.floor(n/12)}'${n%12}"`;
+const PASSION_GROUPS = [
+  ["Food and drink", ["Cooking","Brunch","Baking","Trying new restaurants","Soul food","Vegan food","Wine","Coffee","Tea"]],
+  ["Music", ["Live music","R&B and soul","Hip-hop","Jazz","Gospel","Afrobeats","Neo-soul","House music","Reggae","Karaoke"]],
+  ["Arts and culture", ["Art and museums","Movies","TV and anime","Theater","Reading","Writing","Poetry","Photography","Fashion","Design"]],
+  ["Staying active", ["Fitness","Hiking","Yoga","Running","Cycling","Dancing","Swimming","Playing sports","Martial arts","Golf"]],
+  ["Going out", ["Travel","Road trips","Festivals","Comedy","Watching sports","Day parties","Bowling","Skating"]],
+  ["Staying in", ["Gaming","Spades and card games","Board games","Podcasts","Gardening","Pets","Puzzles","Home projects"]],
+  ["Growth and community", ["Volunteering","Entrepreneurship","Tech","Personal finance","Faith community","Mentoring","Learning languages","Self-care","Civic engagement"]]
+];
+const INTERESTS = PASSION_GROUPS.flatMap(g => g[1]);
+const MAX_INTERESTS = 6, MIN_PASSIONS = 3;
+const VIBES = ["Cocktails & R&B","Coffee & conversation","Brunch","Dinner","Live music","Art & museums","Outdoors & walks","Comedy","Dessert","Something active"];
+const VENUE_TAGS = ["Black-owned","Quiet enough to talk","Outdoor seating","Rooftop","Live music","Free parking","Near MARTA"];
+const AREAS = ["Midtown","Downtown","Old Fourth Ward","Inman Park","West End","Westside","Decatur","East Atlanta","Buckhead","College Park","South Atlanta","Sandy Springs","Other"];
+const priceStr = n => "$".repeat(Math.max(1, Math.min(4, +n || 1)));
+const safeUrl = u => /^https?:\/\/[^\s]+$/i.test(String(u||"").trim()) ? String(u).trim() : "";
+const DETAILS = [
+  ["faith","Faith",["Christian","Muslim","Jewish","Spiritual, not religious","Agnostic","Atheist","Other"]],
+  ["politics","Politics",["Liberal","Moderate","Conservative","Not political"]],
+  ["education","Education",["High school","Trade or technical school","Some college","Bachelor's degree","Graduate degree"]],
+  ["drinking","Drinking",["Never","Socially","Regularly"]],
+  ["smoking","Smoking",["Never","Sometimes","Regularly"]],
+  ["cannabis","Cannabis",["Never","Sometimes","Regularly"]]
+];
+const GENDERS = ["Woman","Man","Non-binary"];
+const GOALS = ["A committed relationship","A life partner"];
+const MARRIAGE = ["","I want to marry","I'm open to marriage","I don't plan to marry"];
+const FILTER_CATS = DETAILS.concat([["goal","Relationship goal",GOALS],["marriage","Marriage",MARRIAGE.filter(Boolean)]]);
+function valOf(p, k){
+  if (k === "goal" || k === "marriage") return p[k] || "";
+  if (k === "height") return (p.details||{}).height || 0;
+  return (p.details||{})[k] || "";
+}
+function cleanDetails(d){
+  const out = {};
+  if (HEIGHTS.includes(+d.height)) out.height = +d.height;
+  DETAILS.forEach(([k,,opts]) => { if (opts.includes(d[k])) out[k] = d[k]; });
+  const ints = (d.interests||[]).filter(x => INTERESTS.includes(x)).slice(0, MAX_INTERESTS);
+  if (ints.length) out.interests = ints;
+  return out;
+}
+const REPORT_CATS = [
+  ["eligibility","Lying about eligibility"],
+  ["scam","Impersonation, scam or asking for money"],
+  ["harassment","Harassment or discrimination"],
+  ["sexual","Sexual content"],
+  ["threat","Threats or safety concern"],
+  ["underage","Might be under 18"],
+  ["other","Something else"]
+];
+
+// ---------- State ----------
+let db = null, user = null, uid = null, owner = false;
+const S = {
+  profiles:{}, approvals:{}, reactions:{}, reports:{}, invites:{}, announce:null, events:{}, rsvps:{}, venues:{}, myPlans:{}, theirPlans:{},
+  priv:{}, loaded:{profiles:false,approvals:false,reactions:false,priv:false},
+  myMsgs:{}, theirMsgs:{}, msgSubs:{}, mySeen:{}, theirSeen:{}, msgImg:{},
+  photoCache:{}, photoLoading:{},
+  route:null, chatWith:null, cardPhoto:0,
+  draft:null, draftPhotos:null, elig:null, pledgeChecked:false,
+  adminTab:"queue", readonly:false
+};
+
+// ---------- Utils ----------
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clone = o => JSON.parse(JSON.stringify(o ?? {}));
+const now = () => Date.now();
+const dayKey = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const pairId = other => [uid, other].sort().join("__");
+const trim = s => String(s ?? "").trim();
+function ageFrom(dob){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dob || ""); if(!m) return null;
+  const t = new Date(), y=+m[1], mo=+m[2], d=+m[3];
+  let a = t.getFullYear() - y;
+  if (t.getMonth()+1 < mo || (t.getMonth()+1 === mo && t.getDate() < d)) a--;
+  return a;
+}
+function ago(ts){
+  if(!ts) return "";
+  const s = (now()-ts)/1000;
+  if (s < 60) return "just now";
+  if (s < 3600) return Math.floor(s/60)+" min ago";
+  if (s < 86400) return Math.floor(s/3600)+" hr ago";
+  return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+}
+function toast(msg){
+  document.querySelectorAll(".toast").forEach(t => t.remove());
+  const el = document.createElement("div"); el.className="toast"; el.setAttribute("role","status"); el.textContent = msg;
+  document.body.appendChild(el); setTimeout(()=>el.remove(), 3200);
+}
+const chains = {};
+function enqueue(key, fn){
+  chains[key] = (chains[key] || Promise.resolve()).then(fn).catch(handleErr);
+  return chains[key];
+}
+function handleErr(e){
+  console.error(e);
+  const code = e && e.code;
+  if (code === "invalid_argument") { S.readonly = true; toast("You have view-only access. Ask the founder to give you Contributor access."); }
+  else if (code === "quota_exceeded") toast("Storage is full. Tell the founding team so they can make room.");
+  else if (code === "resource_exhausted") toast("Too many actions at once. Wait a moment and try again.");
+  else toast("That didn't save. Check your connection and try again.");
+}
+const privPath = () => `data/users/${uid}/private`;
+function savePriv(patch){
+  Object.assign(S.priv, patch);
+  const body = clone(S.priv);
+  return enqueue("priv", () => db.doc(privPath()).set(body));
+}
+
+// ---------- Derived ----------
+const myProfile = () => S.profiles[uid];
+const myApproval = () => S.approvals[uid];
+function isApprovedCurrent(id){
+  const p = S.profiles[id], a = S.approvals[id];
+  return !!(p && a && a.status === "approved" && a.revision === p.revision && !p.paused && !p.ineligible);
+}
+function isSuspended(id){ const a = S.approvals[id]; return !!(a && a.status === "suspended"); }
+const myR = () => (S.reactions[uid] && S.reactions[uid].r) || {};
+const theirR = id => (S.reactions[id] && S.reactions[id].r) || {};
+function mutualFit(id, amin, amax){
+  const me = myProfile(), p = S.profiles[id];
+  if (!me || !p) return false;
+  amin = amin ?? me.ageMin; amax = amax ?? me.ageMax;
+  if (!(me.partnerGenders||[]).includes(p.gender)) return false;
+  if (!(p.partnerGenders||[]).includes(me.gender)) return false;
+  if (p.age < amin || p.age > amax) return false;
+  if (me.age < p.ageMin || me.age > p.ageMax) return false;
+  return true;
+}
+const myFilters = () => S.priv.filters || {};
+// Dealbreakers remove people. Everything else only changes the order people appear in.
+function passesFilters(id, F){
+  F = F || myFilters();
+  const p = S.profiles[id], blankOk = F.includeBlank !== false;
+  for (const [k] of FILTER_CATS){
+    const f = F[k]; if (!f || !f.strict || !(f.vals||[]).length) continue;
+    const v = valOf(p, k);
+    if (!v){ if (!blankOk) return false; continue; }
+    if (!f.vals.includes(v)) return false;
+  }
+  const h = F.height;
+  if (h && h.strict && (h.min || h.max)){
+    const v = valOf(p, "height");
+    if (!v){ if (!blankOk) return false; }
+    else if ((h.min && v < h.min) || (h.max && v > h.max)) return false;
+  }
+  if (F.activeOnly && (p.lastActive||0) < now() - 7*86400000) return false;
+  return true;
+}
+function sharedInterests(id){
+  const mine = ((myProfile()||{}).details||{}).interests || [], theirs = ((S.profiles[id]||{}).details||{}).interests || [];
+  return id === uid ? [] : theirs.filter(x => mine.includes(x));
+}
+function softScore(id){
+  const F = myFilters(), p = S.profiles[id]; let n = 0;
+  for (const [k] of FILTER_CATS){ const f = F[k]; if (f && !f.strict && (f.vals||[]).includes(valOf(p,k))) n++; }
+  const h = F.height, v = valOf(p, "height");
+  if (h && !h.strict && v && (h.min || h.max) && (!h.min || v >= h.min) && (!h.max || v <= h.max)) n++;
+  return n + Math.min(3, sharedInterests(id).length) * 0.5;
+}
+function isCandidate(id){
+  if (id === uid) return false;
+  if (!isApprovedCurrent(id)) return false;
+  if (myR()[id]) return false;
+  const t = theirR(id)[uid]; if (t && t.k === "block") return false;
+  return mutualFit(id) && passesFilters(id);
+}
+function rankedPool(){
+  const week = now() - 7*86400000;
+  return Object.keys(S.profiles).filter(isCandidate).sort((a,b) => {
+    const sa = softScore(a), sb = softScore(b);
+    const ra = (S.profiles[a].lastActive||0) >= week ? 0 : 1, rb = (S.profiles[b].lastActive||0) >= week ? 0 : 1;
+    return sb - sa || ra - rb || (a < b ? -1 : 1);
+  });
+}
+function canReact(id){
+  if (!isApprovedCurrent(uid) || id === uid || !isApprovedCurrent(id) || myR()[id]) return false;
+  const t = theirR(id)[uid]; if (t && t.k === "block") return false;
+  return mutualFit(id);
+}
+const LIKE_TTL = 30*86400000;
+function likedMe(id){ const t = theirR(id)[uid]; return t && t.k === "like" && now() - t.at < LIKE_TTL ? t : null; }
+function likesYou(){
+  if (!isApprovedCurrent(uid)) return [];
+  return Object.keys(S.reactions).filter(id => likedMe(id) && canReact(id))
+    .sort((a,b) => likedMe(b).at - likedMe(a).at);
+}
+function describeOn(ownerId, on){
+  const p = S.profiles[ownerId]; if (!on || !p) return null;
+  if (on.startsWith("prompt:")){ const pr = (p.prompts||[]).find(x => x.id === on.slice(7)); return pr ? {kind:"prompt", q:PROMPT[pr.id], a:pr.a} : null; }
+  if (on.startsWith("photo:")) return {kind:"photo", i:+on.slice(6)};
+  return null;
+}
+function likeBanner(id){
+  const t = likedMe(id); if (!t || myR()[id]) return "";
+  const name = esc(S.profiles[id].name), d = describeOn(uid, t.on);
+  let what = `${name} likes you`;
+  if (d && d.kind === "prompt") what = `${name} liked your prompt: ${esc(d.q)}`;
+  if (d && d.kind === "photo") what = `${name} liked your photo`;
+  return `<div class="liked-you"><b>${what}</b>${t.note?`<q>${esc(t.note)}</q>`:""}</div>`;
+}
+function newInviteCode(){
+  const A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", used = new Set(Object.values(S.profiles).map(p => p.inviteCode));
+  for (;;){ let c = ""; for (let i = 0; i < 6; i++) c += A[Math.floor(Math.random()*A.length)]; if (!used.has(c)) return c; }
+}
+function inviterFor(code){
+  if (!code) return "";
+  const hit = Object.keys(S.profiles).find(id => id !== uid && S.profiles[id].inviteCode === code);
+  return hit || "";
+}
+const joinedVia = id => Object.keys(S.profiles).filter(x => S.profiles[x].invitedBy === id);
+function filterCount(F, amin, amax){
+  return Object.keys(S.profiles).filter(id => {
+    if (id === uid || !isApprovedCurrent(id)) return false;
+    const t = theirR(id)[uid]; if (t && t.k === "block") return false;
+    return mutualFit(id, amin, amax) && passesFilters(id, F);
+  }).length;
+}
+function activeFilterCount(){
+  const F = myFilters(); let n = 0;
+  FILTER_CATS.forEach(([k]) => { if (F[k] && (F[k].vals||[]).length) n++; });
+  if (F.height && (F.height.min || F.height.max)) n++;
+  if (F.activeOnly) n++;
+  return n;
+}
+function strictCount(){
+  const F = myFilters(); let n = 0;
+  FILTER_CATS.forEach(([k]) => { if (F[k] && F[k].strict && (F[k].vals||[]).length) n++; });
+  if (F.height && F.height.strict && (F.height.min || F.height.max)) n++;
+  if (F.activeOnly) n++;
+  return n;
+}
+function matchIds(){
+  if (!myProfile() || isSuspended(uid)) return [];
+  const mine = myR();
+  return Object.keys(mine).filter(id => {
+    if (mine[id].k !== "like") return false;
+    const t = theirR(id)[uid];
+    return t && t.k === "like" && S.profiles[id] && !isSuspended(id) && !S.profiles[id].ineligible;
+  });
+}
+function convo(other){
+  const p = pairId(other);
+  const a = (S.myMsgs[p]||[]).map(m => ({...m, me:true}));
+  const b = (S.theirMsgs[p]||[]).map(m => ({...m, me:false}));
+  return a.concat(b).sort((x,y) => x.at - y.at);
+}
+function unread(other){
+  const p = pairId(other), last = (S.theirMsgs[p]||[]).slice(-1)[0];
+  return !!(last && last.at > ((S.priv.lastRead||{})[p] || 0));
+}
+function reasons(id){
+  const me = myProfile(), p = S.profiles[id], out = [];
+  if (me && p && id !== uid){
+    if (me.goal === p.goal) out.push("Same goal: " + p.goal.toLowerCase());
+    out.push("In each other's age range");
+    if (me.marriage && p.marriage && me.marriage === p.marriage) out.push("Same view on marriage");
+    const F = myFilters();
+    const si = sharedInterests(id);
+    if (si.length) out.push(si.length === 1 ? `You both love ${si[0].toLowerCase()}` : `${si.length} shared passions`);
+    DETAILS.forEach(([k,label]) => { const v = valOf(p,k); if (v && F[k] && (F[k].vals||[]).includes(v) && out.length < 5) out.push(`${label}: ${v}`); });
+  }
+  return out;
+}
+
+// ---------- Photos ----------
+async function compress(file){
+  if (!file.type.startsWith("image/")) throw new Error("type");
+  if (file.size > 10*1024*1024) throw new Error("size");
+  const bmp = await createImageBitmap(file, {imageOrientation:"from-image"});
+  let max = 900, q = 0.82, out = "";
+  for (let i = 0; i < 8; i++){
+    const sc = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width*sc); c.height = Math.round(bmp.height*sc);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    out = c.toDataURL("image/jpeg", q); // re-encoding drops EXIF, including location
+    if (out.length < 140000) break;
+    q = Math.max(0.5, q - 0.08); max -= 90;
+  }
+  return out;
+}
+function photosOf(id){
+  const p = S.profiles[id], c = S.photoCache[id];
+  return (p && c && c.rev === p.revision) ? c.list : null;
+}
+async function loadPhotos(id){
+  const p = S.profiles[id]; if (!p) return;
+  const c = S.photoCache[id];
+  if ((c && c.rev === p.revision) || S.photoLoading[id] === p.revision) return;
+  S.photoLoading[id] = p.revision;
+  try {
+    const snap = await db.collection(`photos/${id}/p`).get();
+    const list = snap.docs.filter(d => d.data().rev === p.revision)
+      .sort((a,b) => (a.data().i||0) - (b.data().i||0)).map(d => d.data().img);
+    S.photoCache[id] = {rev:p.revision, list};
+    fillPhotos(id);
+  } catch(e){ console.error(e); }
+  finally { delete S.photoLoading[id]; }
+}
+function img(id, i, cls){
+  const list = photosOf(id); if (!list) loadPhotos(id);
+  const src = list && list[i] ? list[i] : "";
+  const name = esc((S.profiles[id]||{}).name || "Member");
+  return `<img class="${cls||""}" data-ph="${esc(id)}:${i}" ${src?`src="${src}"`:""} alt="Photo of ${name}">`;
+}
+function fillPhotos(id){
+  const list = photosOf(id) || [];
+  document.querySelectorAll(`img[data-ph^="${CSS.escape(id)}:"]`).forEach(el => {
+    const i = +el.dataset.ph.split(":").pop(); if (list[i]) el.src = list[i];
+  });
+  if (S.route === "discover" || S.route === "me") renderDots();
+}
+
+// ---------- Routing ----------
+function onboardingRoute(){
+  const pv = S.priv;
+  if (!pv.elig) return S.route === "eligibility" ? "eligibility" : "welcome";
+  if (pv.elig.result !== "eligible") return S.route === "eligibility" ? "eligibility" : "ineligible";
+  if (!pv.pledge || pv.pledge.v < PLEDGE_V) return "pledge";
+  if (!myProfile()) return "editor";
+  return null;
+}
+const MEMBER_ROUTES = ["discover","connections","chat","me","editor","eligibility","admin","filters","details","view","events","passions","dates"];
+function currentRoute(){
+  if (S.route === "admin" && owner) return "admin";
+  const ob = onboardingRoute();
+  if (ob) return ob;
+  if (!MEMBER_ROUTES.includes(S.route)) return "discover";
+  if (S.route === "chat" && !matchIds().includes(S.chatWith)) return "connections";
+  return S.route;
+}
+function go(route, extra){
+  if (route !== "chat" || (extra && extra.chatWith !== S.chatWith)) leaveChatRoom();
+  S.route = route;
+  if (extra && extra.chatWith) S.chatWith = extra.chatWith;
+  if (route === "editor") { S.draft = null; S.draftPhotos = null; }
+  if (route === "passions") S.pdraft = null;
+  if (route !== "passions") S.passionsOnboard = false;
+  if (extra && extra.viewId){ S.viewId = extra.viewId; S.cardPhoto = 0; }
+  if (route === "connections"){ const newest = likesYou().reduce((m,id) => Math.max(m, likedMe(id).at), 0); if (newest > (S.priv.likesSeen||0)) savePriv({likesSeen:newest}); }
+  if (route === "details") S.draft = { details: clone((myProfile()||{}).details || {}) };
+  if (route === "filters"){ const me = myProfile(); S.f = clone(myFilters()); S.fAge = {min:me.ageMin, max:me.ageMax}; }
+  if (route === "eligibility") S.elig = null;
+  render(true);
+}
+const LIVE = ["discover","connections","me","admin","welcome","ineligible","view","events","dates"];
+
+function render(force){
+  if (!db) return;
+  if (!Object.values(S.loaded).every(Boolean)) return;
+  const r = currentRoute();
+  document.body.dataset.route = r;
+  if (r === "chat"){ if (force || S._last !== "chat") renderChat(); else updateChat(); }
+  else if (force || S._last !== r || LIVE.includes(r)) {
+    const main = $("#main"), y = window.scrollY;
+    if (r === "discover") ensureDeck();
+    main.innerHTML = VIEWS[r]();
+    if (r === "editor") afterEditor();
+    if (r === "filters") updateFilterCount();
+    if (force || S._last !== r){ window.scrollTo(0,0); main.focus({preventScroll:true}); }
+    else window.scrollTo(0,y);
+  }
+  S._last = r;
+  renderNav(r);
+  renderHeader(r);
+}
+function icon(name){
+  const paths = {
+    discover:'<circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6Z"/>',
+    connections:'<path d="M20 11.5a8 8 0 0 1-8 8H5l-3 2v-6a8 8 0 1 1 18-4Z"/><path d="M7 10h8M7 14h5"/>',
+    dates:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M8 15h2M14 15h2"/>',
+    me:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',
+    admin:'<path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7Z"/><path d="m8 12 3 3 5-6"/>',
+    more:'<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>',
+    heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
+    close:'<path d="m6 6 12 12M18 6 6 18"/>',
+    send:'<path d="m21 3-7 18-4-7-7-4Z M10 14 21 3"/>',
+    attachment:'<path d="m8 13 7-7a3 3 0 0 1 4 4L9 20a5 5 0 0 1-7-7L13 2"/>',
+    arrow:'<path d="m14 5-7 7 7 7"/>'
+  };
+  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.heart}</svg>`;
+}
+function renderHeader(r){
+  $("#hdr").innerHTML = owner && r !== "admin" ? `<button class="btn-quiet" style="min-height:40px;padding:8px 14px" data-act="go" data-r="admin">Review</button>` : "";
+}
+function renderNav(r){
+  const nav = $("#tabs");
+  const inApp = myProfile() && !onboardingRoute() && !["chat","editor","eligibility","filters","details","passions"].includes(r);
+  if (!inApp && r !== "admin"){ nav.hidden = true; return; }
+  if (r === "admin" && !myProfile()){ nav.hidden = true; return; }
+  nav.hidden = false;
+  const anyUnread = matchIds().some(unread) || likesYou().some(id => likedMe(id).at > (S.priv.likesSeen||0));
+  const tab = (key,label,extra="") => `<button data-act="go" data-r="${key}" ${r===key?'aria-current="page"':""} aria-label="${label}">${icon(key)}<span>${label}</span>${extra}</button>`;
+  nav.innerHTML = `<div class="in">${tab("discover","Discover")}${tab("connections","Matches", anyUnread?'<span class="badge" aria-label="unread messages"></span>':"")}${tab("dates","Dates", matchIds().some(planNeedsMe) ? '<span class="badge" aria-label="date plans need you"></span>' : "")}${tab("me","Profile")}${owner?tab("admin","Review"):""}</div>`;
+}
+
+// ---------- Views ----------
+const VIEWS = {};
+VIEWS.welcome = () => `
+  <section class="welcome">
+    <div class="welcome-art" aria-hidden="true">${icon("heart")}</div>
+    <div class="section-kicker">A shared choice. A new connection.</div>
+    <h1>Your kind of connection.</h1>
+    <p>Meet Black adults who are childfree for life. A full life, a thoughtful partner, and room for the things you love.</p>
+    <div class="welcome-facts"><span>Intentional dating</span><span>Mutual matches</span><span>Free conversations</span></div>
+    <button class="btn-primary btn-block" data-act="go" data-r="eligibility">Check if I'm eligible</button>
+    <p class="welcome-note">18+ · Never married · No children or parental role · Never seeking parenthood · Seeking a Black partner. Every profile is reviewed by a person before discovery.</p>
+    <p class="tiny muted">Interactive demo. All profiles and messages are synthetic and stored only in this browser. Use invented details.</p>
+  </section>`;
+
+VIEWS.eligibility = () => {
+  if (!S.elig){
+    const e = S.priv.elig;
+    S.elig = { dob: e ? e.dob : "", a: e ? e.answers.slice() : Array(ELIG_QS.length).fill(null) };
+  }
+  const E = S.elig;
+  return `
+  ${myProfile() ? `<button class="btn-link" data-act="go" data-r="me">Back to profile</button>` : ""}
+  <h1>Is this community for you?</h1>
+  <p class="muted">Answer honestly. We don't check these against documents, and you can change them later.</p>
+  <div class="panel">
+    <label for="dob" style="margin-top:0">Date of birth <span class="hint">Only your age is shown to members.</span></label>
+    <input type="date" id="dob" data-e="dob" value="${esc(E.dob)}" max="${dayKey()}">
+    ${myProfile() ? "" : `<label for="icode">Invite code <span class="hint">Optional</span></label>
+    <input type="text" id="icode" data-e="code" maxlength="8" autocapitalize="characters" value="${esc(E.code||S.priv.inviteCode||"")}" placeholder="From the friend who invited you">`}
+    <div style="margin-top:14px">
+    ${ELIG_QS.map((q,i) => `
+      <fieldset class="q" style="border:0;margin:0;padding-left:0;padding-right:0">
+        <legend class="q-text">${esc(q)}</legend>
+        <div class="seg">
+          <label><input type="radio" name="q${i}" value="yes" data-e="q" data-i="${i}" ${E.a[i]==="yes"?"checked":""}><span>Yes, that's true</span></label>
+          <label><input type="radio" name="q${i}" value="no" data-e="q" data-i="${i}" ${E.a[i]==="no"?"checked":""}><span>No</span></label>
+        </div>
+      </fieldset>`).join("")}
+    </div>
+  </div>
+  <div id="elig-err"></div>
+  <button class="btn-primary btn-block" data-act="submit-elig">Continue</button>`;
+};
+
+VIEWS.ineligible = () => {
+  const under = S.priv.elig && S.priv.elig.reason === "age";
+  return `
+  <h1>This community isn't the right fit right now.</h1>
+  <p>${under ? "Members must be 18 or older." : "Membership is for Black adults who have never been married, have no children or parental role, never want to become parents and are looking for Black partners."}</p>
+  <p class="muted">If you answered something by mistake, you can change your answers. You can also delete everything you've entered.</p>
+  <button class="btn-block" data-act="go" data-r="eligibility">Change my answers</button>
+  <button class="btn-block btn-danger" style="margin-top:10px" data-act="delete-account">Delete my data</button>`;
+};
+
+VIEWS.pledge = () => `
+  <h1>Our community, our commitment.</h1>
+  <div class="panel"><p class="pledge" style="margin:0">${esc(PLEDGE_TEXT)}</p></div>
+  <p class="small muted">The pledge doesn't replace moderation. Breaking it can get you removed, and you can always report or block someone.</p>
+  <div class="checks"><label><input type="checkbox" id="pledge-check" ${S.pledgeChecked?"checked":""}> I agree to the Community Pledge.</label></div>
+  <button class="btn-primary btn-block" style="margin-top:12px" data-act="accept-pledge" ${S.pledgeChecked?"":"disabled"}>Accept and continue</button>`;
+
+function draftDefaults(){
+  const p = myProfile();
+  if (S.priv.draft) return clone(S.priv.draft);
+  if (p) return { name:p.name, gender:p.gender, partnerGenders:(p.partnerGenders||[]).slice(), bio:p.bio||"",
+    p1:p.prompts[0].id, a1:p.prompts[0].a, p2:p.prompts[1].id, a2:p.prompts[1].a,
+    p3:(p.prompts[2]||{}).id||"", a3:(p.prompts[2]||{}).a||"", p4:(p.prompts[3]||{}).id||"", a4:(p.prompts[3]||{}).a||"", goal:p.goal, marriage:p.marriage||"",
+    zip:p.zip, city:p.city, ageMin:p.ageMin, ageMax:p.ageMax, details:clone(p.details||{}) };
+  return { name:"", gender:"", partnerGenders:[], bio:"", p1:"", a1:"", p2:"", a2:"", p3:"", a3:"", p4:"", a4:"", goal:"", marriage:"", zip:"", city:"", ageMin:18, ageMax:99, details:{} };
+}
+VIEWS.editor = () => {
+  if (!S.draft) S.draft = draftDefaults();
+  const D = S.draft, editing = !!myProfile();
+  const opt = (list, val, ph) => (ph?`<option value="">${ph}</option>`:"") + list.map(o => { const [v,l] = Array.isArray(o)?o:[o,o]; return `<option value="${esc(v)}" ${v===val?"selected":""}>${esc(l||ph)}</option>`; }).join("");
+  const promptOpts = (n) => { const val = D["p"+n], others = [1,2,3,4].filter(x => x !== n).map(x => D["p"+x]);
+    return `<option value="">${n > 2 ? "No prompt" : "Choose a prompt"}</option>` + CATALOG.map(([id,t]) => `<option value="${id}" ${id===val?"selected":""} ${others.includes(id)?"disabled":""}>${esc(t)}</option>`).join(""); };
+  return `
+  ${editing ? `<button class="btn-link" data-act="go" data-r="me">Cancel</button>` : ""}
+  <h1>${editing ? "Edit your profile" : "Build your profile"}</h1>
+  <p class="muted">${editing ? "Saving changes sends your profile back for review. You'll be hidden from Discover until it's approved." : "Use Review to approve this synthetic profile. No real person reviews demo profiles."} Your progress saves automatically.</p>
+
+  <h2>About you</h2>
+  <label for="f-name">First name or nickname</label>
+  <input type="text" id="f-name" data-f="name" maxlength="40" value="${esc(D.name)}" autocomplete="given-name">
+  <label for="f-gender">I'm a</label>
+  <select id="f-gender" data-f="gender">${opt(GENDERS, D.gender, "Choose one")}</select>
+  <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin:16px 0 6px">I'd like to meet</legend>
+  <div class="checks">${GENDERS.map(g => `<label><input type="checkbox" data-f="partnerGenders" value="${g}" ${D.partnerGenders.includes(g)?"checked":""}> ${({"Woman":"Women","Man":"Men","Non-binary":"Non-binary people"})[g]}</label>`).join("")}</div></fieldset>
+
+  <h2>Your prompts</h2>
+  <p class="small muted">Answer at least two different prompts, and up to four, in 20–200 characters each. Members can like a prompt and comment on it.</p>
+  ${[1,2,3,4].map(n => `
+    <label for="f-p${n}">Prompt ${n}${n > 2 ? ' <span class="hint">Optional</span>' : ""}</label>
+    <select id="f-p${n}" data-f="p${n}">${promptOpts(n)}</select>
+    <textarea id="f-a${n}" data-f="a${n}" maxlength="200" aria-label="Answer to prompt ${n}" placeholder="Your answer">${esc(D["a"+n])}</textarea>
+    <div class="counter" id="c-a${n}"></div>`).join("")}
+
+  <label for="f-bio">Bio <span class="hint">Optional, up to 500 characters</span></label>
+  <textarea id="f-bio" data-f="bio" maxlength="500">${esc(D.bio)}</textarea>
+  <div class="counter" id="c-bio"></div>
+
+  <h2>What you're looking for</h2>
+  <label for="f-goal">Relationship goal</label>
+  <select id="f-goal" data-f="goal">${opt(GOALS, D.goal, "Choose one")}</select>
+  <label for="f-mar">Marriage <span class="hint">Optional</span></label>
+  <select id="f-mar" data-f="marriage">${MARRIAGE.map(m => `<option value="${esc(m)}" ${m===D.marriage?"selected":""}>${m?esc(m):"Prefer not to say"}</option>`).join("")}</select>
+  <div class="row">
+    <div><label for="f-amin">Ages from</label><input type="number" id="f-amin" data-f="ageMin" min="18" max="99" value="${esc(D.ageMin)}"></div>
+    <div><label for="f-amax">to</label><input type="number" id="f-amax" data-f="ageMax" min="18" max="99" value="${esc(D.ageMax)}"></div>
+  </div>
+
+  <h2>Where you are</h2>
+  <p class="small muted">The founding beta is Atlanta-area only. Members see your neighborhood or city, never your ZIP.</p>
+  <div class="row">
+    <div><label for="f-city">Neighborhood or city</label><input type="text" id="f-city" data-f="city" maxlength="40" value="${esc(D.city)}" placeholder="Decatur"></div>
+    <div style="flex:.7"><label for="f-zip">ZIP code</label><input type="text" id="f-zip" data-f="zip" inputmode="numeric" maxlength="5" value="${esc(D.zip)}"></div>
+  </div>
+
+  <h2>The basics</h2>
+  <p class="small muted">Optional. Members can filter by these, and you can change them later without another review.</p>
+  ${detailsFields(D)}
+
+  <h2>Photos</h2>
+  <p class="small muted">Add 2 to 6 clear photos of you. Location data is removed from each photo.</p>
+  <div class="photos" id="photos"><p class="muted small">Loading photos…</p></div>
+  <input type="file" id="file" accept="image/*" hidden>
+
+  <div id="ed-err"></div>
+  <button class="btn-primary btn-block" style="margin-top:22px" data-act="submit-profile">${editing ? "Save and send for review" : "Submit for review"}</button>`;
+};
+function afterEditor(){
+  updateCounters();
+  if (!S.draftPhotos) loadDraftPhotos(); else renderPhotoGrid();
+}
+function updateCounters(){
+  const D = S.draft; if (!D) return;
+  [["a1",20,200],["a2",20,200],["a3",20,200],["a4",20,200],["bio",0,500]].forEach(([k,min,max]) => {
+    const el = document.getElementById("c-"+k); if (!el) return;
+    const n = trim(D[k]).length;
+    el.textContent = `${n}/${max}` + (min && n < min ? ` · at least ${min}` : "");
+    el.classList.toggle("bad", (min && n > 0 && n < min) || n > max);
+  });
+}
+async function loadDraftPhotos(){
+  try {
+    const snap = await db.collection(`data/users/${uid}`).get();
+    let list = snap.docs.filter(d => /^photo\d$/.test(d.id)).sort((a,b) => a.id < b.id ? -1 : 1).map(d => d.data().img);
+    if (!list.length && myProfile()){
+      await loadPhotos(uid);
+      list = (photosOf(uid) || []).slice();
+      for (let i = 0; i < list.length; i++) await db.doc(`data/users/${uid}/photo${i}`).set({img:list[i]});
+    }
+    S.draftPhotos = list;
+  } catch(e){ handleErr(e); S.draftPhotos = []; }
+  renderPhotoGrid();
+}
+function renderPhotoGrid(){
+  const el = $("#photos"); if (!el) return;
+  const L = S.draftPhotos || [];
+  let html = L.map((src,i) => `<div class="ph"><img src="${src}" alt="Your photo ${i+1}"><span class="n">${i+1}</span><button class="x" data-act="rm-photo" data-i="${i}" aria-label="Remove photo ${i+1}">Remove</button></div>`).join("");
+  if (L.length < 6) html += `<div class="ph"><button class="add" data-act="add-photo">${S._uploading ? "Adding…" : "+ Add photo"}</button></div>`;
+  el.innerHTML = html;
+}
+async function writeDraftPhotos(){
+  const L = S.draftPhotos;
+  for (let i = 0; i < 6; i++){
+    const ref = db.doc(`data/users/${uid}/photo${i}`);
+    if (L[i]) await ref.set({img:L[i]}); else await ref.delete();
+  }
+}
+
+function card(id, likeable){
+  const p = S.profiles[id], list = photosOf(id), n = list ? list.length : (p.photoCount||1);
+  const i = Math.min(S.cardPhoto, Math.max(0,n-1));
+  return `
+  <article class="card" ${likeable?`data-swipe="${esc(id)}"`:""} aria-label="${esc(p.name)}, ${p.age}">
+    <div class="card-photo">
+      ${likeable?`<div class="stamp like" aria-hidden="true">Like</div><div class="stamp pass" aria-hidden="true">Pass</div>`:""}
+      ${img(id, i)}
+      <div class="dots" id="dots">${Array.from({length:n},(_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</div>
+      ${n>1?`<button class="nav prev" data-act="photo-step" data-d="-1" data-id="${esc(id)}" aria-label="Previous photo"></button><button class="nav next" data-act="photo-step" data-d="1" data-id="${esc(id)}" aria-label="Next photo"></button>`:""}
+      ${likeable?`<button class="photo-like" data-act="like-on" data-id="${esc(id)}" data-on="photo" aria-label="Like photo">${icon("heart")}</button>`:""}
+      <div class="photo-identity"><span class="intent-label">${p.ineligible ? "PROFILE HIDDEN" : "CHILDFREE BY CHOICE"}</span><h2>${esc(p.name)}, ${p.age}</h2><p>${esc(p.city)} · ${esc(p.gender)}</p></div>
+    </div>
+    <div class="card-body">
+      <p class="card-sub">${esc(p.city)} · ${esc(p.gender)}${p.marriage?` · ${esc(p.marriage)}`:""}</p>
+      ${likeable ? likeBanner(id) : ""}
+      ${basicsRow(p)}
+      ${interestsRow(id)}
+      <div class="chips">${reasons(id).map(r=>`<span class="chip">${esc(r)}</span>`).join("")}</div>
+      ${p.prompts.map(pr => `<div class="prompt">${likeable?`<button class="likeon" data-act="like-on" data-id="${esc(id)}" data-on="prompt:${esc(pr.id)}" aria-label="Like this prompt and add a comment">${icon("heart")}</button>`:""}<div class="pq">${esc(PROMPT[pr.id]||"")}</div><div class="pa">${esc(pr.a)}</div></div>`).join("")}
+      ${p.bio?`<div class="bio">${esc(p.bio)}</div>`:""}
+    </div>
+  </article>`;
+}
+function basicsRow(p){
+  const d = p.details || {}, items = [];
+  if (d.height) items.push(ftin(d.height));
+  ["faith","politics","education"].forEach(k => { if (d[k]) items.push(d[k]); });
+  if (d.drinking) items.push(d.drinking === "Never" ? "Doesn't drink" : `Drinks ${d.drinking.toLowerCase()}`);
+  if (d.smoking) items.push(d.smoking === "Never" ? "Doesn't smoke" : `Smokes ${d.smoking.toLowerCase()}`);
+  if (d.cannabis) items.push(d.cannabis === "Never" ? "No cannabis" : `Cannabis ${d.cannabis.toLowerCase()}`);
+  return items.length ? `<div class="basics">${items.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : "";
+}
+function interestsRow(id){
+  const ints = ((S.profiles[id]||{}).details||{}).interests || []; if (!ints.length) return "";
+  const shared = sharedInterests(id);
+  return `<div class="interests" aria-label="Passions">${ints.map(x => `<span class="${shared.includes(x)?"shared":""}">${esc(x)}</span>`).join("")}</div>`;
+}
+function detailsFields(D){
+  const d = D.details || (D.details = {});
+  return `
+  <label for="d-height">Height</label>
+  <select id="d-height" data-f="d:height"><option value="">Prefer not to say</option>${HEIGHTS.map(h => `<option value="${h}" ${+d.height===h?"selected":""}>${ftin(h)}</option>`).join("")}</select>
+  ${DETAILS.map(([k,label,opts]) => `
+    <label for="d-${k}">${label}</label>
+    <select id="d-${k}" data-f="d:${k}"><option value="">Prefer not to say</option>${opts.map(o => `<option value="${esc(o)}" ${d[k]===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`).join("")}`;
+}
+function renderDots(){
+  const im = document.querySelector(".card-photo img"), el = $("#dots"); if (!im || !el) return;
+  const id = im.dataset.ph.split(":")[0];
+  const list = photosOf(id); if (!list) return;
+  const i = Math.min(S.cardPhoto, list.length-1);
+  el.innerHTML = list.map((_,k)=>`<i class="${k===i?"on":""}"></i>`).join("");
+}
+function deck(){ return ((S.priv.disc||{}).queue||[]).filter(isCandidate); }
+function ensureDeck(){
+  if (!isApprovedCurrent(uid)) return;
+  const today = dayKey(), d = S.priv.disc || {};
+  // Keep cards hidden by filters in the queue so loosening filters brings them back without using up today's new picks.
+  const queue = (d.queue||[]).filter(id => S.profiles[id] && !myR()[id]);
+  let newCount = d.day === today ? (d.newCount||0) : 0;
+  const pool = rankedPool().filter(id => !queue.includes(id));
+  let top = d.day === today ? (d.top || "") : "";
+  // Once a day, the best-fitting new person becomes the top pick and goes to the front.
+  if (!top && newCount < DAILY_LIMIT && pool.length){ top = pool.shift(); queue.unshift(top); newCount++; }
+  while (newCount < DAILY_LIMIT && pool.length){ queue.push(pool.shift()); newCount++; }
+  const same = d.day === today && d.newCount === newCount && (d.top||"") === top && JSON.stringify(d.queue||[]) === JSON.stringify(queue);
+  if (!same) savePriv({disc:{day:today, newCount, queue, top}});
+}
+function announceBanner(){
+  const a = S.announce;
+  if (!a || !a.text || a.id === S.priv.dismissedAnnounce) return "";
+  return `<div class="announce" role="note"><b>From the founding team</b>${esc(a.text)}<button data-act="dismiss-announce" aria-label="Dismiss announcement">Close</button></div>`;
+}
+function discTop(text){
+  const n = activeFilterCount();
+  return `${announceBanner()}<div class="disc-top"><p class="small muted" style="margin:0">${esc(text)}</p><button class="btn-quiet" data-act="go" data-r="filters">${n ? `Filters (${n})` : "Filters"}</button></div>`;
+}
+function statusBlock(){
+  const p = myProfile(), a = myApproval();
+  if (isSuspended(uid)) return `<div class="status bad"><h2 style="margin-top:0">Your account is suspended.</h2><p>You can't use Discover or chat while it's under review. You can still use settings, delete your account or contact support.</p></div>`;
+  if (p.ineligible) return `<div class="status bad"><h2 style="margin-top:0">You're hidden from Discover.</h2><p>Your current eligibility answers don't match this community. If that was a mistake, update them in Profile.</p></div>`;
+  if (a && a.status === "changes" && a.revision === p.revision) return `<div class="status bad"><h2 style="margin-top:0">Your profile needs a few changes.</h2><p><b>From the review team:</b> ${esc(a.note || "Please review your profile and resubmit.")}</p><button class="btn-primary" data-act="go" data-r="editor">Edit profile</button></div>`;
+  if (!a || a.revision !== p.revision) return `<div class="status"><h2 style="margin-top:0">Your profile is in review.</h2><p>Use Review to approve this synthetic profile. Approval is simulated on this device.</p></div>`;
+  if (p.paused) return `<div class="status"><h2 style="margin-top:0">Your profile is paused.</h2><p>No one can see you and you won't get new cards. Your existing chats still work.</p><button data-act="pause">Resume my profile</button></div>`;
+  return "";
+}
+VIEWS.discover = () => {
+  const st = statusBlock(); if (st) return st;
+  const D = deck();
+  if (!D.length){
+    const d = S.priv.disc || {}, used = d.day === dayKey() ? d.newCount||0 : 0;
+    const sc = strictCount();
+    return `${discTop("")}<h1>${used >= DAILY_LIMIT ? "That's everyone for today." : "No one new right now."}</h1>
+      <p>${used >= DAILY_LIMIT ? `You get up to ${DAILY_LIMIT} new people a day. Come back tomorrow for more.` : "There aren't more approved members who match your preferences yet. We're inviting new members to the founding cohort every week."}</p>
+      ${used < DAILY_LIMIT && sc ? `<p>You have ${sc} ${sc===1?"dealbreaker":"dealbreakers"} on. Turning some into preferences will show more people, with your favorites still shown first.</p>` : ""}
+      <p class="muted small">We never widen your filters without asking.</p>
+      <div class="row"><button data-act="go" data-r="filters">Edit filters</button><button class="btn-quiet" data-act="go" data-r="connections">Matches</button></div>`;
+  }
+  const id = D[0];
+  const dd = S.priv.disc || {}, isTop = dd.day === dayKey() && dd.top === id;
+  const why = isTop ? reasons(id).filter(r => r !== "In each other's age range").slice(0,2).join(" · ") : "";
+  return `<div class="discover-heading"><div><h1>Discover</h1><p>Atlanta, Georgia · Your daily introductions</p></div></div>${discTop(`${D.length} ${D.length===1?"person":"people"} waiting for you`)}
+    ${isTop ? `<div class="toppick" role="note"><div>Today's top pick<small>${esc(why || "Picked from your preferences and recent activity")}</small></div></div>` : ""}
+    ${card(id, true)}
+    <div class="card-actions" style="padding:0 0 6px;border:0">
+      <button class="pass" data-act="react" data-k="pass" data-id="${esc(id)}">${icon("close")} Pass</button>
+      <button class="like btn-primary" data-act="react" data-k="like" data-id="${esc(id)}">${icon("heart")} Like</button>
+    </div>
+    <div class="under"><button data-act="report" data-id="${esc(id)}">Report</button><button data-act="block" data-id="${esc(id)}">Block</button></div>
+    <p class="swipe-hint">Swipe right to like, left to pass. Arrow keys work too.</p>`;
+};
+
+VIEWS.filters = () => {
+  const F = S.f, A2 = S.fAge;
+  const strictBox = (k, on) => `<label class="strict"><input type="checkbox" data-fs="${k}" ${on?"checked":""}> Dealbreaker: only show people who match</label>`;
+  const group = ([k,label,opts]) => { const f = F[k] || {}; return `
+    <div class="fgroup"><h3>${label}</h3>
+      <div class="pick" role="group" aria-label="${label}">${opts.map(o => `<label><input type="checkbox" data-fl="${k}" value="${esc(o)}" ${(f.vals||[]).includes(o)?"checked":""}><span>${esc(o)}</span></label>`).join("")}</div>
+      ${strictBox(k, f.strict)}</div>`; };
+  const h = F.height || {};
+  return `<button class="btn-link" data-act="go" data-r="discover">Back to Discover</button>
+    <h1>Filters</h1>
+    <p class="muted">Pick what you're looking for. By default these are preferences: matching people are shown first, and others still appear. Turn on a dealbreaker to only see people who match.</p>
+    <div class="fcount" id="fcount" aria-live="polite"></div>
+    <div class="fgroup"><h3>Age</h3>
+      <div class="row"><div><label for="fa-min" style="margin-top:4px">From</label><input type="number" id="fa-min" min="18" max="99" data-fa="min" value="${A2.min}"></div>
+      <div><label for="fa-max" style="margin-top:4px">To</label><input type="number" id="fa-max" min="18" max="99" data-fa="max" value="${A2.max}"></div></div>
+      <p class="tiny muted" style="margin-top:6px">Age is always a dealbreaker, and it works both ways: you only see people whose range includes you.</p></div>
+    <div class="fgroup"><h3>Height</h3>
+      <div class="row">
+        <div><label for="fh-min" style="margin-top:4px">From</label><select id="fh-min" data-fh="min"><option value="">Any</option>${HEIGHTS.map(x=>`<option value="${x}" ${h.min===x?"selected":""}>${ftin(x)}</option>`).join("")}</select></div>
+        <div><label for="fh-max" style="margin-top:4px">To</label><select id="fh-max" data-fh="max"><option value="">Any</option>${HEIGHTS.map(x=>`<option value="${x}" ${h.max===x?"selected":""}>${ftin(x)}</option>`).join("")}</select></div>
+      </div>${strictBox("height", h.strict)}</div>
+    ${FILTER_CATS.map(group).join("")}
+    <div class="fgroup"><h3>More</h3>
+      <div class="checks"><label><input type="checkbox" data-fx="activeOnly" ${F.activeOnly?"checked":""}> Only people active in the last 7 days</label>
+      <label><input type="checkbox" data-fx="includeBlank" ${F.includeBlank!==false?"checked":""}> Include people who didn't answer a dealbreaker question</label></div></div>
+    <div id="f-err"></div>
+    <div style="height:90px"></div>
+    <div class="savebar"><div class="in"><button class="btn-quiet" data-act="clear-filters">Clear all</button><button class="btn-primary" style="flex:2" data-act="save-filters">Save filters</button></div></div>`;
+};
+function updateFilterCount(){
+  const el = $("#fcount"); if (!el) return;
+  const n = filterCount(S.f, +S.fAge.min || 18, +S.fAge.max || 99);
+  el.textContent = n === 0 ? "No approved members match these filters yet." : n < 10 ? "Fewer than 10 approved members match these filters." : `About ${n} approved members match these filters.`;
+}
+function filterChanged(t){
+  const F = S.f;
+  if (t.dataset.fl){ const k = t.dataset.fl; F[k] = F[k] || {vals:[], strict:false}; const s = new Set(F[k].vals||[]); t.checked ? s.add(t.value) : s.delete(t.value); const cat = FILTER_CATS.find(c => c[0]===k); F[k].vals = cat[2].filter(o => s.has(o)); }
+  if (t.dataset.fs){ const k = t.dataset.fs; F[k] = F[k] || {vals:[]}; F[k].strict = t.checked; }
+  if (t.dataset.fh){ F.height = F.height || {}; F.height[t.dataset.fh] = +t.value || 0; }
+  if (t.dataset.fx){ F[t.dataset.fx] = t.checked; }
+  if (t.dataset.fa){ S.fAge[t.dataset.fa] = t.value; }
+  updateFilterCount();
+}
+VIEWS.passions = () => {
+  if (!S.pdraft) S.pdraft = (((myProfile()||{}).details||{}).interests || []).slice();
+  const sel = S.pdraft, onboard = !!S.passionsOnboard;
+  return `${onboard ? "" : `<button class="btn-link" data-act="go" data-r="me">Cancel</button>`}
+    <h1>Your passions</h1>
+    <p class="muted">Pick ${MIN_PASSIONS} to ${MAX_INTERESTS} things you love. They show on your profile, and people who share them are shown to you first.</p>
+    <div class="pcount"><b id="pcount" aria-live="polite">${sel.length} of ${MAX_INTERESTS} picked</b>
+      <input type="text" id="psearch" placeholder="Search" aria-label="Search passions" style="max-width:170px;padding:8px 12px"></div>
+    ${PASSION_GROUPS.map(([g, items]) => `<div class="pgroup" data-group><h3>${esc(g)}</h3>
+      <div class="pick" role="group" aria-label="${esc(g)}">${items.map(x => `<label><input type="checkbox" data-pas value="${esc(x)}" ${sel.includes(x)?"checked":""}><span>${esc(x)}</span></label>`).join("")}</div></div>`).join("")}
+    <p class="muted small" id="pnone" hidden>Nothing matches that search.</p>
+    <div id="p-err"></div>
+    <div style="height:90px"></div>
+    <div class="savebar"><div class="in">${onboard ? `<button class="btn-quiet" data-act="skip-passions">Skip for now</button>` : ""}<button class="btn-primary" style="flex:2" data-act="save-passions">${onboard ? "Continue" : "Save passions"}</button></div></div>`;
+};
+VIEWS.details = () => `<button class="btn-link" data-act="go" data-r="me">Cancel</button>
+  <h1>The basics</h1>
+  <p class="muted">These show on your profile and help people find you with filters. Changes go live right away without another review.</p>
+  ${detailsFields(S.draft)}
+  <button class="btn-primary btn-block" style="margin-top:22px" data-act="save-details">Save</button>`;
+
+const fmtWhen = w => { const d = new Date(w); return isNaN(d) ? "" : d.toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); };
+const goingTo = eid => Object.keys(S.rsvps).filter(id => ((S.rsvps[id]||{}).going||{})[eid] && S.profiles[id]);
+function upcomingEvents(){
+  const cutoff = now() - 3*3600000;
+  return Object.entries(S.events).map(([id,e]) => ({...e, id})).filter(e => new Date(e.when).getTime() >= cutoff).sort((a,b) => new Date(a.when) - new Date(b.when));
+}
+VIEWS.events = () => `${announceBanner()}<h1>Events</h1>
+    <p class="muted">Meet other members in person at founding-cohort events around Atlanta.</p>${eventsList()}`;
+function eventsList(){
+  const list = upcomingEvents(), canRsvp = isApprovedCurrent(uid);
+  return `${list.length ? list.map(e => {
+      const g = goingTo(e.id), mine = g.includes(uid), full = e.capacity && g.length >= e.capacity && !mine;
+      return `<article class="event">
+        <div class="date">${esc(fmtWhen(e.when))}</div>
+        <h2>${esc(e.title)}</h2>
+        <div class="meta">${esc(e.place)}</div>
+        ${e.details ? `<p style="white-space:pre-wrap">${esc(e.details)}</p>` : ""}
+        <div class="going">${g.length ? `${g.length} ${g.length===1?"member":"members"} going` : "Be the first to RSVP"}${e.capacity ? (n => ` · ${n} ${n===1?"spot":"spots"} left`)(Math.max(0, e.capacity - g.length)) : ""}</div>
+        ${!canRsvp ? `<p class="small muted">You can RSVP once your profile is approved.</p>`
+          : mine ? `<button class="btn-block" data-act="rsvp" data-id="${esc(e.id)}" data-v="0">You're going · Cancel RSVP</button>`
+          : full ? `<button class="btn-block" disabled>Full</button>`
+          : `<button class="btn-block btn-primary" data-act="rsvp" data-id="${esc(e.id)}" data-v="1">I'm going</button>`}
+      </article>`; }).join("") : `<p>No events are scheduled yet. The founding team will post the first Atlanta meetup here.</p>`}
+    <p class="tiny muted">Meet in public places and tell a friend where you'll be. Members only see how many people are going, not who.</p>`;
+}
+VIEWS.dates = () => {
+  const ids = matchIds(), cut = now() - 3*3600000;
+  const all = ids.map(id => ({id, st:planState(id)}));
+  const locked = all.filter(x => x.st.stage === "locked");
+  const upcoming = locked.filter(x => new Date(x.st.time).getTime() >= cut).sort((a,b) => new Date(a.st.time) - new Date(b.st.time));
+  const past = locked.length - upcoming.length;
+  const pending = all.filter(x => ["drafting","sent","noMatch","newRound","pickTime","counter"].includes(x.st.stage));
+  const line = x => {
+    const n = esc(S.profiles[x.id].name), st = x.st, mine = planNeedsMe(x.id) || (st.stage === "drafting");
+    const txt = {
+      drafting:`Finish planning your date with ${n}`,
+      sent: st.iAmInit ? `Waiting on ${n} to pick a venue` : `${n} wants to plan a date: ${esc(st.init.vibe)}`,
+      noMatch: st.iAmInit ? `Waiting on ${n} to choose a spot` : `Choose a spot for your date with ${n}`,
+      newRound: st.iAmInit ? `${n} asked for new spots` : `Waiting on ${n} for new spots`,
+      pickTime: st.iAmInit ? `Waiting on ${n} to pick a time` : `Pick a time with ${n} at ${esc(st.venue ? st.venue.name : "your spot")}`,
+      counter: st.iAmInit ? `${n} suggested ${esc(fmtAt(st.time))}` : `Waiting on ${n} to confirm the time`
+    }[st.stage];
+    return `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">${txt}</div><div class="st" style="color:${mine ? "#FFB800" : "#8E8E93"}">${mine ? "Your turn" : "Proposing"}</div></div></button>`;
+  };
+  return `${announceBanner()}<h1>Dates</h1>
+    <h2 style="margin-top:6px">Upcoming dates</h2>
+    ${upcoming.length ? upcoming.map(x => `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">Date with ${esc(S.profiles[x.id].name)}</div><div class="s">${esc(x.st.venue ? x.st.venue.name : "Your spot")} · ${esc(fmtAt(x.st.time))}</div><div class="st" style="color:#00A859">Locked</div></div></button>`).join("")
+      : `<p class="muted">No dates yet. After you've chatted with a match, tap Plan a date in your conversation.</p>`}
+    ${past ? `<p class="tiny muted">${past} past ${past===1?"date":"dates"}</p>` : ""}
+    ${pending.length ? `<h2>Pending proposals</h2>${pending.map(line).join("")}` : ""}
+    <h2>Community events</h2>
+    <p class="muted small">Founding-cohort meetups around Atlanta.</p>
+    ${eventsList()}`;
+};
+VIEWS.view = () => {
+  const id = S.viewId;
+  if (!S.profiles[id] || !canReact(id)) return `<button class="btn-link" data-act="go" data-r="connections">Back</button><p class="muted">This person isn't available anymore.</p>`;
+  return `<button class="btn-link" data-act="go" data-r="connections">Back to matches</button>
+    ${card(id, true)}
+    <div class="card-actions" style="padding:0 0 6px;border:0">
+      <button class="pass" data-act="react" data-k="pass" data-id="${esc(id)}">${icon("close")} Pass</button>
+      <button class="like btn-primary" data-act="react" data-k="like" data-id="${esc(id)}">${icon("heart")} Like back</button>
+    </div>
+    <div class="under"><button data-act="report" data-id="${esc(id)}">Report</button><button data-act="block" data-id="${esc(id)}">Block</button></div>
+    <p class="swipe-hint">Swipe right to like, left to pass. Arrow keys work too.</p>`;
+};
+VIEWS.connections = () => {
+  const ids = matchIds();
+  const withMsgs = ids.filter(id => convo(id).length).sort((a,b) => { const la = convo(a).slice(-1)[0].at, lb = convo(b).slice(-1)[0].at; return lb - la; });
+  const fresh = ids.filter(id => !convo(id).length);
+  const pending = Object.entries(myR()).filter(([id,r]) => r.k === "like" && !ids.includes(id) && S.profiles[id] && now() - r.at < 30*86400000).length;
+  const ly = likesYou();
+  const lySection = ly.length ? `<h3>Likes you</h3><p class="small muted" style="margin:-4px 0 8px">Like them back to match.</p><div class="newm">${ly.map(id => { const t = likedMe(id); return `<button class="lk" data-act="view-like" data-id="${esc(id)}">${img(id,0)}<span>${esc(S.profiles[id].name)}</span>${t.note?'<span class="tiny muted">Left a comment</span>':""}</button>`; }).join("")}</div>` : "";
+  if (!ids.length) return `<h1>Matches</h1>${lySection}<p>When someone you like likes you back, they'll show up here.</p>${pending?`<p class="muted small">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>`:""}`;
+  return `${announceBanner()}<h1>Matches</h1>${lySection}
+    ${fresh.length ? `<h3>New matches</h3><div class="newm">${fresh.map(id => `<button data-act="open-chat" data-id="${esc(id)}">${img(id,0)}<span>${esc(S.profiles[id].name)}</span></button>`).join("")}</div>` : ""}
+    <h3>Conversations</h3>
+    ${withMsgs.length ? `<ul class="list">${withMsgs.map(id => { const last = convo(id).slice(-1)[0]; return `<li><button class="item" data-act="open-chat" data-id="${esc(id)}">${img(id,0,"avatar")}<div class="grow"><div class="t">${esc(S.profiles[id].name)}</div><div class="s">${last.me?"You: ":""}${last.img?"Sent a photo":esc(last.t)}</div></div>${unread(id)?'<span class="dot" aria-label="unread"></span>':`<span class="tiny muted">${ago(last.at)}</span>`}</button></li>`; }).join("")}</ul>` : `<p class="muted">Say hi to a new match to start a conversation.</p>`}
+    ${pending?`<p class="muted small" style="margin-top:18px">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>`:""}`;
+};
+
+function likeContext(id){
+  const out = [], name = esc(S.profiles[id].name);
+  const mine = myR()[id], theirs = theirR(id)[uid];
+  const line = (r, who, owner, whose) => {
+    const d = describeOn(owner, r.on); if (!d && !r.note) return;
+    const what = d && d.kind === "prompt" ? `${who} liked ${whose} prompt “${esc(d.q)}”` : d && d.kind === "photo" ? `${who} liked ${whose} photo` : `${who} liked ${whose} profile`;
+    out.push(`<div class="ctx">${what}${r.note?`<q>${esc(r.note)}</q>`:""}</div>`);
+  };
+  [[mine,"You",id,"their"],[theirs,name,uid,"your"]].filter(x => x[0]).sort((a,b) => a[0].at - b[0].at).forEach(x => line(...x));
+  return out.join("");
+}
+function renderChat(){
+  const id = S.chatWith, p = S.profiles[id];
+  $("#main").innerHTML = `
+    <div class="chat-head">
+      <button class="btn-link" data-act="go" data-r="connections" aria-label="Back to matches">${icon("arrow")}</button>
+      ${img(id,0,"avatar")}
+      <div class="grow"><div style="font-family:var(--serif);font-size:20px">${esc(p.name)}, ${p.age}</div><div class="tiny muted">${esc(p.city)}</div></div>
+      <button class="btn-quiet" style="min-height:40px;padding:8px 12px" data-act="chat-menu" data-id="${esc(id)}" aria-label="Conversation options">${icon("more")}</button>
+    </div>
+    <div id="dpin"></div>
+    <div class="msgs" id="msgs" aria-live="polite"></div>
+    <div class="composer"><div class="in" style="flex-direction:column;align-items:stretch;gap:4px">
+      <div class="typing" id="typing" aria-live="polite"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <button class="ph-btn" data-act="chat-photo" aria-label="Send a photo">${icon("attachment")}</button>
+        <textarea id="compose" maxlength="1000" placeholder="Write a message" aria-label="Message"></textarea>
+        <button class="btn-primary" data-act="send" aria-label="Send message">${icon("send")}</button>
+      </div>
+      <input type="file" id="chatfile" accept="image/*" hidden>
+    </div></div>`;
+  $("#tabs").hidden = true;
+  updateChat(true);
+  joinChatRoom(id);
+}
+function updateChat(scroll){
+  const el = $("#msgs"); if (!el) return;
+  const id = S.chatWith, list = convo(id);
+  const ctx = likeContext(id);
+  const atBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 80;
+  const pr = pairId(id), myLast = (S.myMsgs[pr]||[]).slice(-1)[0];
+  const seenLast = myLast && list.length && list[list.length-1].me && (S.theirSeen[pr]||0) >= myLast.at;
+  const pst = planState(id);
+  const showMs = pst.stage === "none" && list.length >= MILESTONE && list.some(m => m.me) && list.some(m => !m.me) && !((S.priv.msDismiss||{})[pr]);
+  const pinned = pst.stage === "locked";
+  const pinEl = $("#dpin");
+  if (pinEl) pinEl.innerHTML = pinned ? `<div class="dpin" role="note"><span class="grow"><b>Date locked</b> · ${esc(pst.venue ? pst.venue.name : "")} · ${esc(fmtAt(pst.time))}</span><button data-act="pin-details">Details</button></div>` : "";
+  el.innerHTML = (pinned ? `<div id="dlocked">${planBlock(id)}</div>` : "") + ctx + (list.length ? list.map((m, mi) => (m.img
+      ? `<div class="b img ${m.me?"me":"them"}"><img data-mi="${esc((m.me?uid:id)+"|"+pr+"|"+m.img)}" ${S.msgImg[(m.me?uid:id)+"|"+pr+"|"+m.img]?`src="${S.msgImg[(m.me?uid:id)+"|"+pr+"|"+m.img]}"`:""} alt="Photo from ${m.me?"you":esc(S.profiles[id].name)}"></div>`
+      : `<div class="b ${m.me?"me":"them"}">${esc(m.t)}</div>`) + `<div class="when ${m.me?"me":""}">${ago(m.at)}</div>` + (showMs && mi === MILESTONE - 1 ? milestoneBlock(id) : "")).join("") + (seenLast ? `<div class="seen">Seen</div>` : "") + (pinned ? "" : planBlock(id))
+    : `<p class="muted" style="text-align:center;margin-top:30px">You matched with ${esc(S.profiles[id].name)}. Say hello.</p><p class="tiny muted" style="text-align:center">Founding beta: don't share sensitive details like your address or money information.</p>` + (pinned ? "" : planBlock(id)));
+  if (scroll || atBottom) window.scrollTo(0, document.body.scrollHeight);
+  el.querySelectorAll("img[data-mi]:not([src])").forEach(loadMsgImg);
+  const p = pairId(id), last = (S.theirMsgs[p]||[]).slice(-1)[0];
+  if (last && last.at > ((S.priv.lastRead||{})[p]||0)) savePriv({lastRead:{...(S.priv.lastRead||{}), [p]:last.at}});
+  if (last && last.at > (S.mySeen[p]||0) && document.visibilityState === "visible"){ S.mySeen[p] = last.at; writeMyMsgs(p, id); }
+}
+function writeMyMsgs(p, other){
+  const body = {to:other, list:S.myMsgs[p]||[], seenAt:S.mySeen[p]||0};
+  if (S.myPlans[p]) body.plan = S.myPlans[p];
+  return enqueue("msg:"+p, () => db.doc(`msgs/${uid}/c/${p}`).set(clone(body)));
+}
+async function loadMsgImg(el){
+  const key = el.dataset.mi; if (S.msgImg[key] === "loading") return;
+  const [sender, p, mid] = key.split("|");
+  S.msgImg[key] = "loading";
+  try {
+    const d = await db.doc(`msgs/${sender}/c/${p}/i/${mid}`).get();
+    const src = d.exists && String(d.data().img||"").startsWith("data:image/") ? d.data().img : "";
+    S.msgImg[key] = src;
+    document.querySelectorAll(`img[data-mi="${CSS.escape(key)}"]`).forEach(x => { if (src) x.src = src; else x.alt = "Photo unavailable"; });
+  } catch(e){ delete S.msgImg[key]; }
+}
+// ---------- Typing indicator (live room, nothing saved) ----------
+let room = null, chatRoom = null, chatRoomFor = null, typingTimer = null, peersOff = null;
+function roomName(other){
+  const k = pairId(other); let h = 5381; for (let i = 0; i < k.length; i++) h = ((h << 5) + h + k.charCodeAt(i)) >>> 0;
+  return "c-" + h.toString(36) + "-" + k.length.toString(36);
+}
+async function joinChatRoom(other){
+  if (!room) return;
+  if (chatRoomFor === other && chatRoom) return;
+  await leaveChatRoom();
+  chatRoomFor = other;
+  try {
+    const r = await room.join(roomName(other));
+    if (chatRoomFor !== other){ r.leave(); return; }
+    chatRoom = r;
+    peersOff = r.onPeers(ch => showTyping(ch.peers), () => {});
+  } catch(e){ chatRoom = null; }
+}
+async function leaveChatRoom(){
+  const r = chatRoom; chatRoom = null; chatRoomFor = null;
+  if (peersOff){ peersOff(); peersOff = null; }
+  if (r){ try { await r.leave(); } catch(_){} }
+}
+function showTyping(peers){
+  const el = $("#typing"); if (!el) return;
+  const other = S.chatWith;
+  const on = peers.some(p => !p.isMe && (p.by === other || p.by === null) && p.presence && p.presence.typing === true && now() - (+p.presence.at||0) < 8000);
+  el.textContent = on ? `${S.profiles[other].name} is typing…` : "";
+}
+function setTyping(on){
+  if (!chatRoom) return;
+  chatRoom.presence({typing:on, at:now()}).catch(() => {});
+  clearTimeout(typingTimer);
+  if (on) typingTimer = setTimeout(() => setTyping(false), 4000);
+}
+
+VIEWS.me = () => {
+  const p = myProfile(), a = myApproval();
+  let status = "In review";
+  if (isSuspended(uid)) status = "Suspended";
+  else if (p.ineligible) status = "Hidden: eligibility answers";
+  else if (a && a.revision === p.revision && a.status === "approved") status = p.paused ? "Paused" : "Live";
+  else if (a && a.revision === p.revision && a.status === "changes") status = "Changes requested";
+  const blocked = Object.entries(myR()).filter(([,r]) => r.k === "block").map(([id]) => id);
+  return `<h1>Your profile</h1>
+    <p><b>Status:</b> ${esc(status)}</p>
+    ${card(uid).replace('class="card"','class="card" style="margin-top:0"')}
+    <button class="btn-block" data-act="go" data-r="editor">Edit profile</button>
+    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="passions">${(((p.details||{}).interests)||[]).length ? "Edit passions" : "Add your passions"}</button>
+    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="details">Edit the basics (no review needed)</button>
+    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="filters">Discovery filters</button>
+    <button class="btn-block btn-primary" style="margin-top:10px" data-act="invite">Invite a friend</button>
+    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="pause">${p.paused?"Resume my profile":"Pause my profile"}</button>
+    <h2>Settings</h2>
+    <ul class="list">
+      <li><button class="item" data-act="go" data-r="eligibility"><div class="grow"><div class="t">Eligibility answers</div><div class="s">Update your answers if something changed</div></div></button></li>
+      <li><button class="item" data-act="show-pledge"><div class="grow"><div class="t">Community Pledge</div><div class="s">Accepted ${S.priv.pledge?new Date(S.priv.pledge.at).toLocaleDateString():""}</div></div></button></li>
+      <li><button class="item" data-act="help"><div class="grow"><div class="t">Help and support</div><div class="s">Get help or appeal a decision</div></div></button></li>
+    </ul>
+    <h3>Blocked members</h3>
+    ${blocked.length ? `<ul class="list">${blocked.map(id => `<li class="item" style="cursor:default"><div class="grow"><div class="t">${esc((S.profiles[id]||{}).name || "Former member")}</div></div><button class="btn-quiet" style="min-height:38px;padding:6px 12px" data-act="unblock" data-id="${esc(id)}">Unblock</button></li>`).join("")}</ul><p class="tiny muted">Unblocking doesn't restore a match.</p>` : `<p class="muted small">You haven't blocked anyone.</p>`}
+    <div class="sep"></div>
+    <button class="btn-block btn-danger" data-act="delete-account">Delete my account</button>
+    <p class="tiny muted" style="margin-top:10px">Deleting removes your profile, photos, likes and messages you sent. Reports you filed are kept for safety review.</p>`;
+};
+
+VIEWS.admin = () => {
+  const ids = Object.keys(S.profiles);
+  const queue = ids.filter(id => { const a = S.approvals[id], p = S.profiles[id]; return !p.ineligible && !isSuspended(id) && (!a || a.revision !== p.revision); });
+  const approved = ids.filter(isApprovedCurrent);
+  const reports = Object.entries(S.reports).flatMap(([rid,doc]) => (doc.items||[]).map(it => ({...it, reporter:rid}))).sort((a,b) => b.at - a.at);
+  const t = (k,l) => `<button data-act="admin-tab" data-t="${k}" aria-pressed="${S.adminTab===k}">${l}</button>`;
+  const by = g => approved.filter(id => S.profiles[id].gender === g).length;
+  let body = "";
+  if (S.adminTab === "queue"){
+    body = queue.length ? queue.map(id => reviewItem(id)).join("") : `<p class="muted">Nothing waiting for review.</p>`;
+  } else if (S.adminTab === "venues"){
+    const vs = Object.entries(S.venues).map(([id,v]) => ({id, ...v})).sort((a,b) => a.name < b.name ? -1 : 1);
+    const V = S.vdraft || (S.vdraft = {vibes:[], tags:[], price:2});
+    body = `<p class="small muted">The date planner suggests 3 spots from this list, matched to the vibe and budget. Add places you'd actually send members.</p>
+      ${vs.length ? `<ul class="list">${vs.map(v => `<li class="item" style="cursor:default">${v.photo?`<img class="avatar" style="border-radius:12px" src="${v.photo}" alt="">`:""}<div class="grow"><div class="t">${esc(v.name)}</div><div class="s">${esc(v.area)} · ${priceStr(v.price)} · ${esc((v.vibes||[]).join(", "))}</div></div><button class="btn-quiet btn-danger" style="min-height:38px;padding:6px 12px" data-act="delete-venue" data-id="${esc(v.id)}">Remove</button></li>`).join("")}</ul>` : `<p class="muted">No venues yet. Add at least 3 so the planner has something to suggest.</p>`}
+      <h3>Add a venue</h3>
+      <label for="v-name">Name</label><input type="text" id="v-name" maxlength="60">
+      <label for="v-area">Area</label><select id="v-area"><option value="">Choose one</option>${AREAS.map(a => `<option>${esc(a)}</option>`).join("")}</select>
+      <label for="v-address">Address</label><input type="text" id="v-address" maxlength="140">
+      <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin:16px 0 6px">Good for</legend>
+      <div class="pick">${VIBES.map(x => `<label><input type="checkbox" data-vv value="${esc(x)}"><span>${esc(x)}</span></label>`).join("")}</div></fieldset>
+      <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin:16px 0 6px">Price</legend>
+      <div class="pick">${[1,2,3,4].map(n => `<label><input type="radio" name="v-price" data-vp value="${n}" ${n===2?"checked":""}><span>${priceStr(n)}</span></label>`).join("")}</div></fieldset>
+      <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin:16px 0 6px">Tags</legend>
+      <div class="pick">${VENUE_TAGS.map(x => `<label><input type="checkbox" data-vt value="${esc(x)}"><span>${esc(x)}</span></label>`).join("")}</div></fieldset>
+      <label for="v-blurb">One-line description</label><input type="text" id="v-blurb" maxlength="120" placeholder="Afro-Caribbean vinyl bar with great cocktails">
+      <label for="v-menu">Menu link <span class="hint">Optional</span></label><input type="text" id="v-menu" placeholder="https://">
+      <label for="v-reserve">Reservation link <span class="hint">Optional</span></label><input type="text" id="v-reserve" placeholder="https://">
+      <label>Photo <span class="hint">Optional</span></label><button class="btn-quiet" data-act="venue-photo" id="vphoto-btn">${S.vphoto ? "Change photo" : "Add photo"}</button><img id="vphoto-prev" ${S.vphoto?`src="${S.vphoto}"`:""} alt="" style="height:70px;border-radius:10px;margin-left:10px;vertical-align:middle">
+      <input type="file" id="vfile" accept="image/*" hidden>
+      <div id="v-err"></div>
+      <button class="btn-primary btn-block" style="margin-top:14px" data-act="add-venue">Add venue</button>`;
+  } else if (S.adminTab === "events"){
+    const list = upcomingEvents();
+    body = `${list.length ? list.map(e => { const g = goingTo(e.id); return `<div class="panel"><div class="small" style="font-weight:700;color:var(--berry)">${esc(fmtWhen(e.when))}</div><b>${esc(e.title)}</b><p class="small muted" style="margin:2px 0 8px">${esc(e.place)} · ${g.length} going${e.capacity?` of ${e.capacity}`:""}</p>${g.length?`<p class="small">${g.map(id => esc(S.profiles[id].name)).join(", ")}</p>`:""}<button class="btn-danger" data-act="delete-event" data-id="${esc(e.id)}">Cancel event</button></div>`; }).join("") : `<p class="muted">No upcoming events.</p>`}
+      <h3>New event</h3>
+      <label for="ev-title">Title</label><input type="text" id="ev-title" maxlength="80" placeholder="Founding members mixer">
+      <label for="ev-when">Date and time</label><input type="datetime-local" id="ev-when">
+      <label for="ev-place">Place</label><input type="text" id="ev-place" maxlength="120" placeholder="Venue name, neighborhood">
+      <label for="ev-details">Details <span class="hint">Optional</span></label><textarea id="ev-details" maxlength="600"></textarea>
+      <label for="ev-cap">Capacity <span class="hint">Optional</span></label><input type="number" id="ev-cap" min="0" max="1000">
+      <div id="ev-err"></div>
+      <button class="btn-primary btn-block" style="margin-top:12px" data-act="create-event">Post event</button>`;
+  } else if (S.adminTab === "gaps"){
+    body = gapsView(approved);
+  } else if (S.adminTab === "announce"){
+    const a = S.announce;
+    body = `<p class="small muted">Post a short note that every member sees at the top of Discover, Matches and Dates until they close it. Posting a new one replaces the old one.</p>
+      ${a && a.text ? `<div class="announce" style="padding-right:14px"><b>Live now · ${ago(a.at)}</b>${esc(a.text)}</div><button class="btn-danger" data-act="remove-announce">Remove announcement</button>` : `<p class="muted">No announcement is live.</p>`}
+      <label for="ann-text">New announcement</label>
+      <textarea id="ann-text" maxlength="280" placeholder="Our first Atlanta mixer is Saturday. RSVP in Events."></textarea>
+      <button class="btn-primary btn-block" style="margin-top:10px" data-act="post-announce">Post to all members</button>`;
+  } else if (S.adminTab === "invites"){
+    const open = openInvites(), done = allInvites().filter(x => (S.priv.handledInvites||{})[x.id]);
+    const leaders = Object.keys(S.profiles).map(id => [id, joinedVia(id).length]).filter(x => x[1]).sort((a,b) => b[1]-a[1]).slice(0,5);
+    body = `<p class="small muted">Share the app with each person (Share menu, Contributor access), then mark them added.</p>
+      ${open.length ? `<ul class="list">${open.map(x => `<li class="item" style="cursor:default"><div class="grow"><div class="t">${esc(x.name)} · ${esc(x.email)}</div><div class="s">Invited by ${esc((S.profiles[x.by]||{}).name || "former member")} · ${ago(x.at)}</div></div><button class="btn-quiet" style="min-height:38px;padding:6px 12px" data-act="invite-done" data-id="${esc(x.id)}">Added</button></li>`).join("")}</ul>` : `<p class="muted">No invite requests waiting.</p>`}
+      ${leaders.length ? `<h3>Top inviters</h3><ul class="list">${leaders.map(([id,n]) => `<li class="item" style="cursor:default"><div class="grow"><div class="t">${esc(S.profiles[id].name)}</div></div><span class="small">${n} joined</span></li>`).join("")}</ul>` : ""}
+      ${done.length ? `<p class="tiny muted" style="margin-top:14px">${done.length} already added.</p>` : ""}`;
+  } else if (S.adminTab === "members"){
+    body = ids.length ? `<ul class="list">${ids.map(id => { const p = S.profiles[id], a = S.approvals[id];
+      const st = isSuspended(id) ? "Suspended" : p.ineligible ? "Ineligible" : isApprovedCurrent(id) ? "Live" : p.paused ? "Paused" : (a && a.revision===p.revision && a.status==="changes") ? "Changes requested" : "In review";
+      return `<li class="item" style="cursor:default">${img(id,0,"avatar")}<div class="grow"><div class="t">${esc(p.name)}, ${p.age}</div><div class="s">${esc(p.gender)} · ${esc(p.city)} · ${st}${p.invitedBy && S.profiles[p.invitedBy] ? ` · invited by ${esc(S.profiles[p.invitedBy].name)}` : ""}</div></div>${isSuspended(id)?`<button class="btn-quiet" style="min-height:38px;padding:6px 12px" data-act="reinstate" data-id="${esc(id)}">Reinstate</button>`:`<button class="btn-quiet btn-danger" style="min-height:38px;padding:6px 12px" data-act="suspend" data-id="${esc(id)}">Suspend</button>`}</li>`; }).join("")}</ul>` : `<p class="muted">No members yet.</p>`;
+  } else {
+    body = reports.length ? reports.map(r => `<div class="panel"><b>${esc((REPORT_CATS.find(c=>c[0]===r.category)||[,"Other"])[1])}</b><p class="small muted" style="margin:4px 0 8px">${new Date(r.at).toLocaleString()} · Reported by ${esc((S.profiles[r.reporter]||{}).name || "former member")} · About ${esc((S.profiles[r.subject]||{}).name || "former member")}</p>${r.detail?`<p>${esc(r.detail)}</p>`:""}${S.profiles[r.subject] && !isSuspended(r.subject)?`<button class="btn-danger" data-act="suspend" data-id="${esc(r.subject)}">Suspend ${esc(S.profiles[r.subject].name)}</button>`:""}</div>`).join("") : `<p class="muted">No reports.</p>`;
+  }
+  return `${myProfile()?"":`<button class="btn-link" data-act="go" data-r="discover">Back to the app</button>`}
+    <h1>Review</h1>
+    <div class="stats"><div class="stat"><b>${approved.length}</b><span>Live members</span></div><div class="stat"><b>${queue.length}</b><span>Waiting for review</span></div><div class="stat"><b>${reports.length}</b><span>Reports</span></div></div>
+    <p class="small muted">Live: ${by("Woman")} women · ${by("Man")} men · ${by("Non-binary")} non-binary</p>
+    <div class="tabs-inline">${t("queue","Review queue")}${t("members","Members")}${t("reports","Reports")}${t("invites", openInvites().length ? `Invites (${openInvites().length})` : "Invites")}${t("gaps","Recruiting")}${t("announce","Announce")}${t("events","Events")}${t("venues","Venues")}</div>
+    ${body}`;
+};
+const BANDS = [[18,24],[25,29],[30,34],[35,39],[40,44],[45,54],[55,99]];
+function gapsView(approved){
+  const P = id => S.profiles[id];
+  // Supply: live members by gender and age band. Demand: live members who want that gender and whose age range covers the band.
+  const rows = BANDS.map(([lo,hi]) => {
+    const cells = GENDERS.map(g => {
+      const supply = approved.filter(id => P(id).gender === g && P(id).age >= lo && P(id).age <= hi).length;
+      const demand = approved.filter(id => (P(id).partnerGenders||[]).includes(g) && P(id).ageMin <= hi && P(id).ageMax >= lo).length;
+      return {g, supply, demand, short: demand >= 3 && demand > supply * 2};
+    });
+    return {lo, hi, cells};
+  });
+  const label = (lo,hi) => hi >= 99 ? `${lo}+` : `${lo}–${hi}`;
+  const plural = {"Woman":"women","Man":"men","Non-binary":"non-binary members"};
+  const needs = rows.flatMap(r => r.cells.filter(c => c.short).map(c => `${plural[c.g]} ${label(r.lo,r.hi)}`));
+  return `<p class="small muted">Each cell shows live members / members looking for them. Highlighted cells have more than twice as many people looking as there are members, so recruit there first.</p>
+    ${needs.length ? `<div class="status"><b>Recruit next:</b> ${esc(needs.slice(0,4).join(", "))}</div>` : `<p class="muted small">No big gaps yet. Gaps appear once at least 3 people are looking for a group.</p>`}
+    <div class="tablewrap"><table class="gaps"><thead><tr><th>Age</th>${GENDERS.map(g => `<th>${esc(plural[g].replace(" members",""))}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(r => `<tr><td>${label(r.lo,r.hi)}</td>${r.cells.map(c => `<td class="${c.short?"short":""}">${c.supply} / ${c.demand}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function allInvites(){
+  return Object.entries(S.invites).flatMap(([by,doc]) => (doc.items||[]).map(x => ({...x, by}))).sort((a,b) => b.at - a.at);
+}
+const openInvites = () => allInvites().filter(x => !(S.priv.handledInvites||{})[x.id]);
+function reviewItem(id){
+  const p = S.profiles[id], list = photosOf(id); if (!list) loadPhotos(id);
+  return `<div class="panel">
+    <div style="font-family:var(--serif);font-size:24px">${esc(p.name)}, ${p.age}</div>
+    <p class="small muted" style="margin:2px 0 8px">${esc(p.gender)} · wants to meet ${esc((p.partnerGenders||[]).join(", "))} · ages ${p.ageMin}–${p.ageMax} · ${esc(p.city)} ${esc(p.zip)} · revision ${p.revision}</p>
+    <div class="review-photos">${Array.from({length:p.photoCount||0},(_,i)=>img(id,i)).join("")}</div>
+    ${p.prompts.map(pr => `<p><span class="small muted">${esc(PROMPT[pr.id])}</span><br>${esc(pr.a)}</p>`).join("")}
+    ${p.bio?`<p><span class="small muted">Bio</span><br>${esc(p.bio)}</p>`:""}
+    <p class="small">${esc(p.goal)}${p.marriage?` · ${esc(p.marriage)}`:""}</p>
+    ${basicsRow(p)}${interestsRow(id)}
+    <div class="row" style="margin-top:10px">
+      <button class="btn-primary" data-act="approve" data-id="${esc(id)}">Approve</button>
+      <button data-act="request-changes" data-id="${esc(id)}">Request changes</button>
+    </div>
+    <button class="btn-link" style="color:var(--bad);margin-top:6px" data-act="suspend" data-id="${esc(id)}">Suspend</button>
+  </div>`;
+}
+
+// ---------- Modals ----------
+function sheet(html){
+  $("#layer").innerHTML = `<div class="scrim" data-act="close-scrim"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  const f = $("#layer").querySelector("select,textarea,button"); if (f) f.focus();
+}
+function closeSheet(){ $("#layer").innerHTML = ""; }
+function confirmSheet(title, text, label, fn, danger){
+  S._confirm = fn;
+  sheet(`<h2 style="margin-top:0">${esc(title)}</h2><p>${esc(text)}</p><button class="btn-block ${danger?"btn-danger":"btn-primary"}" data-act="confirm-yes">${esc(label)}</button><button class="btn-block btn-quiet" style="margin-top:10px" data-act="close">Cancel</button>`);
+}
+
+// ---------- Actions ----------
+function setReaction(id, k, extra){
+  const r = clone(myR()); r[id] = {k, at:now(), ...(extra||{})};
+  S.reactions[uid] = {r};
+  return enqueue("react", () => db.doc(`reactions/${uid}`).set({r}));
+}
+async function deleteAll(){
+  closeSheet();
+  $("#main").innerHTML = `<p class="muted" style="margin-top:40px">Deleting your data…</p>`;
+  try {
+    Object.values(S.msgSubs).forEach(u => u()); S.msgSubs = {};
+    const tasks = [];
+    const m = await db.collection(`msgs/${uid}/c`).get();
+    for (const d of m.docs){
+      const im = await db.collection(`msgs/${uid}/c/${d.id}/i`).get();
+      im.docs.forEach(x => tasks.push(db.doc(`msgs/${uid}/c/${d.id}/i/${x.id}`)));
+      tasks.push(db.doc(`msgs/${uid}/c/${d.id}`));
+    }
+    const ph = await db.collection(`photos/${uid}/p`).get(); ph.docs.forEach(d => tasks.push(db.doc(`photos/${uid}/p/${d.id}`)));
+    for (let i = 0; i < 6; i++) tasks.push(db.doc(`data/users/${uid}/photo${i}`));
+    tasks.push(db.doc(`profiles/${uid}`), db.doc(`reactions/${uid}`), db.doc(`rsvps/${uid}`), db.doc(privPath()));
+    for (const ref of tasks) await ref.delete();
+    S.priv = {}; S.myMsgs = {}; S.draft = null; S.draftPhotos = null; delete S.profiles[uid]; delete S.reactions[uid];
+    S.route = "welcome"; toast("Your data was deleted.");
+  } catch(e){ handleErr(e); }
+  render(true);
+}
+const A = {
+  go: d => go(d.r),
+  close: closeSheet,
+  "close-scrim": (d, el, e) => { if (e.target === el) closeSheet(); },
+  "confirm-yes": () => { const f = S._confirm; S._confirm = null; closeSheet(); if (f) f(); },
+  "submit-elig": () => {
+    const E = S.elig, errs = [];
+    const age = ageFrom(E.dob);
+    if (age === null) errs.push("Enter your date of birth.");
+    if (E.a.some(x => !x)) errs.push("Answer every question.");
+    if (errs.length){ $("#elig-err").innerHTML = `<div class="errors" role="alert">${errs.map(esc).join("<br>")}</div>`; return; }
+    let result = "eligible", reason = "";
+    if (age < 18){ result = "ineligible"; reason = "age"; }
+    else if (E.a.some(x => x !== "yes")){ result = "ineligible"; reason = "attestation"; }
+    savePriv({elig:{v:ELIG_V, dob:E.dob, answers:E.a.slice(), result, reason, at:now()}, ...(E.code ? {inviteCode:E.code} : {})});
+    const p = myProfile();
+    if (p){
+      const inel = result !== "eligible", patch = {ineligible:inel};
+      if (!inel) patch.age = age;
+      if (p.ineligible !== inel || p.age !== age) enqueue("profile", () => db.doc(`profiles/${uid}`).update(patch));
+    }
+    S.route = result === "eligible" ? (p ? "me" : "pledge") : "ineligible";
+    render(true);
+  },
+  "accept-pledge": () => {
+    if (!S.pledgeChecked) return;
+    if (!(S.priv.pledge && S.priv.pledge.v === PLEDGE_V)) savePriv({pledge:{v:PLEDGE_V, at:now()}});
+    S.route = "editor"; render(true);
+  },
+  "show-pledge": () => sheet(`<h2 style="margin-top:0">Our community, our commitment.</h2><p class="pledge">${esc(PLEDGE_TEXT)}</p><button class="btn-block" data-act="close">Close</button>`),
+  help: () => sheet(`<h2 style="margin-top:0">Help and support</h2><p>${SUPPORT_EMAIL ? `Email <a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a> for help, to appeal a review decision or to report an urgent safety concern.` : "Contact the founding team directly for help or to appeal a review decision."}</p><p class="small muted">If you're in immediate danger, call 911.</p><button class="btn-block" data-act="close">Close</button>`),
+  "add-photo": () => { if (!S._uploading) $("#file").click(); },
+  "rm-photo": async d => {
+    S.draftPhotos.splice(+d.i, 1); renderPhotoGrid();
+    enqueue("dphotos", writeDraftPhotos);
+  },
+  "submit-profile": async (d, el) => {
+    const D = S.draft, errs = [];
+    if (!trim(D.name)) errs.push("Add your first name or nickname.");
+    if (!D.gender) errs.push("Choose your gender.");
+    if (!D.partnerGenders.length) errs.push("Choose who you'd like to meet.");
+    const chosen = [1,2,3,4].filter(n => D["p"+n]);
+    if (!D.p1 || !D.p2) errs.push("Choose at least two prompts.");
+    if (new Set(chosen.map(n => D["p"+n])).size !== chosen.length) errs.push("Each prompt can only be used once.");
+    chosen.forEach(n => { const l = trim(D["a"+n]).length; if (l < 20 || l > 200) errs.push(`Prompt ${n} answer needs 20–200 characters (now ${l}).`); });
+    [3,4].forEach(n => { if (!D["p"+n] && trim(D["a"+n])) errs.push(`Choose a prompt for answer ${n}, or clear that answer.`); });
+    if (trim(D.bio).length > 500) errs.push("Bio must be 500 characters or fewer.");
+    if (!D.goal) errs.push("Choose a relationship goal.");
+    const amin = +D.ageMin, amax = +D.ageMax;
+    if (!(amin >= 18 && amax <= 99 && amin <= amax)) errs.push("Set an age range between 18 and 99.");
+    if (!trim(D.city)) errs.push("Add your neighborhood or city.");
+    if (!/^3[01]\d{3}$/.test(trim(D.zip))) errs.push("Enter a Georgia ZIP code. The founding beta is Atlanta-area only.");
+    const photos = S.draftPhotos || [];
+    if (photos.length < 2) errs.push("Add at least 2 photos.");
+    if (errs.length){ $("#ed-err").innerHTML = `<div class="errors" role="alert"><b>Fix these to continue:</b><ul>${errs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`; return; }
+    el.disabled = true; el.textContent = "Submitting…";
+    try {
+      const prev = myProfile(), rev = (prev ? prev.revision : 0) + 1;
+      for (let i = 0; i < 6; i++){
+        const ref = db.doc(`photos/${uid}/p/${i}`);
+        if (photos[i]) await ref.set({img:photos[i], i, rev}); else await ref.delete();
+      }
+      const profile = {
+        name:trim(D.name), gender:D.gender, partnerGenders:D.partnerGenders.slice(), bio:trim(D.bio),
+        prompts:chosen.map(n => ({id:D["p"+n], v:1, a:trim(D["a"+n])})),
+        goal:D.goal, marriage:D.marriage, city:trim(D.city), zip:trim(D.zip), metro:"atlanta",
+        ageMin:amin, ageMax:amax, age:ageFrom(S.priv.elig.dob), photoCount:photos.length, details:cleanDetails(D.details||{}),
+        revision:rev, submittedAt:now(), lastActive:now(), paused:prev ? !!prev.paused : false, ineligible:false,
+        pledgeV:PLEDGE_V, eligV:ELIG_V,
+        inviteCode: prev && prev.inviteCode ? prev.inviteCode : newInviteCode(),
+        invitedBy: prev ? (prev.invitedBy || "") : inviterFor(S.priv.inviteCode)
+      };
+      await db.doc(`profiles/${uid}`).set(profile);
+      S.profiles[uid] = profile;
+      S.photoCache[uid] = {rev, list:photos.slice()};
+      await savePriv({draft:null});
+      S.draft = null; S.route = "discover";
+      if (!prev){ S.route = "passions"; S.passionsOnboard = true; S.pdraft = null; }
+      toast(prev ? "Changes sent for review." : "Profile submitted for review.");
+      render(true);
+    } catch(e){ handleErr(e); el.disabled = false; el.textContent = "Try again"; }
+  },
+  "photo-step": d => {
+    const id = d.id, list = photosOf(id); if (!list) return;
+    S.cardPhoto = (S.cardPhoto + (+d.d) + list.length) % list.length;
+    const im = document.querySelector(".card-photo img"); if (im){ im.src = list[S.cardPhoto]; im.dataset.ph = `${id}:${S.cardPhoto}`; }
+    renderDots();
+  },
+  react: d => doReact(d.id, d.k),
+  "view-like": d => go("view", {viewId:d.id}),
+  "like-on": d => {
+    const id = d.id, p = S.profiles[id]; if (!canReact(id)) return;
+    let on = d.on, preview = "";
+    if (on === "photo"){
+      const im = document.querySelector(".card-photo img"), i = im ? +im.dataset.ph.split(":").pop() : 0;
+      on = "photo:" + i;
+      const src = (photosOf(id)||[])[i];
+      preview = src ? `<img src="${src}" alt="${esc(p.name)}'s photo" style="width:120px;border-radius:12px;display:block;margin:0 auto 6px">` : "";
+    } else {
+      const t = describeOn(id, on); if (!t) return;
+      preview = `<div class="panel" style="margin-top:0"><div class="small muted" style="font-weight:600">${esc(t.q)}</div><div style="font-family:var(--serif);font-size:20px;margin-top:4px">${esc(t.a)}</div></div>`;
+    }
+    sheet(`<h2 style="margin-top:0">Like ${esc(p.name)}'s ${on.startsWith("photo")?"photo":"prompt"}</h2>${preview}
+      <label for="like-note">Add a comment <span class="hint">Optional, up to 150 characters</span></label>
+      <textarea id="like-note" maxlength="150" placeholder="Say what caught your eye"></textarea>
+      <button class="btn-block btn-primary" style="margin-top:12px" data-act="send-like" data-id="${esc(id)}" data-on="${esc(on)}">Send like</button>
+      <button class="btn-block btn-quiet" style="margin-top:10px" data-act="close">Cancel</button>`);
+  },
+  "send-like": d => {
+    const note = trim($("#like-note").value).slice(0,150);
+    closeSheet();
+    const matched = likedMe(d.id);
+    doReact(d.id, "like", {on:d.on, ...(note?{note}:{})});
+    if (!matched) toast(note ? "Like and comment sent." : "Like sent.");
+  },
+  report: d => {
+    const p = S.profiles[d.id];
+    sheet(`<h2 style="margin-top:0">Report ${esc(p ? p.name : "member")}</h2>
+      <p class="small muted">Reports go to the review team. ${esc(p?p.name:"They")} won't know you reported them.</p>
+      <label for="rep-cat">What's going on?</label>
+      <select id="rep-cat">${REPORT_CATS.map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join("")}</select>
+      <label for="rep-detail">Details <span class="hint">Optional</span></label>
+      <textarea id="rep-detail" maxlength="500"></textarea>
+      <div class="checks"><label><input type="checkbox" id="rep-block" checked> Also block ${esc(p?p.name:"them")}</label></div>
+      <button class="btn-block btn-primary" style="margin-top:12px" data-act="send-report" data-id="${esc(d.id)}">Send report</button>
+      <button class="btn-block btn-quiet" style="margin-top:10px" data-act="close">Cancel</button>`);
+  },
+  "send-report": d => {
+    const items = clone((S.reports[uid]||{}).items || []);
+    items.push({id:"r"+now(), subject:d.id, category:$("#rep-cat").value, detail:trim($("#rep-detail").value).slice(0,500), at:now()});
+    S.reports[uid] = {items};
+    const alsoBlock = $("#rep-block").checked;
+    enqueue("report", () => db.doc(`reports/${uid}`).set({items}));
+    if (alsoBlock) doBlock(d.id);
+    closeSheet(); toast("Report sent. Thank you for keeping the community safe.");
+    render();
+  },
+  block: d => confirmSheet(`Block ${(S.profiles[d.id]||{}).name || "this member"}?`, "You won't see each other in Discover, and any match or chat between you will close.", "Block", () => doBlock(d.id), true),
+  unblock: d => { setReaction(d.id, "unblocked"); toast("Unblocked."); render(); },
+  "open-chat": d => go("chat", {chatWith:d.id}),
+  "chat-menu": d => {
+    const n = esc(S.profiles[d.id].name);
+    const busy = !["none","canceled"].includes(planState(d.id).stage);
+    sheet(`<h2 style="margin-top:0">${n}</h2>
+      ${busy ? "" : `<button class="btn-block btn-primary" style="margin-bottom:10px" data-act="plan-start" data-id="${esc(d.id)}">Plan a date</button>`}
+      <button class="btn-block" data-act="unmatch" data-id="${esc(d.id)}">Unmatch</button>
+      <button class="btn-block btn-danger" style="margin-top:10px" data-act="block" data-id="${esc(d.id)}">Block</button>
+      <button class="btn-block" style="margin-top:10px" data-act="report" data-id="${esc(d.id)}">Report</button>
+      <button class="btn-block btn-quiet" style="margin-top:10px" data-act="close">Cancel</button>`);
+  },
+  unmatch: d => confirmSheet(`Unmatch ${S.profiles[d.id].name}?`, "This closes your match and conversation for both of you. You won't be matched again.", "Unmatch", () => { setReaction(d.id, "unmatch"); S.route = "connections"; render(true); toast("Unmatched."); }, true),
+  send: () => {
+    const ta = $("#compose"), t = trim(ta.value), id = S.chatWith;
+    if (!t) return;
+    if (!matchIds().includes(id)){ toast("This conversation is closed."); return; }
+    const minute = now() - 60000;
+    const recent = Object.values(S.myMsgs).flat().filter(m => m.at > minute).length;
+    if (recent >= 20){ toast("You're sending messages too fast. Wait a minute."); return; }
+    const p = pairId(id);
+    const list = (S.myMsgs[p]||[]).concat({id:"m"+now(), t:t.slice(0,1000), at:now()}).slice(-300);
+    S.myMsgs[p] = list; ta.value = "";
+    writeMyMsgs(p, id); setTyping(false);
+    updateChat(true);
+  },
+  "chat-photo": () => { if (!S._chatUploading) $("#chatfile").click(); },
+  pause: () => {
+    const p = myProfile(), paused = !p.paused;
+    p.paused = paused;
+    enqueue("profile", () => db.doc(`profiles/${uid}`).update({paused}));
+    toast(paused ? "Profile paused." : "Profile resumed."); render();
+  },
+  "delete-account": () => confirmSheet("Delete your account?", "This permanently removes your profile, photos, likes and the messages you sent. It can't be undone.", "Delete everything", deleteAll, true),
+  "admin-tab": d => { S.adminTab = d.t; render(); },
+  "pin-details": () => { const el = $("#dlocked"); if (el) el.scrollIntoView({behavior: reduceMotion() ? "auto" : "smooth", block:"start"}); },
+  "plan-start": d => { if (!matchIds().includes(d.id)) return; startPlan(d.id); },
+  "milestone-dismiss": d => { savePriv({msDismiss:{...(S.priv.msDismiss||{}), [pairId(d.id)]:now()}}); updateChat(); },
+  "pp-budget": d => { S.pp.budget = +d.b; renderPropose(); },
+  "pp-day": d => {
+    const P = S.pp, i = P.opts.findIndex(o => o.day === d.d);
+    if (i >= 0) P.opts.splice(i, 1);
+    else if (P.opts.length >= 3){ toast("You can offer up to 3 times."); return; }
+    else P.opts.push({day:d.d, time:"19:00"});
+    P.opts.sort((a,b) => a.day < b.day ? -1 : 1); renderPropose();
+  },
+  "pp-remove": d => { S.pp.opts.splice(+d.i, 1); renderPropose(); },
+  "pp-find": () => {
+    const P = S.pp;
+    if (!P.opts.length){ $("#pp-err").innerHTML = `<div class="errors" role="alert">Pick at least one day.</div>`; return; }
+    const times = P.opts.map(o => o.day + "T" + (o.time || "19:00")).sort();
+    if (times.some(t => new Date(t).getTime() <= now())){ $("#pp-err").innerHTML = `<div class="errors" role="alert">Each time needs to be in the future.</div>`; return; }
+    const venues = pickVenues(P.vibe, P.budget, []);
+    const plan = {id:"d"+now(), role:"init", vibe:P.vibe, budget:P.budget, times, rounds:[venues], likes:{}, sent:-1, accept:"", status:"active", at:now(), venueCache:venueCache(venues)};
+    if (!venues.length){
+      plan.sent = 0; setMyPlan(P.other, plan); closeSheet();
+      toast(`Sent. There are no suggested spots yet, so ${S.profiles[P.other].name} will pick one.`);
+      if (S._last === "chat") updateChat(true); return;
+    }
+    setMyPlan(P.other, plan);
+    S.vswipe = {other:P.other, round:0, idx:0, role:"init"}; renderVenueSwipe();
+  },
+  "venue-react": d => { const c = $(".vcard"); if (c) swipeOut(c, "venue", d.k); },
+  "plan-continue": d => {
+    const st = planState(d.id); if (st.stage !== "drafting") return;
+    const r = (st.init.rounds||[]).length - 1, done = Object.keys(st.init.likes||{}).filter(k => k.startsWith(r+":")).length;
+    S.vswipe = {other:d.id, round:r, idx:Math.min(done, ((st.init.rounds||[])[r]||[]).length - 1), role:"init"}; renderVenueSwipe();
+  },
+  "plan-swipe": d => {
+    const st = planState(d.id); if (st.stage !== "sent" || st.iAmInit) return;
+    const mine = st.resp, done = mine ? Object.keys(mine.likes||{}).filter(k => k.startsWith(st.round+":")).length : 0;
+    S.vswipe = {other:d.id, round:st.round, idx:Math.min(done, st.venues.length - 1), role:"resp"}; renderVenueSwipe();
+  },
+  "plan-decline": d => {
+    const st = planState(d.id); if (st.iAmInit || !["sent","noMatch","pickTime"].includes(st.stage)) return;
+    const mine = respPlan(st); mine.status = "canceled"; mine.reason = "Not this time"; mine.canceledAt = now();
+    setMyPlan(d.id, mine); updateChat();
+  },
+  "plan-fallback": d => renderFallback(d.id),
+  "plan-newround": d => {
+    const st = planState(d.id), mine = respPlan(st); mine.request = st.round + 1; mine.done = st.round;
+    setMyPlan(d.id, mine); closeSheet(); toast(`Asked ${S.profiles[d.id].name} for new spots.`); if (S._last === "chat") updateChat();
+  },
+  "plan-search": d => renderSearchSpot(d.id),
+  "plan-custom": d => {
+    const name = trim($("#cs-name").value), address = trim($("#cs-addr").value);
+    if (!name || !address){ $("#cs-err").innerHTML = `<div class="errors" role="alert">Add the place name and where it is.</div>`; return; }
+    const st = planState(d.id), mine = respPlan(st); mine.custom = {name:name.slice(0,60), address:address.slice(0,140), area:""};
+    setMyPlan(d.id, mine); S.tp = {other:d.id, choice:"", custom:false}; renderTimePick();
+  },
+  "plan-newpick": d => {
+    const st = planState(d.id); if (st.stage !== "newRound" || !st.iAmInit) return;
+    const plan = clone(st.init), used = (plan.rounds||[]).flat(), venues = pickVenues(plan.vibe, plan.budget, used);
+    plan.rounds.push(venues); plan.venueCache = {...(plan.venueCache||{}), ...venueCache(venues)};
+    if (!venues.length){ plan.sent = plan.rounds.length - 1; setMyPlan(d.id, plan); toast(`No other spots fit, so ${S.profiles[d.id].name} will pick one.`); updateChat(); return; }
+    setMyPlan(d.id, plan); S.vswipe = {other:d.id, round:plan.rounds.length - 1, idx:0, role:"init"}; renderVenueSwipe();
+  },
+  "plan-time": d => { S.tp = {other:d.id, choice:"", custom:false}; renderTimePick(); },
+  "tp-custom": () => { S.tp.custom = true; renderTimePick(); },
+  "tp-lock": () => {
+    const T = S.tp, st = planState(T.other);
+    if (!["pickTime"].includes(st.stage)){ closeSheet(); return; }
+    const custom = $("#tp-custom") ? $("#tp-custom").value : "";
+    const time = T.choice || custom;
+    if (!time){ $("#tp-err").innerHTML = `<div class="errors" role="alert">Pick one of the times or suggest a new one.</div>`; return; }
+    if (new Date(time).getTime() <= now()){ $("#tp-err").innerHTML = `<div class="errors" role="alert">Pick a time in the future.</div>`; return; }
+    const mine = respPlan(st); mine.pick = {venue:st.venueId, time};
+    setMyPlan(T.other, mine); closeSheet(); S.tp = null;
+    toast((st.init.times||[]).includes(time) ? "Date locked!" : `Sent your time to ${S.profiles[T.other].name}.`);
+    if (S._last === "chat") updateChat(true); else render();
+  },
+  "plan-accept": d => {
+    const st = planState(d.id); if (st.stage !== "counter" || !st.iAmInit) return;
+    const plan = clone(st.init); plan.accept = st.time; setMyPlan(d.id, plan); toast("Date locked!"); updateChat();
+  },
+  "plan-change": d => renderCancelPlan(d.id),
+  "plan-cancel": d => {
+    const st = planState(d.id); if (!st.init) return closeSheet();
+    const reason = (document.querySelector("[data-cr]:checked")||{}).value || "";
+    const mine = st.iAmInit ? clone(st.init) : respPlan(st);
+    mine.status = "canceled"; mine.reason = st.stage === "drafting" ? "" : reason; mine.canceledAt = now();
+    setMyPlan(d.id, mine); closeSheet(); toast(st.stage === "locked" ? "Date canceled." : "Proposal canceled.");
+    if (S._last === "chat") updateChat(); else render();
+  },
+  "plan-reschedule": d => {
+    const st = planState(d.id), mine = st.iAmInit ? clone(st.init) : respPlan(st);
+    mine.status = "canceled"; mine.reason = "Wants to reschedule"; mine.canceledAt = now();
+    const pre = {vibe:st.init.vibe, budget:st.init.budget};
+    setMyPlan(d.id, mine); startPlan(d.id, pre);
+  },
+  "venue-photo": () => $("#vfile").click(),
+  "add-venue": () => {
+    const name = trim($("#v-name").value), area = $("#v-area").value, address = trim($("#v-address").value);
+    const vibes = [...document.querySelectorAll("[data-vv]:checked")].map(x => x.value);
+    const tags = [...document.querySelectorAll("[data-vt]:checked")].map(x => x.value);
+    const price = +((document.querySelector("[data-vp]:checked")||{}).value || 2);
+    const errs = [];
+    if (!name) errs.push("Add the venue name.");
+    if (!area) errs.push("Choose an area.");
+    if (!address) errs.push("Add the address.");
+    if (!vibes.length) errs.push("Pick at least one vibe it's good for.");
+    const menu = trim($("#v-menu").value), reserve = trim($("#v-reserve").value);
+    if (menu && !safeUrl(menu)) errs.push("The menu link must start with https://");
+    if (reserve && !safeUrl(reserve)) errs.push("The reservation link must start with https://");
+    if (errs.length){ $("#v-err").innerHTML = `<div class="errors" role="alert">${errs.map(esc).join("<br>")}</div>`; return; }
+    const id = "v" + now(), v = {name:name.slice(0,60), area, address:address.slice(0,140), vibes, tags, price, blurb:trim($("#v-blurb").value).slice(0,120), menu:safeUrl(menu), reserve:safeUrl(reserve), photo:S.vphoto||"", at:now()};
+    S.venues[id] = v; S.vphoto = "";
+    enqueue("venue:"+id, () => db.doc(`venues/${id}`).set(v));
+    toast(`${name} added.`); render(true);
+  },
+  "delete-venue": d => confirmSheet("Remove this venue?", "It won't be suggested for new dates. Dates already planned there keep their details.", "Remove", () => {
+    delete S.venues[d.id]; enqueue("venue:"+d.id, () => db.doc(`venues/${d.id}`).delete()); render();
+  }, true),
+  "save-passions": () => {
+    const sel = S.pdraft || [];
+    if (sel.length < MIN_PASSIONS){ $("#p-err").innerHTML = `<div class="errors" role="alert">Pick at least ${MIN_PASSIONS} passions${S.passionsOnboard ? ", or skip for now" : ""}.</div>`; return; }
+    const p = myProfile(), details = cleanDetails({...(p.details||{}), interests:sel});
+    p.details = details;
+    enqueue("profile", () => db.doc(`profiles/${uid}`).update({details}));
+    const onboard = S.passionsOnboard; S.passionsOnboard = false;
+    toast("Passions saved."); go(onboard ? "discover" : "me");
+  },
+  "skip-passions": () => { S.passionsOnboard = false; go("discover"); },
+  "create-event": () => {
+    const title = trim($("#ev-title").value), when = $("#ev-when").value, place = trim($("#ev-place").value);
+    const details = trim($("#ev-details").value).slice(0,600), capacity = Math.max(0, Math.round(+$("#ev-cap").value || 0));
+    const errs = [];
+    if (!title) errs.push("Add a title.");
+    if (!when || isNaN(new Date(when)) || new Date(when).getTime() < now()) errs.push("Pick a date and time in the future.");
+    if (!place) errs.push("Add a place.");
+    if (errs.length){ $("#ev-err").innerHTML = `<div class="errors" role="alert">${errs.map(esc).join("<br>")}</div>`; return; }
+    const id = "e" + now(), ev = {title:title.slice(0,80), when, place:place.slice(0,120), details, capacity, at:now()};
+    S.events[id] = ev;
+    enqueue("event:"+id, () => db.doc(`events/${id}`).set(ev));
+    toast("Event posted."); render();
+  },
+  "delete-event": d => confirmSheet("Cancel this event?", "It will disappear for all members. Tell anyone who RSVPed with an announcement.", "Cancel event", () => {
+    delete S.events[d.id]; enqueue("event:"+d.id, () => db.doc(`events/${d.id}`).delete()); toast("Event canceled."); render();
+  }, true),
+  rsvp: d => {
+    if (!isApprovedCurrent(uid)) return;
+    const e = S.events[d.id]; if (!e) return;
+    const going = {...((S.rsvps[uid]||{}).going||{})};
+    if (d.v === "1"){
+      const g = goingTo(d.id);
+      if (e.capacity && g.length >= e.capacity){ toast("This event is full."); return; }
+      going[d.id] = now();
+    } else delete going[d.id];
+    // keep only RSVPs for events that still exist
+    Object.keys(going).forEach(k => { if (!S.events[k]) delete going[k]; });
+    S.rsvps[uid] = {going};
+    enqueue("rsvp", () => db.doc(`rsvps/${uid}`).set({going}));
+    toast(d.v === "1" ? "You're going. See you there." : "RSVP canceled."); render();
+  },
+  "post-announce": () => {
+    const text = trim($("#ann-text").value).slice(0,280); if (!text){ toast("Write the announcement first."); return; }
+    S.announce = {id:"a"+now(), text, at:now()};
+    enqueue("announce", () => db.doc("announce/current").set(S.announce));
+    toast("Posted to all members."); render();
+  },
+  "remove-announce": () => { S.announce = null; enqueue("announce", () => db.doc("announce/current").delete()); toast("Removed."); render(); },
+  "dismiss-announce": () => { savePriv({dismissedAnnounce:S.announce.id}); render(); },
+  invite: () => {
+    const me = myProfile();
+    if (!me.inviteCode){ me.inviteCode = newInviteCode(); enqueue("profile", () => db.doc(`profiles/${uid}`).update({inviteCode:me.inviteCode})); }
+    const msg = `I joined Black Childfree, a dating community for Black adults who've never been married, don't have kids and never want them. The Atlanta founding beta is invite-only: ${APP_URL} Use my code ${me.inviteCode} when you sign up.`;
+    const mine = ((S.invites[uid]||{}).items)||[], joined = joinedVia(uid).length;
+    sheet(`<h2 style="margin-top:0">Invite a friend</h2>
+      <p>The founding beta is invite-only, so the team adds each new person. Tell us who to add, then send them the message below.</p>
+      <label for="inv-name">Friend's first name</label><input type="text" id="inv-name" maxlength="40">
+      <label for="inv-email">Their email <span class="hint">The one they use for Claude</span></label><input type="text" id="inv-email" inputmode="email" maxlength="120">
+      <div id="inv-err"></div>
+      <button class="btn-block btn-primary" style="margin-top:12px" data-act="send-invite">Ask the team to add them</button>
+      <label for="inv-msg">Message to send them</label>
+      <textarea id="inv-msg" readonly style="min-height:120px">${esc(msg)}</textarea>
+      <button class="btn-block" style="margin-top:8px" data-act="copy-invite">Copy message</button>
+      <p class="small muted" style="margin-top:14px">Your code: <b>${esc(me.inviteCode)}</b> · ${mine.length} ${mine.length===1?"friend":"friends"} invited · ${joined} joined</p>
+      <button class="btn-block btn-quiet" data-act="close">Done</button>`);
+  },
+  "copy-invite": async () => {
+    const ta = $("#inv-msg"); ta.select();
+    try { await navigator.clipboard.writeText(ta.value); toast("Copied."); }
+    catch(_){ try { document.execCommand("copy"); toast("Copied."); } catch(__){ toast("Select the message and copy it."); } }
+  },
+  "send-invite": () => {
+    const name = trim($("#inv-name").value), email = trim($("#inv-email").value).toLowerCase();
+    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ $("#inv-err").innerHTML = `<div class="errors" role="alert">Add their first name and a valid email.</div>`; return; }
+    const items = clone(((S.invites[uid]||{}).items)||[]);
+    if (items.some(x => x.email === email)){ $("#inv-err").innerHTML = `<div class="errors" role="alert">You already invited ${esc(email)}.</div>`; return; }
+    if (items.filter(x => now() - x.at < 86400000).length >= 10){ $("#inv-err").innerHTML = `<div class="errors" role="alert">You can invite up to 10 people a day.</div>`; return; }
+    items.push({id:"v"+now(), name:name.slice(0,40), email:email.slice(0,120), at:now()});
+    S.invites[uid] = {items};
+    enqueue("invites", () => db.doc(`invites/${uid}`).set({items}));
+    $("#inv-name").value = ""; $("#inv-email").value = ""; $("#inv-err").innerHTML = "";
+    toast(`Sent. The team will add ${name}.`);
+  },
+  "invite-done": d => {
+    const h = {...(S.priv.handledInvites||{}), [d.id]:now()};
+    savePriv({handledInvites:h}); render();
+  },
+  "save-filters": () => {
+    const amin = Math.round(+S.fAge.min), amax = Math.round(+S.fAge.max);
+    if (!(amin >= 18 && amax <= 99 && amin <= amax)){ $("#f-err").innerHTML = `<div class="errors" role="alert">Set an age range between 18 and 99.</div>`; return; }
+    const h = S.f.height;
+    if (h && h.min && h.max && h.min > h.max){ $("#f-err").innerHTML = `<div class="errors" role="alert">The shortest height must be lower than the tallest.</div>`; return; }
+    savePriv({filters:clone(S.f)});
+    const me = myProfile();
+    if (me.ageMin !== amin || me.ageMax !== amax){
+      me.ageMin = amin; me.ageMax = amax;
+      enqueue("profile", () => db.doc(`profiles/${uid}`).update({ageMin:amin, ageMax:amax}));
+    }
+    toast("Filters saved."); go("discover");
+  },
+  "clear-filters": () => { S.f = {}; render(true); },
+  "save-details": () => {
+    const details = cleanDetails(S.draft.details || {});
+    myProfile().details = details;
+    enqueue("profile", () => db.doc(`profiles/${uid}`).update({details}));
+    toast("Saved."); go("me");
+  },
+  approve: d => { const p = S.profiles[d.id]; setApproval(d.id, {status:"approved", revision:p.revision, note:"", at:now()}); toast(`${p.name} approved.`); },
+  "request-changes": d => {
+    sheet(`<h2 style="margin-top:0">Request changes from ${esc(S.profiles[d.id].name)}</h2>
+      <label for="note">What should they fix?</label><textarea id="note" maxlength="400" placeholder="For example: add a photo where your face is clearly visible."></textarea>
+      <button class="btn-block btn-primary" style="margin-top:12px" data-act="send-changes" data-id="${esc(d.id)}">Send request</button>
+      <button class="btn-block btn-quiet" style="margin-top:10px" data-act="close">Cancel</button>`);
+  },
+  "send-changes": d => {
+    const note = trim($("#note").value); if (!note){ toast("Add a note so they know what to fix."); return; }
+    setApproval(d.id, {status:"changes", revision:S.profiles[d.id].revision, note, at:now()}); closeSheet(); toast("Change request sent.");
+  },
+  suspend: d => confirmSheet(`Suspend ${S.profiles[d.id].name}?`, "They'll be removed from Discover and can't chat until you reinstate them.", "Suspend", () => { setApproval(d.id, {status:"suspended", revision:S.profiles[d.id].revision, note:"", at:now()}); toast("Member suspended."); }, true),
+  reinstate: d => { setApproval(d.id, {status:"pending", revision:-1, note:"", at:now()}); toast("Reinstated. Their profile is back in the review queue."); }
+};
+function doReact(id, k, extra){
+  if (!canReact(id)) return;
+  setReaction(id, k, extra);
+  S.cardPhoto = 0;
+  if (S.priv.disc) savePriv({disc:{...S.priv.disc, queue:(S.priv.disc.queue||[]).filter(x => x !== id)}});
+  const t = theirR(id)[uid];
+  if (k === "like" && t && t.k === "like") showMatch(id);
+  if (S.route === "view"){ S.route = "connections"; render(true); } else render();
+}
+function doBlock(id){
+  setReaction(id, "block");
+  if (S.route === "chat") S.route = "connections";
+  toast("Blocked."); render(true);
+}
+function setApproval(id, a){
+  S.approvals[id] = a;
+  enqueue("appr:"+id, () => db.doc(`approvals/${id}`).set(a));
+  render();
+}
+function showMatch(id){
+  const p = S.profiles[id]; if (!p) return;
+  savePriv({matchSeen:{...(S.priv.matchSeen||{}), [id]:now()}});
+  const mine = myR()[id], theirs = theirR(id)[uid];
+  const theyFinished = mine && theirs && theirs.at > mine.at;
+  const shared = sharedInterests(id);
+  const note = theirs && theirs.note ? theirs.note : "";
+  const back = S._last === "discover" ? "Keep swiping" : "Not now";
+  $("#layer").innerHTML = `<div class="match" role="dialog" aria-modal="true" aria-labelledby="match-title">
+    <div class="pair"><div class="av" aria-hidden="true">${esc((myProfile().name||"Y")[0])}${img(uid,0)}</div><div class="av">${esc(p.name[0])}${img(id,0)}</div></div>
+    <h1 id="match-title" style="margin:0 0 6px">It's a match!</h1>
+    <p style="font-size:18px;margin:0 0 14px">${theyFinished ? `${esc(p.name)} liked you back.` : `You and ${esc(p.name)} liked each other.`}</p>
+    ${shared.length ? `<p style="margin:0 0 6px;font-weight:600">You both love</p><div class="shared">${shared.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
+    ${note ? `<p class="note">“${esc(note)}”</p>` : ""}
+    <div class="actions">
+      <button class="btn-primary" data-act="match-chat" data-id="${esc(id)}">Send a message</button>
+      <button data-act="close">${back}</button>
+    </div></div>`;
+  $("#layer .btn-primary").focus();
+}
+// Show the match screen for matches the other person completed (live, or while you were away).
+function checkNewMatches(){
+  if (!myProfile() || !S.loaded.priv || !S.loaded.reactions) return;
+  const ids = matchIds();
+  if (!S.priv.matchSeen){ savePriv({matchSeen:Object.fromEntries(ids.map(i => [i, now()]))}); return; }
+  if ($("#layer").innerHTML || ["editor","chat","eligibility","pledge","passions"].includes(S._last)) return;
+  const fresh = ids.filter(i => !S.priv.matchSeen[i]);
+  if (fresh.length) showMatch(fresh[0]);
+}
+A["match-chat"] = d => { closeSheet(); go("chat", {chatWith:d.id}); };
+
+// ---------- Events ----------
+document.addEventListener("click", e => {
+  if (S._suppressClick && now() - S._suppressClick < 350){ S._suppressClick = 0; return; }
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const f = A[el.dataset.act]; if (f) f(el.dataset, el, e);
+});
+let draftTimer = null;
+function setDraft(key, val){
+  if (key.startsWith("d:")){ S.draft.details = S.draft.details || {}; S.draft.details[key.slice(2)] = key === "d:height" ? (+val || "") : val; }
+  else S.draft[key] = val;
+}
+function draftChanged(){
+  updateCounters();
+  if (S.route === "details") return; // the details screen saves with its own button
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => savePriv({draft:clone(S.draft)}), 1200);
+}
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.dataset.f && S.draft && t.type !== "checkbox" && t.tagName !== "SELECT"){ setDraft(t.dataset.f, t.value); draftChanged(); }
+  if (t.dataset.e === "dob" && S.elig) S.elig.dob = t.value;
+  if (t.dataset.e === "code" && S.elig) S.elig.code = t.value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if (t.dataset.fa && S.f) filterChanged(t);
+  if (t.id === "compose") setTyping(!!t.value.trim());
+  if (t.id === "psearch"){
+    const q = t.value.trim().toLowerCase(); let any = false;
+    document.querySelectorAll("[data-group]").forEach(g => {
+      let shown = 0;
+      g.querySelectorAll(".pick label").forEach(l => { const hit = !q || l.textContent.toLowerCase().includes(q); l.classList.toggle("hide", !hit); if (hit) shown++; });
+      g.hidden = !shown; if (shown) any = true;
+    });
+    $("#pnone").hidden = any;
+  }
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.f === "partnerGenders" && S.draft){
+    const s = new Set(S.draft.partnerGenders); t.checked ? s.add(t.value) : s.delete(t.value);
+    S.draft.partnerGenders = GENDERS.filter(g => s.has(g)); draftChanged();
+  } else if (/^p[1-4]$/.test(t.dataset.f||"") && S.draft){
+    S.draft[t.dataset.f] = t.value; draftChanged();
+    [1,2,3,4].forEach(n => { const sel = document.getElementById("f-p"+n); if (!sel) return;
+      const others = [1,2,3,4].filter(x => x !== n).map(x => S.draft["p"+x]);
+      [...sel.options].forEach(o => o.disabled = !!o.value && others.includes(o.value)); });
+  } else if (t.dataset.pas !== undefined && S.pdraft){
+    const set = new Set(S.pdraft);
+    if (t.checked && set.size >= MAX_INTERESTS){ t.checked = false; toast(`You can pick up to ${MAX_INTERESTS}. Unpick one to add another.`); return; }
+    t.checked ? set.add(t.value) : set.delete(t.value);
+    S.pdraft = INTERESTS.filter(x => set.has(x));
+    $("#pcount").textContent = `${S.pdraft.length} of ${MAX_INTERESTS} picked`;
+  } else if (t.dataset.int !== undefined && S.draft){
+    const d = S.draft.details = S.draft.details || {}, set = new Set(d.interests || []);
+    if (t.checked && set.size >= MAX_INTERESTS){ t.checked = false; toast(`You can pick up to ${MAX_INTERESTS} interests.`); return; }
+    t.checked ? set.add(t.value) : set.delete(t.value);
+    d.interests = INTERESTS.filter(x => set.has(x)); draftChanged();
+  } else if (t.dataset.f && S.draft){ setDraft(t.dataset.f, t.value); draftChanged(); }
+  if (t.dataset.fl || t.dataset.fs || t.dataset.fh || t.dataset.fx || t.dataset.fa) filterChanged(t);
+  if (t.dataset.e === "q" && S.elig) S.elig.a[+t.dataset.i] = t.value;
+  if (t.id === "pledge-check"){ S.pledgeChecked = t.checked; const b = document.querySelector('[data-act="accept-pledge"]'); if (b) b.disabled = !t.checked; }
+  if (t.dataset.pv !== undefined && S.pp) S.pp.vibe = t.value;
+  if (t.dataset.ot !== undefined && S.pp){ S.pp.opts[+t.dataset.ot].time = t.value || "19:00"; renderPropose(); }
+  if (t.dataset.tp !== undefined && S.tp){ S.tp.choice = t.value; }
+  if (t.dataset.tpc !== undefined && S.tp){ S.tp.customVal = t.value; S.tp.choice = ""; document.querySelectorAll("[data-tp]").forEach(x => x.checked = false); }
+  if (t.id === "vfile" && t.files[0]){
+    const f = t.files[0]; t.value = "";
+    compress(f).then(async data => {
+      // keep venue photos small: they load for every planner card
+      const im = new Image(); im.src = data; await im.decode();
+      const c = document.createElement("canvas"), sc = Math.min(1, 640/Math.max(im.width, im.height));
+      c.width = Math.round(im.width*sc); c.height = Math.round(im.height*sc); c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      S.vphoto = c.toDataURL("image/jpeg", 0.7);
+      const pv = $("#vphoto-prev"), bt = $("#vphoto-btn"); if (pv) pv.src = S.vphoto; if (bt) bt.textContent = "Change photo";
+    }).catch(() => toast("That photo couldn't be added."));
+  }
+  if (t.id === "chatfile" && t.files[0]){
+    const file = t.files[0], id = S.chatWith, p = pairId(id); t.value = "";
+    if (!matchIds().includes(id)){ toast("This conversation is closed."); return; }
+    const today = dayKey(), sentToday = (S.myMsgs[p]||[]).filter(m => m.img && new Date(m.at).toDateString() === new Date().toDateString()).length;
+    if (sentToday >= 10){ toast("You can send up to 10 photos a day in each conversation."); return; }
+    S._chatUploading = true; toast("Sending photo…");
+    compress(file).then(async data => {
+      const mid = "i" + now();
+      await db.doc(`msgs/${uid}/c/${p}/i/${mid}`).set({img:data});
+      S.msgImg[uid+"|"+p+"|"+mid] = data;
+      S.myMsgs[p] = (S.myMsgs[p]||[]).concat({id:"m"+now(), t:"", img:mid, at:now()}).slice(-300);
+      await writeMyMsgs(p, id);
+      updateChat(true);
+    }).catch(err => {
+      if (err && err.code) handleErr(err);
+      else toast(err.message === "size" ? "That photo is over 10 MB. Choose a smaller one." : err.message === "type" ? "That file isn't a photo." : "That photo couldn't be sent. Try another.");
+    }).finally(() => { S._chatUploading = false; });
+  }
+  if (t.id === "file" && t.files[0]){
+    const file = t.files[0]; t.value = "";
+    S._uploading = true; renderPhotoGrid();
+    compress(file).then(data => {
+      S.draftPhotos.push(data);
+      return enqueue("dphotos", writeDraftPhotos);
+    }).catch(err => {
+      toast(err.message === "size" ? "That photo is over 10 MB. Choose a smaller one." : err.message === "type" ? "That file isn't a photo." : "That photo couldn't be added. Try another.");
+    }).finally(() => { S._uploading = false; renderPhotoGrid(); });
+  }
+});
+// ---------- Date planner ----------
+const MILESTONE = 10;
+const fmtAt = iso => { const d = new Date(iso); if (isNaN(d)) return ""; return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}) + " @ " + d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); };
+const mapUrl = v => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${v.name}, ${v.address||v.area||""}, Atlanta, GA`)}`;
+function planState(other){
+  const p = pairId(other), mine = S.myPlans[p], theirs = S.theirPlans[p];
+  const inits = [mine, theirs].filter(x => x && x.role === "init" && x.id);
+  if (!inits.length) return {stage:"none", p};
+  const active = inits.filter(x => x.status !== "canceled").sort((a,b) => a.at - b.at)[0];
+  const init = active || inits.slice().sort((a,b) => b.at - a.at)[0];
+  const iAmInit = init === mine;
+  const side = iAmInit ? theirs : mine;
+  const resp = side && side.role === "resp" && side.id === init.id ? side : null;
+  const base = {init, resp, iAmInit, p};
+  if (init.status === "canceled" || (resp && resp.status === "canceled")){
+    const c = init.status === "canceled" ? init : resp;
+    return {...base, stage:"canceled", byMe:(c === mine), reason:c.reason || "", at:c.canceledAt || c.at};
+  }
+  if (!(init.sent >= 0)) return {...base, stage: iAmInit ? "drafting" : "none"};
+  const r = init.sent, venues = (init.rounds||[])[r] || [];
+  const venueOf = id => id === "custom" ? (resp && resp.custom) : (S.venues[id] || (init.venueCache||{})[id]);
+  if (resp && resp.pick){
+    const t = resp.pick.time, ok = (init.times||[]).includes(t) || init.accept === t;
+    return {...base, stage: ok ? "locked" : "counter", venueId:resp.pick.venue, venue:venueOf(resp.pick.venue), time:t, round:r};
+  }
+  const mutual = resp && resp.custom ? "custom" : venues.find(v => (init.likes||{})[r+":"+v] && resp && (resp.likes||{})[r+":"+v]);
+  if (mutual) return {...base, stage:"pickTime", venueId:mutual, venue:venueOf(mutual), round:r};
+  if (!venues.length || (resp && resp.done === r)){
+    if (resp && resp.request === r + 1) return {...base, stage:"newRound", round:r};
+    return {...base, stage:"noMatch", round:r, noVenues:!venues.length};
+  }
+  return {...base, stage:"sent", round:r, venues};
+}
+function planNeedsMe(other){
+  const st = planState(other);
+  if (st.iAmInit) return st.stage === "newRound" || st.stage === "counter";
+  return ["sent","noMatch","pickTime"].includes(st.stage);
+}
+function pickVenues(vibe, budget, exclude){
+  return Object.entries(S.venues).map(([id,v]) => ({id, v})).filter(x => !exclude.includes(x.id))
+    .map(x => ({...x, score:((x.v.vibes||[]).includes(vibe) ? 3 : 0) + (x.v.price === budget ? 1 : Math.abs((x.v.price||2) - budget) === 1 ? 0.5 : -1)}))
+    .sort((a,b) => b.score - a.score || (a.v.name < b.v.name ? -1 : 1)).slice(0,3).map(x => x.id);
+}
+function venueCache(ids){
+  const out = {};
+  ids.forEach(id => { const v = S.venues[id]; if (v){ const {photo, ...rest} = v; out[id] = rest; } });
+  return out;
+}
+function setMyPlan(other, plan){ const p = pairId(other); S.myPlans[p] = plan; return writeMyMsgs(p, other); }
+function respPlan(st){
+  const p = st.p, mine = S.myPlans[p];
+  if (mine && mine.role === "resp" && mine.id === st.init.id) return clone(mine);
+  return {id:st.init.id, role:"resp", likes:{}, done:-1, request:-1, custom:null, pick:null, status:"active", at:now()};
+}
+function openPlanner(inner, bar){
+  $("#layer").innerHTML = `<div class="planner" role="dialog" aria-modal="true" aria-label="Date planner"><div class="pin">${inner}</div></div>${bar ? `<div class="pbar"><div class="pin">${bar}</div></div>` : ""}`;
+  const f = $("#layer").querySelector(".planner button, .planner select"); if (f) f.focus();
+}
+function phead(title, closeLabel){ return `<div class="phead"><button data-act="close">${closeLabel || "Cancel"}</button><b>${esc(title)}</b><span style="width:52px"></span></div>`; }
+
+// Step 1 of the wireframes: propose vibe, budget and up to 3 times
+function renderPropose(){
+  const P = S.pp, name = esc(S.profiles[P.other].name);
+  const days = Array.from({length:14}, (_,i) => { const d = new Date(); d.setDate(d.getDate()+i+1); return d; });
+  const key = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const sel = new Set(P.opts.map(o => o.day));
+  openPlanner(`${phead("Propose a date")}
+    <p class="pm" style="margin-top:6px">Plan something with ${name}. They'll swipe on spots and pick one of your times.</p>
+    <h2><label for="pp-vibe" style="font-size:22px;font-weight:400;font-family:var(--serif);margin:0">What's the vibe?</label></h2>
+    <select id="pp-vibe" data-pv>${VIBES.map(v => `<option ${v===P.vibe?"selected":""}>${esc(v)}</option>`).join("")}</select>
+    <h2>Budget</h2>
+    <div class="pchips" role="group" aria-label="Budget">${[1,2,3,4].map(n => `<button data-act="pp-budget" data-b="${n}" aria-pressed="${P.budget===n}">${priceStr(n)}</button>`).join("")}</div>
+    <h2>When are you free? <span class="pm" style="font-family:var(--sans);font-size:15px">Pick up to 3</span></h2>
+    <div class="days" role="group" aria-label="Next 14 days">${days.map(d => { const k = key(d); return `<button data-act="pp-day" data-d="${k}" aria-pressed="${sel.has(k)}" aria-label="${d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})}"><span>${d.toLocaleDateString(undefined,{weekday:"short"})}</span><b>${d.getDate()}</b></button>`; }).join("")}</div>
+    ${P.opts.map((o,i) => `<div class="opt"><div class="grow">Option ${i+1}: ${esc(fmtAt(o.day+"T"+o.time).split(" @ ")[0])}</div><input type="time" data-ot="${i}" value="${o.time}" aria-label="Time for option ${i+1}"><button data-act="pp-remove" data-i="${i}" aria-label="Remove option ${i+1}">Remove</button></div>`).join("")}
+    ${P.opts.length < 3 ? `<div class="opt add">${P.opts.length ? "Tap another day to add an option" : "Tap a day above to add your first option"}</div>` : ""}
+    <div id="pp-err"></div>`,
+    `<button class="btn-go btn-block" data-act="pp-find">Find venues</button>`);
+}
+function venueCardHTML(v, i, n){
+  if (!v) return "";
+  return `<article class="card vcard" data-swipe="venue" aria-label="${esc(v.name)}">
+    <div class="vphoto">${esc(v.name)}${v.photo?`<img src="${v.photo}" alt="${esc(v.name)}">`:""}<div class="stamp like" aria-hidden="true">Like</div><div class="stamp pass" aria-hidden="true">Pass</div></div>
+    <div class="vbody">
+      <h3>${esc(v.name)}</h3>
+      <div class="vmeta">${esc(v.area)}${v.address?` · ${esc(v.address)}`:""}</div>
+      <div class="vmeta">${priceStr(v.price)} · ${esc((v.vibes||[]).join(" · "))}</div>
+      ${(v.tags||[]).length ? `<div class="vtags">${v.tags.map(t => `<span>${esc(t)}</span>`).join("")}</div>` : ""}
+      ${v.blurb ? `<p style="margin:8px 0">${esc(v.blurb)}</p>` : ""}
+      <div style="display:flex;gap:16px;flex-wrap:wrap">${v.menu?`<a href="${esc(v.menu)}" target="_blank" rel="noopener noreferrer">View menu</a>`:""}<a href="${esc(mapUrl(v))}" target="_blank" rel="noopener noreferrer">View on map</a></div>
+      <div class="vprog">Spot ${i+1} of ${n}</div>
+    </div>
+  </article>
+  <div class="vact"><button class="vpass" data-act="venue-react" data-k="pass">Pass</button><button class="vlike" data-act="venue-react" data-k="like">Like</button></div>
+  <p class="pm small" style="text-align:center;margin-top:8px">Swipe right to like, left to pass.</p>`;
+}
+// Step 4: both people swipe the same 3 spots
+function renderVenueSwipe(){
+  const V = S.vswipe, st = planState(V.other), plan = st.init;
+  const ids = (plan.rounds||[])[V.round] || [], id = ids[V.idx];
+  const v = S.venues[id] || (plan.venueCache||{})[id];
+  openPlanner(`${phead("Suggested venues", "Exit planner")}
+    <p class="pm">${V.role === "init" ? "Like the spots you'd go to. Your match will swipe on the same ones." : `${esc(S.profiles[V.other].name)} picked a vibe: ${esc(plan.vibe)} · ${priceStr(plan.budget)}. Like a spot you'd both enjoy.`}</p>
+    ${venueCardHTML(v, V.idx, ids.length)}`);
+}
+function venueReact(k){
+  const V = S.vswipe; if (!V) return;
+  const st = planState(V.other); if (!st.init) return closeSheet();
+  const ids = (st.init.rounds||[])[V.round] || [], vid = ids[V.idx];
+  if (V.role === "init"){
+    const plan = clone(st.init); plan.likes = plan.likes || {}; plan.likes[V.round+":"+vid] = k === "like";
+    V.idx++;
+    if (V.idx >= ids.length){ plan.sent = V.round; setMyPlan(V.other, plan); S.vswipe = null; closeSheet(); toast(`Sent to ${S.profiles[V.other].name}.`); if (S._last === "chat") updateChat(true); return; }
+    setMyPlan(V.other, plan); renderVenueSwipe(); return;
+  }
+  const mine = respPlan(st); mine.likes[V.round+":"+vid] = k === "like";
+  V.idx++;
+  const bothLike = k === "like" && (st.init.likes||{})[V.round+":"+vid];
+  if (bothLike){ setMyPlan(V.other, mine); S.vswipe = null; S.tp = {other:V.other, choice:"", custom:false}; renderTimePick(); return; }
+  if (V.idx >= ids.length){ mine.done = V.round; setMyPlan(V.other, mine); S.vswipe = null; renderFallback(V.other); return; }
+  setMyPlan(V.other, mine); renderVenueSwipe();
+}
+// Step 5: nobody matched on a spot
+function renderFallback(other){
+  const st = planState(other), more = pickVenues(st.init.vibe, st.init.budget, (st.init.rounds||[]).flat()).length > 0;
+  openPlanner(`${phead("", "Exit planner")}
+    <h1>No venue match!</h1>
+    <p>${st.noVenues ? "There aren't suggested spots for this plan yet." : "None of these spots were a match for both of you."} Pick a place you like instead${more && !st.noVenues ? ", or ask for new suggestions" : ""}.</p>
+    ${more && !st.noVenues ? `<button class="btn-go btn-block" style="margin-top:14px" data-act="plan-newround" data-id="${esc(other)}">Suggest 3 new venues</button>` : ""}
+    <button class="btn-ghost btn-block" style="margin-top:10px" data-act="plan-search" data-id="${esc(other)}">Let me search for a spot</button>`);
+}
+function renderSearchSpot(other){
+  openPlanner(`${phead("Suggest a spot")}
+    <h2>Where should you go?</h2>
+    <label for="cs-name">Place name</label><input type="text" id="cs-name" maxlength="60">
+    <label for="cs-addr">Address or neighborhood</label><input type="text" id="cs-addr" maxlength="140">
+    <div id="cs-err"></div>`,
+    `<button class="btn-go btn-block" data-act="plan-custom" data-id="${esc(other)}">Use this spot</button>`);
+}
+// Step 6: receiver picks one of the proposed times
+function renderTimePick(){
+  const T = S.tp, st = planState(T.other), name = esc(S.profiles[T.other].name);
+  const v = st.venue || {name:"this spot"};
+  const times = (st.init.times||[]).filter(t => new Date(t).getTime() > now());
+  openPlanner(`${phead("Confirm time", "Back")}
+    <h1 style="font-size:30px">${st.venueId === "custom" ? `Meet at ${esc(v.name)}` : `You both liked ${esc(v.name)}!`}</h1>
+    <p>${name} proposed ${times.length ? "these times. Which works best?" : "times that have passed. Suggest a new one."}</p>
+    <div class="topt" role="radiogroup" aria-label="Proposed times">${times.map(t => `<label><input type="radio" name="tp" value="${esc(t)}" data-tp ${T.choice===t?"checked":""}>${esc(fmtAt(t))}</label>`).join("")}</div>
+    <div style="border-top:1px solid #1C1C1E;margin:12px 0"></div>
+    ${T.custom || !times.length ? `<label for="tp-custom">Suggest a different time</label><input type="datetime-local" id="tp-custom" data-tpc value="${esc(T.customVal||"")}"><p class="pm small" style="margin-top:6px">${name} will need to confirm a new time.</p>` : `<button class="btn-mute" data-act="tp-custom">Suggest a different time</button>`}
+    <div id="tp-err"></div>`,
+    `<button class="btn-go btn-block" data-act="tp-lock">${T.custom && !T.choice ? `Send to ${name}` : "Lock in date"}</button>`);
+}
+function renderCancelPlan(other){
+  const st = planState(other), name = esc(S.profiles[other].name);
+  openPlanner(`${phead(st.stage === "locked" ? "Change plans" : "Cancel proposal", "Back")}
+    <h2>${st.stage === "locked" ? "Need to reschedule or cancel?" : "Cancel this proposal?"}</h2>
+    <p class="pm">${name} will see a short, kind note. No pressure either way.</p>
+    <div class="topt" role="radiogroup" aria-label="Reason">${["Something came up","I need a different day","I'm not feeling a connection"].map((r,i) => `<label><input type="radio" name="cr" value="${esc(r)}" data-cr ${i===0?"checked":""}>${esc(r)}</label>`).join("")}</div>
+    ${st.stage === "locked" ? `<button class="btn-gold btn-block" style="margin-top:12px" data-act="plan-reschedule" data-id="${esc(other)}">Reschedule: propose new times</button>` : ""}`,
+    `<button class="btn-red btn-block" data-act="plan-cancel" data-id="${esc(other)}">${st.stage === "locked" ? "Cancel date" : "Cancel proposal"}</button>`);
+}
+function startPlan(other, prefill){
+  S.pp = {other, vibe:(prefill && prefill.vibe) || VIBES[0], budget:(prefill && prefill.budget) || 2, opts:[]};
+  renderPropose();
+}
+
+// Chat timeline cards
+function planBlock(other){
+  const st = planState(other), name = esc(S.profiles[other].name), v = st.venue;
+  const id = esc(other);
+  switch (st.stage){
+    case "locked": return `<div class="dblock gold" role="region" aria-label="Your date">
+      <div class="lbl">Date locked</div>
+      <div class="big">${esc(v ? v.name : "Your spot")}</div>
+      <p class="sub" style="margin:0">${v && (v.address || v.area) ? esc(v.address || v.area) : ""}</p>
+      <p style="margin:6px 0 0;font-weight:600">${esc(fmtAt(st.time))}</p>
+      <div style="display:flex;gap:16px;margin:10px 0 4px;flex-wrap:wrap">${v ? `<a href="${esc(mapUrl(v))}" target="_blank" rel="noopener noreferrer">View on map</a>` : ""}${v && v.menu ? `<a href="${esc(v.menu)}" target="_blank" rel="noopener noreferrer">View menu</a>` : ""}</div>
+      ${v && v.reserve ? `<a class="btn btn-go btn-block" style="display:block;text-align:center;text-decoration:none;color:#0A0A0A;margin-top:8px" href="${esc(v.reserve)}" target="_blank" rel="noopener noreferrer">Reserve table</a>` : ""}
+      <button class="btn-mute" data-act="plan-change" data-id="${id}">Need to reschedule or cancel?</button></div>`;
+    case "drafting": return `<div class="dblock"><div class="lbl">Date plan in progress</div><p class="sub">You started planning with ${name}. Finish picking spots to send it.</p><div class="row" style="display:flex;gap:8px"><button class="btn-gold" style="flex:1" data-act="plan-continue" data-id="${id}">Continue</button><button class="btn-mute" data-act="plan-change" data-id="${id}">Discard</button></div></div>`;
+    case "sent": return st.iAmInit
+      ? `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">You proposed ${esc(st.init.vibe)} · ${priceStr(st.init.budget)}. ${name} is picking a venue and time.</p><button class="btn-mute" style="color:#E31C25" data-act="plan-change" data-id="${id}">Cancel proposal</button></div>`
+      : `<div class="dblock gold"><div class="lbl">${name} wants to plan a date</div><p>${esc(st.init.vibe)} · ${priceStr(st.init.budget)}</p><p class="sub">${(st.init.times||[]).map(fmtAt).map(esc).join("<br>")}</p><div class="row" style="display:flex;gap:8px;align-items:center"><button class="btn-gold" style="flex:1" data-act="plan-swipe" data-id="${id}">Pick a venue</button><button class="btn-mute" data-act="plan-decline" data-id="${id}">Not this time</button></div></div>`;
+    case "noMatch": return st.iAmInit
+      ? `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">${name} is choosing a spot for ${esc(st.init.vibe)}.</p><button class="btn-mute" style="color:#E31C25" data-act="plan-change" data-id="${id}">Cancel proposal</button></div>`
+      : `<div class="dblock gold"><div class="lbl">${st.noVenues ? `${name} wants to plan a date` : "No venue match yet"}</div>${st.noVenues ? `<p>${esc(st.init.vibe)} · ${priceStr(st.init.budget)}</p><p class="sub">${(st.init.times||[]).map(fmtAt).map(esc).join("<br>")}</p><p class="sub">Pick a spot you'd like to go.</p>` : `<p class="sub">Ask for new suggestions or pick a spot yourself.</p>`}<div class="row" style="display:flex;gap:8px;align-items:center"><button class="btn-gold" style="flex:1" data-act="plan-fallback" data-id="${id}">Choose a spot</button><button class="btn-mute" data-act="plan-decline" data-id="${id}">Not this time</button></div></div>`;
+    case "newRound": return st.iAmInit
+      ? `<div class="dblock gold"><div class="lbl">${name} passed on those spots</div><p class="sub">Pick 3 new venues to send.</p><button class="btn-gold btn-block" data-act="plan-newpick" data-id="${id}">Pick 3 new venues</button></div>`
+      : `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">You asked for new spots. ${name} is picking them.</p></div>`;
+    case "pickTime": return st.iAmInit
+      ? `<div class="dblock"><div class="lbl">You both liked ${esc(v ? v.name : "a spot")}</div><p class="sub">${name} is picking one of your times.</p></div>`
+      : `<div class="dblock gold"><div class="lbl">You both liked ${esc(v ? v.name : "a spot")}!</div><button class="btn-go btn-block" data-act="plan-time" data-id="${id}">Pick a time</button></div>`;
+    case "counter": return st.iAmInit
+      ? `<div class="dblock gold"><div class="lbl">${name} suggested a new time</div><p class="big">${esc(fmtAt(st.time))}</p><p class="sub">at ${esc(v ? v.name : "your spot")}</p><div class="row" style="display:flex;gap:8px"><button class="btn-go" style="flex:1" data-act="plan-accept" data-id="${id}">Accept time</button><button class="btn-red" data-act="plan-change" data-id="${id}">Cancel</button></div></div>`
+      : `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">You suggested ${esc(fmtAt(st.time))}. ${name} needs to confirm.</p></div>`;
+    case "canceled": return `<div class="dblock"><div class="lbl" style="color:#8E8E93">Date plan canceled</div><p class="sub">${st.byMe ? "You" : name} canceled the plan.${st.reason ? ` “${esc(st.reason)}.”` : ""}</p><button class="btn-mute" style="color:#FFB800" data-act="plan-start" data-id="${id}">Plan another date</button></div>`;
+  }
+  return "";
+}
+function milestoneBlock(other){
+  const name = esc(S.profiles[other].name), id = esc(other);
+  return `<div class="dblock gold" role="note"><div class="lbl">Milestone unlocked</div>
+    <p>You and ${name} have exchanged ${MILESTONE} messages!</p>
+    <p class="sub">Ready to skip the small talk and meet up? We'll help you pick a spot.</p>
+    <button class="btn-gold btn-block" style="margin-top:6px" data-act="plan-start" data-id="${id}">Plan a date</button>
+    <button class="btn-mute" data-act="milestone-dismiss" data-id="${id}">Not yet, keep chatting</button></div>`;
+}
+
+// ---------- Swipe ----------
+const SWIPE_AT = 110;
+const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let drag = null;
+document.addEventListener("pointerdown", e => {
+  const c = e.target.closest(".card[data-swipe]");
+  if (!c || e.target.closest("button,a,input,textarea,select") || (e.pointerType === "mouse" && e.button !== 0)) return;
+  drag = {c, id:c.dataset.swipe, x:e.clientX, y:e.clientY, dx:0, active:false, pid:e.pointerId};
+});
+document.addEventListener("pointermove", e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!drag.active){
+    if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ drag = null; return; } // vertical scroll wins
+    if (Math.abs(dx) < 8) return;
+    drag.active = true; drag.c.classList.add("dragging");
+    try { drag.c.setPointerCapture(e.pointerId); } catch(_){}
+  }
+  drag.dx = dx;
+  drag.c.style.transform = `translateX(${dx}px) rotate(${dx/22}deg)`;
+  const o = Math.min(1, Math.abs(dx)/SWIPE_AT);
+  drag.c.querySelector(".stamp.like").style.opacity = dx > 0 ? o : 0;
+  drag.c.querySelector(".stamp.pass").style.opacity = dx < 0 ? o : 0;
+});
+function endDrag(e){
+  if (!drag || (e && e.pointerId !== drag.pid)) return;
+  const d = drag; drag = null;
+  if (!d.active) return;
+  d.c.classList.remove("dragging");
+  S._suppressClick = now();
+  if (Math.abs(d.dx) >= SWIPE_AT) swipeOut(d.c, d.id, d.dx > 0 ? "like" : "pass");
+  else {
+    d.c.classList.add("settle"); d.c.style.transform = "";
+    d.c.querySelectorAll(".stamp").forEach(x => x.style.opacity = 0);
+    setTimeout(() => d.c.classList.remove("settle"), 260);
+  }
+}
+document.addEventListener("pointerup", endDrag);
+document.addEventListener("pointercancel", endDrag);
+function swipeOut(c, id, k){
+  const act = id === "venue" ? () => venueReact(k) : () => doReact(id, k);
+  if (reduceMotion()){ act(); return; }
+  const dir = k === "like" ? 1 : -1;
+  c.querySelector(".stamp." + k).style.opacity = 1;
+  c.classList.add("fly");
+  c.style.transform = `translateX(${dir*window.innerWidth*1.1}px) rotate(${dir*18}deg)`;
+  setTimeout(act, 260);
+}
+document.addEventListener("keydown", e => {
+  if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && $(".vcard") && !e.target.closest("input,textarea,select")){
+    e.preventDefault(); swipeOut($(".vcard"), "venue", e.key === "ArrowRight" ? "like" : "pass"); return;
+  }
+  if ((e.key === "ArrowRight" || e.key === "ArrowLeft") && !$("#layer").innerHTML && !e.target.closest("input,textarea,select")){
+    const c = document.querySelector(".card[data-swipe]");
+    if (c && (S._last === "discover" || S._last === "view")){ e.preventDefault(); swipeOut(c, c.dataset.swipe, e.key === "ArrowRight" ? "like" : "pass"); return; }
+  }
+  if (e.key === "Escape" && $("#layer").innerHTML) closeSheet();
+  if (e.target.id === "compose" && e.key === "Enter" && !e.shiftKey){ e.preventDefault(); A.send(); }
+});
+
+// ---------- Data ----------
+function onData(){
+  syncMsgSubs();
+  if (S.route === "chat" || S._last === "chat") return render();
+  // Don't rebuild forms while someone is typing.
+  if (["editor","eligibility","pledge","filters","details","passions"].includes(S._last) && S._last === currentRoute()) { renderNav(S._last); return; }
+  render();
+  checkNewMatches();
+}
+function syncMsgSubs(){
+  if (!uid) return;
+  const want = new Set(matchIds());
+  for (const id of Object.keys(S.msgSubs)) if (!want.has(id)){ S.msgSubs[id](); delete S.msgSubs[id]; }
+  for (const id of want) if (!S.msgSubs[id]){
+    const p = pairId(id);
+    S.msgSubs[id] = db.doc(`msgs/${id}/c/${p}`).onSnapshot(s => {
+      const d = s.exists ? s.data() : null;
+      S.theirMsgs[p] = d && d.to === uid ? (d.list||[]).map(m => ({id:String(m.id||""), t:String(m.t||"").slice(0,1000), img:m.img?String(m.img):"", at:+m.at||0})) : [];
+      S.theirSeen[p] = d && d.to === uid ? (+d.seenAt||0) : 0;
+      S.theirPlans[p] = d && d.to === uid && d.plan && typeof d.plan === "object" ? clone(d.plan) : null;
+      onData();
+    }, () => {});
+  }
+}
+function subCollection(path, key){
+  db.collection(path).onSnapshot(s => {
+    const out = {}; s.docs.forEach(d => { out[d.id] = clone(d.data()); });
+    // Keep local writes that haven't come back yet.
+    if (key === "reactions" && S.reactions[uid] && !out[uid]) out[uid] = S.reactions[uid];
+    S[key] = out; S.loaded[key] = true; onData();
+  }, e => { console.error(e); S.loaded[key] = true; onData(); });
+}
+function fatal(title, text){
+  $("#main").innerHTML = `<h1>${esc(title)}</h1><p>${esc(text)}</p>`;
+}
+async function start(){
+  if (!window.claude || !window.claude.use){ fatal("Open this in Claude.", "This app runs inside Claude. Open the link while signed in to claude.ai."); return; }
+  const [d, u] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+  window.claude.use("room").then(r => { room = r; if (r && S._last === "chat" && S.chatWith) joinChatRoom(S.chatWith); }).catch(() => {});
+  db = d; user = u;
+  if (!db || !user){ fatal("Sign in to continue.", "Open this link while signed in to claude.ai to join the founding beta."); return; }
+  uid = await user.id();
+  owner = await user.isOwner();
+  if (!uid){ fatal("Sign in to continue.", "Open this link while signed in to claude.ai to join the founding beta."); return; }
+  const canWrite = await user.can("data.write");
+  if (canWrite === false) S.readonly = true;
+  subCollection("profiles", "profiles");
+  subCollection("approvals", "approvals");
+  subCollection("reactions", "reactions");
+  if (owner){ S.loaded.reports = false; subCollection("reports", "reports"); S.loaded.invites = false; subCollection("invites", "invites"); }
+  else {
+    db.doc(`reports/${uid}`).onSnapshot(s => { S.reports = s.exists ? {[uid]:clone(s.data())} : {}; }, () => {});
+    db.doc(`invites/${uid}`).onSnapshot(s => { S.invites = s.exists ? {[uid]:clone(s.data())} : {}; }, () => {});
+  }
+  subCollection("events", "events");
+  subCollection("venues", "venues");
+  subCollection("rsvps", "rsvps");
+  db.doc("announce/current").onSnapshot(s => { S.announce = s.exists ? clone(s.data()) : null; onData(); }, () => {});
+  db.doc(privPath()).onSnapshot(s => {
+    S.priv = s.exists ? clone(s.data()) : {}; S.loaded.priv = true; onData();
+  }, e => { console.error(e); S.loaded.priv = true; onData(); });
+  db.collection(`msgs/${uid}/c`).onSnapshot(s => {
+    const out = {}, seen = {}, plans = {}; s.docs.forEach(x => { out[x.id] = clone(x.data().list || []); seen[x.id] = +x.data().seenAt || 0; if (x.data().plan) plans[x.id] = clone(x.data().plan); });
+    S.myMsgs = out; S.mySeen = seen; S.myPlans = plans; onData();
+  }, () => {});
+  // Mark activity at most twice a day for ranking.
+  setTimeout(() => {
+    const p = myProfile();
+    if (p && now() - (p.lastActive||0) > 12*3600000){
+      const patch = {lastActive:now()}, age = S.priv.elig ? ageFrom(S.priv.elig.dob) : null;
+      if (age && age !== p.age) patch.age = age;
+      enqueue("profile", () => db.doc(`profiles/${uid}`).update(patch));
+    }
+    if (S.readonly) toast("You have view-only access. Ask the founder for Contributor access to join.");
+  }, 4000);
+}
+start().catch(e => { console.error(e); fatal("Something went wrong.", "Reload the page to try again."); });
+})();
+</script>
+</body>
+</html>

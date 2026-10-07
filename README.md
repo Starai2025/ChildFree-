@@ -1,5 +1,7 @@
 # Black Childfree — MVP1 interactive demo
 
+**[Open the redesigned browser demo](https://raw.githack.com/Starai2025/ChildFree-/main/prototype/web-mvp1/demo.html)** — synthetic profiles and messages, with saved progress and no account needed. Like Malik to try the conversation, or use Demo controls to start onboarding. If the CDN link is unavailable, [download the self-contained app](https://github.com/Starai2025/ChildFree-/raw/refs/heads/main/prototype/web-mvp1/demo-standalone.html) and open it in a desktop browser. Local behavior is verified; this environment's proxy blocks checking the CDN endpoint. See [browser demo evidence and limits](docs/CLAUDE_BROWSER_DEMO.md).
+
 An Expo/React Native app for Black adults 18+ who have never legally married, have no children or current parental role, never want parenthood, and seek Black partners.
 
 This checkpoint adds a complete **synthetic, device-local demo**: six-step onboarding, simulated identity/review, reciprocal discovery, mutual matching, text conversations, profile/settings, reports, block/unmatch, export/deletion, and a fixture review console. All people and activity are labeled synthetic. The demo never calls Supabase, Persona, Stream, SMTP, or push services.
@@ -47,4 +49,4 @@ When changing public settings or app stage, restart Metro with `--clear`. The UI
 
 The user-supplied `BlackChildfreeAppclaude1.zip` is also preserved as a [separate Claude web prototype](prototype/web-mvp1/README.md) and accompanying documents. It depends on Claude's artifact runtime and is not part of the Expo demo. See the [import record](docs/CLAUDE1_IMPORT.md) for exact files, supplied decision notes and runtime limits. The existing MVP1 implementation remains intact.
 
-The Claude prototype now has a redesigned orange/white interface based on the user's Figma screenshot. Open its [standalone design preview](prototype/web-mvp1/design-preview.html) without a Claude account; it displays static screens with synthetic data. The updated functional HTML must be applied separately to the hosted Claude artifact.
+The Claude prototype now has a redesigned orange/white interface based on the user's Figma screenshot. Its separate [interactive browser demo](prototype/web-mvp1/README.md) runs without Claude using isolated local fixtures. The [standalone design preview](prototype/web-mvp1/design-preview.html) remains a static screen gallery. The original Claude-runtime HTML must still be applied separately to the hosted Claude artifact.

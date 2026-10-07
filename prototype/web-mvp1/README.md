@@ -1,5 +1,13 @@
 # Web prototype (MVP1 founding beta)
 
+## Clickable browser demo
+
+Open [the interactive browser demo](https://raw.githack.com/Starai2025/ChildFree-/main/prototype/web-mvp1/demo.html). It runs the redesigned interface with synthetic profiles, local matching, messages, onboarding and simulated review. Like Malik to create a mutual match, then enter the conversation. Use **Demo controls → Simulate a reply**, **Start a new demo profile**, or **Reset demo**. No Claude account is needed.
+
+If the hosting link is unavailable, [download demo-standalone.html](https://github.com/Starai2025/ChildFree-/raw/refs/heads/main/prototype/web-mvp1/demo-standalone.html) and open the downloaded file in a desktop browser. This version embeds all images and works offline. Progress stays in that browser, separately from the Expo demo. Use invented information only. Browser storage must be available to save actions.
+
+The demo is isolated: `local-demo-runtime.js` provides synthetic, device-local compatibility APIs only in the generated demo copies. It is not authentication, real shared storage, verification, moderation or a messaging provider. The Claude source `index.html` and live-provider code are unchanged. Regenerate both copies with `node scripts/build-claude-demo.mjs`; run `node tests/claude-browser-demo.mjs` to test the shipped copies without an injected test adapter. See [browser demo evidence](../../docs/CLAUDE_BROWSER_DEMO.md). The public repository was verified; the CDN URL could not be checked from this environment because the network proxy denies its domain.
+
 ## Redesigned copy and preview
 
 The repository copy was redesigned on October 7, 2026, using the user's LOML Figma screenshot as its visual reference: orange/white screens, photo-overlay profile names, persistent Like/Pass buttons, icon navigation, compact forms and a matching conversation composer. Direct Figma access was unavailable; no editable Figma nodes or template assets were imported.
