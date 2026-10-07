@@ -1,28 +1,44 @@
-# Black Childfree — Codex onboarding build
+# Black Childfree — MVP1 interactive demo
 
-Native iOS/Android dating app for Black adults who have never legally married, have no children or current parental role, never want parenthood and seek Black partners. The product contract lives in docs/Native_Dating_MVP_Build_Spec.md.
+An Expo/React Native app for Black adults 18+ who have never legally married, have no children or current parental role, never want parenthood, and seek Black partners.
 
-This checkpoint adds email OTP client code, server-enforced eligibility and pledge, private saved structured profiles, validated public configuration and CI. It is not a complete dating MVP. Provider deployment, actual phone runtime and the remaining features are explicit build gates.
+This checkpoint adds a complete **synthetic, device-local demo**: six-step onboarding, simulated identity/review, reciprocal discovery, mutual matching, text conversations, profile/settings, reports, block/unmatch, export/deletion, and a fixture review console. All people and activity are labeled synthetic. The demo never calls Supabase, Persona, Stream, SMTP, or push services.
+
+The existing real Supabase onboarding code remains available under `/member`. Its profile submission is still blocked until real photos, preferences, identity and review prerequisites exist. This is not a real-member beta or a production release.
 
 ## Run
 
-Use Node 24.19.0 / npm 11.9.0. From the root:
+Use Node 24.19.0 and npm 11.9.0. From the repository root:
 
 ```sh
-npm ci
-npm run check
-npm run test:ui
-npm run dev:mobile
+npm ci --cache /workspace/scratch/npm-cache
+EXPO_NO_TELEMETRY=1 npm run check
+EXPO_NO_TELEMETRY=1 npm run test:ui
+EXPO_NO_TELEMETRY=1 npm run dev:mobile
 ```
 
-With missing configuration, mobile displays setup-required status; no fake accounts are created. See docs/LOCAL_SETUP.md for Supabase configuration, legal/support-page dependencies and native builds. Admin is still a static shell: `npm run dev:admin`.
+For Expo web in the cloud machine:
 
-`npm run export:mobile:native` compiles iOS/Android JavaScript. It does not build signed native binaries or prove launch behavior. Browser UI checks exercise Expo web with explicitly synthetic providers; SQL tests run PostgreSQL in PGlite with isolated auth emulation.
+```sh
+EXPO_NO_TELEMETRY=1 CI=1 npm run start --workspace @black-childfree/mobile -- --web --host localhost --offline --port 8081
+```
 
-## Continue
+Select **Explore the demo**. Start as Amara, Pass on Imani and Like Malik to try the seeded mutual-match flow. In **Settings**, select **Start a new demo profile** for the full six-step journey. After submission, use **Simulated review console** to approve the fixture, then return to Discover. Settings also contains fixture switching, reset, pause, export and deletion. The console uses the same local demo state; it is not production admin access or MFA.
 
-Read AGENTS.md, BUILD_STATUS.md, CONTINUE_IN_CODEX.md, docs/ONBOARDING_TASK_CARD.md and docs/LOCAL_SETUP.md. Preserve the existing scaffold and lockfile. No backend deployment, vendor purchase or production distribution has occurred. One writer owns schema/config changes and an independent reviewer checks changes.
+The separate Vite admin site explains the current review tools and has no live administrative access: `npm run dev:admin`.
 
-## Licensing
+Demo progress persists with AsyncStorage using a separate synthetic-data key. Clearing browser/app storage or resetting the demo erases it. Demo routes redirect to real onboarding when `EXPO_PUBLIC_APP_ENV=production`. Do not enter real member information in demo fields.
 
-The mobile shell derives from Expo's MIT-licensed default template; its notice remains in apps/mobile/LICENSE. Dependencies keep their respective licenses. No proprietary dating-app code or portraits are included. The project has no public source-code license selected.
+## Checks and limitations
+
+`npm run check` performs workspace typecheck/lint, domain/SQL/Edge tests, Deno typecheck and the admin build. `npm run test:ui` exports Expo web and exercises both the original onboarding fixture and the complete local demo in bundled Linux Chromium. `UI_SKIP_EXPORT=1` is only for rerunning against an unchanged, freshly generated QA bundle.
+
+```sh
+EXPO_NO_TELEMETRY=1 CI=1 npm run export:native --workspace @black-childfree/mobile -- --max-workers 2
+```
+
+Native exports compile iOS/Android JavaScript; they are not signed binaries or phone-launch evidence. Hosted provider integration, native device tests and real-member release gates remain open. See [demo walkthrough and evidence](docs/DEMO.md), [live setup](docs/LOCAL_SETUP.md), and [current status](BUILD_STATUS.md).
+
+The design adapts the user's LOML screenshot into original components and illustrated assets. Template assets were not copied. The mobile shell retains its Expo MIT notice in `apps/mobile/LICENSE`; the application has no public source-code license selected.
+
+When changing public settings or app stage, restart Metro with `--clear`. The UI runners clear the cache when switching between QA and production-stage guard exports.

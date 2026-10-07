@@ -21,17 +21,21 @@ const fixtureEnv={
   EXPO_PUBLIC_TERMS_URL:'https://example.org/terms',EXPO_PUBLIC_PRIVACY_URL:'https://example.org/privacy',EXPO_PUBLIC_SUPPORT_URL:'https://example.org/support',
 };
 if (!process.env.UI_SKIP_EXPORT) await new Promise((resolve,reject)=>{
-  const child=spawn(process.platform==='win32'?'npm.cmd':'npm',['run','export:web','--workspace','@black-childfree/mobile','--','--output-dir','dist-qa'],{env:fixtureEnv,stdio:'inherit'});
+  const child=spawn(process.platform==='win32'?'npm.cmd':'npm',['run','export:web','--workspace','@black-childfree/mobile','--','--output-dir','dist-qa','--clear'],{env:fixtureEnv,stdio:'inherit'});
   child.on('error',reject);child.on('exit',code=>code===0?resolve():reject(new Error(`QA export failed: ${code}`)));
 });
 const server=createServer(async (req,res)=>{
   try {
     const target=path.resolve(root,`.${decodeURIComponent(new URL(req.url,'http://localhost').pathname)}`);
     if (target!==root && !target.startsWith(root+path.sep)) {res.writeHead(403).end();return;}
-    const file=target===root?path.join(root,'index.html'):target;
-    const contents=await readFile(file);
     const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.ttf':'font/ttf'};
-    res.writeHead(200,{'Content-Type':mime[path.extname(file)]??'application/octet-stream'}).end(contents);
+    for (const file of [target,target+'.html',path.join(target,'index.html')]) {
+      try {
+        const contents=await readFile(file);
+        res.writeHead(200,{'Content-Type':mime[path.extname(file)]??'application/octet-stream'}).end(contents);return;
+      } catch { /* Try the next Expo static route layout. */ }
+    }
+    res.writeHead(404).end();
   } catch {res.writeHead(404).end();}
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -78,6 +82,7 @@ try {
   });
   const address=server.address();const url=`http://127.0.0.1:${address.port}`;
   await page.goto(url);
+  await page.getByRole('button',{name:'Open real sign-in setup',exact:true}).click();
   const dob=()=>page.getByRole('textbox',{name:'Birth date (YYYY-MM-DD)',exact:true});
   await dob().waitFor();await dob().fill('1990-01-01');
   await page.getByRole('button',{name:'Reload saved information (discard unsaved edits)',exact:true}).click();

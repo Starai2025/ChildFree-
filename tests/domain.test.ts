@@ -33,6 +33,10 @@ test('configuration fails closed and only reports field names', () => {
   assert.equal(readPublicConfig({...good,stage:'production'}).ok,false);
   assert.equal(readPublicConfig({...good,supabaseUrl:'https://user:pass@example.org'}).ok,false);
   assert.equal(readPublicConfig({...good,privacyUrl:'http://example.org/privacy'}).ok,false);
+  for (const field of ['supabaseUrl','termsUrl','privacyUrl','supportUrl']) {
+    for (const value of ['', 'not a URL']) assert.equal(readPublicConfig({...good,[field]:value}).ok,false);
+  }
+  assert.equal(readPublicConfig({...good,supabaseUrl:'ftp://localhost'}).ok,false);
 });
 test('routing comes from server eligibility, pledge and account status', () => {
   const base: Snapshot = {lifecycle:'onboarding',eligible:true,policy_version:1,dob:'1990-01-01',answers:null,pledge:{version:1,text:'Pledge',accepted:true},prompts:[],draft:{revision:1,step:'photos',fields:{}},profile_revision:1};

@@ -1,5 +1,5 @@
-# Native app scaffold
+# Black Childfree mobile
 
-Install from the repository root using npm ci, then npm run dev:mobile.
+Install from the workspace root with npm ci. Start with EXPO_NO_TELEMETRY=1 npm run dev:mobile. The default route offers the synthetic MVP1 demo; the existing real onboarding slice is at /member and requires public settings. See the root README and docs/DEMO.md.
 
-Routes live in src/app. This F01 shell does not implement dating features. Follow the root README, BUILD_STATUS.md and repository specifications. Keep the Expo SDK 57 requirements in AGENTS.md.
+Demo routes live in src/app/demo; UI/state adapters live in src/demo; pure transitions are in packages/domain/src/demo.ts. Keep native SDK 57 compatibility, real onboarding access boundaries and synthetic labels intact. No real provider or phone-runtime evidence is implied by this demo.

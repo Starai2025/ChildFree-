@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "dependencies": {
     "@black-childfree/domain": "0.1.0",
+    "@expo/vector-icons": "15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@supabase/supabase-js": "2.117.2",
     "expo": "57.0.27",
     "expo-constants": "57.0.21",

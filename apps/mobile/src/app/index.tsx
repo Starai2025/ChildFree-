@@ -1,62 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { Image, Platform, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { onboardingRoute, type ApiRequest } from '@black-childfree/domain';
-import { configuration } from '../services/client';
-import { useMember } from '../services/use-member';
-import { Button, ExternalLink, Notice, styles } from '../components/forms';
-import { LoginPanel } from '../components/login-panel';
-import { EligibilityPanel } from '../components/eligibility-panel';
-import { ProfilePanel } from '../components/profile-panel';
+import { Action, navigate, palette, portraits } from '../demo/ui';
+import MemberScreen from './member';
 
-export default function MemberScreen() {
-  const member = useMember();
-  return <MemberFlow key={member.session?.user.id ?? 'signed-out'} member={member} />;
+export default function Welcome() {
+  const {width} = useWindowDimensions();
+  if (process.env.EXPO_PUBLIC_APP_ENV === 'production') return <MemberScreen />;
+  return <SafeAreaView style={styles.safe}><ScrollView contentContainerStyle={styles.page}>
+    <View style={styles.nav}><Text style={styles.logo}>black childfree<Text style={{color: palette.orange}}> ♥</Text></Text><Text style={styles.badge}>THE MVP1 DEMO</Text></View>
+    <View style={styles.hero}>
+      <Text style={styles.eyebrow}>BLACK LOVE. A SHARED CHOICE.</Text>
+      <Text accessibilityRole="header" style={styles.title}>A full life.{'\n'}A real connection.{'\n'}<Text style={{color: palette.orange}}>Your own way.</Text></Text>
+      <Text style={styles.description}>For Black adults who know parenthood isn’t part of their story—and want someone who feels the same.</Text>
+      <View style={styles.portraitRow}>{[0, 1, 2].map((photo, i) => <View key={photo} style={[styles.portrait, {transform: [{rotate: `${(i - 1) * 6}deg`}]}]}><Image source={portraits[photo]} style={[styles.image, {height: (Math.min(Math.max(width - 48, 200), 580) - 20) / 3 / 0.75}]} /><Text style={styles.photoCaption}>{['Amara', 'Malik', 'Imani'][i]} · illustrated demo</Text></View>)}</View>
+      <Action onPress={() => navigate('/demo/discover')}>Explore the demo →</Action>
+      <Action secondary onPress={() => navigate('/member')}>Open real sign-in setup</Action>
+      <Text style={styles.footnote}>A complete interactive preview. All profiles, verification, matches, and messages are synthetic. No real account is created.</Text>
+    </View>
+    <View style={styles.values}>{[['01', 'Shared intention', 'Never married. No children or parental role. Never seeking parenthood.'], ['02', 'Room to be yourself', 'Thoughtful prompts, inclusive preferences, and meaningful connections.'], ['03', 'A kinder beginning', 'A community pledge, mutual matching, and free text conversations.']].map(([n, title, text]) => <View key={n} style={styles.value}><Text style={styles.number}>{n}</Text><Text style={styles.valueTitle}>{title}</Text><Text style={styles.valueText}>{text}</Text></View>)}</View>
+    <Text style={styles.footer}>ATLANTA FOUNDING COHORT · 18+ · BUILT WITH INTENTION</Text>
+  </ScrollView></SafeAreaView>;
 }
-
-function MemberFlow({member}: {member: ReturnType<typeof useMember>}) {
-  const [override, setOverride] = useState<'eligibility' | 'profile' | null>(null);
-  const [formReset, setFormReset] = useState(0);
-  const snapshot = member.snapshot;
-  const route = snapshot ? onboardingRoute(snapshot) : null;
-  const screen = route === 'restricted' || route === 'status' ? route : override ?? route;
-  const scroll = useRef<ScrollView>(null);
-  useEffect(() => {scroll.current?.scrollTo({y: 0, animated: false});}, [screen]);
-  async function execute(request: ApiRequest) {
-    const result = await member.execute(request);
-    if (result && (request.action === 'profile_save' || ((request.action === 'eligibility' || request.action === 'pledge_accept') && result.eligible && result.pledge.accepted))) setOverride(null);
-    return result;
-  }
-  return <SafeAreaView style={{flex: 1, backgroundColor: '#F7F4EE'}}>
-    <KeyboardAvoidingView style={{flex: 1}} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.page}>
-        <Text style={styles.eyebrow}>BLACK CHILDFREE{configuration.ok && configuration.config.stage === 'production' ? '' : ' · DEVELOPMENT BUILD'}</Text>
-        <Text accessibilityRole="header" style={styles.title}>Black love.{ '\n' }Your own blueprint.</Text>
-        {!configuration.ok ? <View style={styles.card}>
-          <Text style={styles.subtitle}>The next chapter is taking shape.</Text>
-          <Text style={styles.body}>A community for Black adults who have chosen life without parenthood. This development build needs setup before accounts can be created.</Text>
-          <Text selectable style={styles.body}>Missing or invalid settings: {configuration.fields.join(', ')}.</Text>
-          <Text style={styles.body}>Developer setup: see docs/LOCAL_SETUP.md in the project. No member information is stored on this screen.</Text>
-        </View> : member.loading ? <ActivityIndicator accessibilityLabel="Restoring session" /> : !member.session ? <LoginPanel /> : !snapshot ? <View style={styles.card}>
-          <Text style={styles.body}>{member.busy ? 'Loading your saved progress…' : 'Your saved progress could not be loaded.'}</Text>
-          <Button label="Retry loading" disabled={member.busy} onPress={() => {void execute({action: 'bootstrap'});}} />
-        </View> : screen === 'eligibility' ? <EligibilityPanel key={`${member.session.user.id}/${snapshot.pledge.version}/${formReset}`} snapshot={snapshot} busy={member.busy} execute={execute} /> : screen === 'profile' ? <ProfilePanel key={`${member.session.user.id}/${snapshot.draft.revision}/${formReset}`} snapshot={snapshot} busy={member.busy} execute={execute} back={() => setOverride('eligibility')} /> : screen === 'photos' ? <View style={styles.card}>
-          <Text style={styles.eyebrow}>PHOTOS · STEP 3 OF 6</Text><Text accessibilityRole="header" style={styles.subtitle}>Your profile draft is saved.</Text>
-          <Text style={styles.body}>Photo uploads, preferences and identity checks are the next build steps. Your profile cannot enter review or discovery yet.</Text>
-          <Button label="Edit saved profile" onPress={() => setOverride('profile')} disabled={member.busy} />
-          <Button label="Check review requirements" secondary onPress={() => {void execute({action: 'profile_submit', revision: snapshot.profile_revision});}} disabled={member.busy} />
-        </View> : <View style={styles.card}>
-          <Text accessibilityRole="header" style={styles.subtitle}>{screen === 'restricted' ? 'Your account needs attention.' : 'Your account status'}</Text>
-          <Text style={styles.body}>Status: {snapshot.lifecycle.replaceAll('_', ' ')}. Contact support for account, appeal, export or deletion help. Discovery and conversations are not implemented in this build.</Text>
-        </View>}
-        {!!member.error && <Notice>{member.error}</Notice>}
-        {configuration.ok && member.session && <View style={styles.stack}>
-          <Button label="Reload saved information (discard unsaved edits)" secondary onPress={() => {void execute({action: 'bootstrap'}).then(result => {if (result) {setOverride(null); setFormReset(n => n + 1);}});}} disabled={member.busy} />
-          <ExternalLink label="Support, appeals and account requests" url={configuration.config.supportUrl} />
-          <ExternalLink label="Privacy Notice" url={configuration.config.privacyUrl} />
-          <Button label="Sign out" secondary onPress={() => {void member.signOut();}} disabled={member.busy} />
-        </View>}
-      </ScrollView>
-    </KeyboardAvoidingView>
-  </SafeAreaView>;
-}
+const styles = StyleSheet.create({
+  safe: {flex: 1, backgroundColor: palette.cream}, page: {maxWidth: 960, width: '100%', alignSelf: 'center', padding: 24, gap: 30, paddingBottom: 40}, nav: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingVertical: 14}, logo: {fontSize: 20, fontWeight: '700', color: palette.ink, letterSpacing: -0.7}, badge: {fontSize: 9, fontWeight: '700', letterSpacing: 1, color: '#AD451D', backgroundColor: palette.peach, padding: 9, borderRadius: 20},
+  hero: {maxWidth: 580, width: '100%', alignSelf: 'center', gap: 22, paddingVertical: 14}, eyebrow: {fontSize: 10, fontWeight: '700', letterSpacing: 2, color: palette.orange}, title: {fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif', fontSize: 48, lineHeight: 55, fontWeight: '600', color: palette.ink, letterSpacing: -1.5}, description: {fontSize: 17, lineHeight: 28, color: palette.muted, maxWidth: 460}, portraitRow: {flexDirection: 'row', gap: 10, paddingVertical: 10}, portrait: {flex: 1, flexBasis: 0, minWidth: 0, borderRadius: 16, backgroundColor: 'white', overflow: 'hidden', borderWidth: 1, borderColor: palette.line}, image: {width: '100%'}, photoCaption: {fontSize: 9, padding: 8, color: palette.muted}, footnote: {fontSize: 12, lineHeight: 20, color: palette.muted, textAlign: 'center'},
+  values: {flexDirection: 'row', flexWrap: 'wrap', gap: 24, borderTopWidth: 1, borderTopColor: palette.line, paddingTop: 28}, value: {flex: 1, minWidth: 180, gap: 8}, number: {fontSize: 12, color: palette.orange, letterSpacing: 1}, valueTitle: {fontSize: 16, fontWeight: '600', color: palette.ink}, valueText: {fontSize: 13, lineHeight: 22, color: palette.muted}, footer: {fontSize: 9, letterSpacing: 1.5, color: palette.muted, textAlign: 'center'},
+});

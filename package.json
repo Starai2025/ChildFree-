@@ -21,7 +21,7 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "check": "npm run typecheck && npm run lint && npm test && npm run check:edge && npm run build:admin",
     "check:edge": "deno check --node-modules-dir=manual --config supabase/functions/onboarding/deno.json supabase/functions/onboarding/index.ts",
-    "test:ui": "node tests/ui-smoke.mjs"
+    "test:ui": "node tests/ui-smoke.mjs && node tests/demo-ui-smoke.mjs && node tests/production-guard.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

@@ -12,3 +12,7 @@ Read docs/Native_Dating_MVP_Build_Spec.md and docs/MVP1_Agent_Execution_Plan.md 
 - Secrets and personal member data stay out of source, prompts and logs. No production publishing or paid-plan commitment without owner authorization.
 - Return commands actually run, results, changed files, limitations and the review handoff. Never claim native launch from a successful web/native JavaScript export.
 - The independent A6 reviewer may work read-only against a fixed commit/diff; report findings to the builder rather than editing files concurrently.
+
+## Current authorized demo checkpoint
+
+The user authorized the complete synthetic MVP1 demo and pushes to main on October 7, 2026. Read docs/DEMO.md for its scope and current evidence. This supersedes historical instructions to restart F01 or defer locally verifiable demo screens. Keep all synthetic state separate from real onboarding; never weaken SQL/provider protections. Use the existing isolated cloud checkout, without creating a worktree. The demo console is a local fixture tool, not independently verified production administration. Continue one source writer and independent read-only A6 review.

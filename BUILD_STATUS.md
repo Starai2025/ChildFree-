@@ -1,31 +1,21 @@
 # Build status
 
-Specification Revision 3; execution plan Revision 2. Implementation: Codex. Integrated branch: main. Reviewed source commit: e6343951e55da8addf9f2e51489a45d895ec8025.
-
-Starr authorized continued locally verifiable Codex work while native testing remains unavailable. F01 software scaffold is accepted; F01/F03 native-runtime and complete Foundation gates are still open.
+Current scope: user-authorized MVP1 synthetic demo, October 7, 2026. Original onboarding baseline is committed as `7eb64dd` in `Starai2025/ChildFree-` main. The ZIP's historical review evidence remains in the earlier verification documents; it is not evidence of current hosted/native behavior.
 
 ## Current implementation
 
-- F02: validated public settings, separate environment identifiers, pinned dependencies, shared domain workspace and committed CI workflow. GitHub CI has not executed (no remote).
-- B01/B02 partial: initial private onboarding migration, permissioned session-derived RPCs, eligibility, versioned pledge/catalog, own snapshots, revision-checked drafts, complete structured-profile draft revisions. All private tables use RLS and deny direct member access. The full V1 schema is not yet implemented.
-- U02 partial: email OTP SDK client, session restoration, eligibility/pledge UI, two structured prompts, explicit gender selection, private draft saves/resume, Back save and setup/error states. Photos/preferences/identity screens are not wired. OTP/deep-link and physical-device testing are pending.
-- F03 preparatory: distinct app schemes/identifiers, EAS profiles, SDK-compatible SecureStore/development-client packages. No EAS credentials, signed builds or device launches.
-- Admin remains the F01 static shell. MFA, reviewer roles and moderation operations are not implemented.
+Complete local demo experience: welcome, six-step onboarding and resume, simulated review, reciprocal fixture discovery, mutual matches, text conversations/retry, profiles/preferences/settings, block/unmatch/report, fixture export/deletion/reset and a local review console. Visual direction adapts the user's LOML screenshot with original illustrated assets. All demo people, outcomes and activity are labeled synthetic. Production-stage routes disable demo access.
 
-Profile submission always denies missing prerequisites. No real verified/approved/discoverable profiles exist. No chat or matching is implemented.
+The real email OTP/eligibility/pledge/structured-profile slice remains at `/member`. Its SQL/API behavior has not been changed; real profile submission still fails closed. The separate Vite admin website describes the demo tools and has no live admin access. No real members are approved, discoverable or messaging.
 
-## Checks
+See docs/DEMO.md for the implementation task card, walkthrough, isolation boundaries and validation. Agent work should start from this checkpoint, not regenerate F01. The shared product specification remains the live-app contract; the user's current demo scope is the explicit local-build exception.
 
-Current focused checks: domain/SQL/Edge-handler tests, workspace typecheck/lint, Deno Edge typecheck, admin build and both iOS/Android JavaScript exports pass. Browser regression checks passed. A6 accepted the locally verifiable slice at the reviewed commit; clean-clone npm ci and checks passed (859 packages; 22 tests). See docs/ONBOARDING_VERIFICATION.md.
+## Remaining live gates
 
-## Remaining gates
+Hosted Supabase reset/deployment and JWT checks; real OTP/SMTP; Terms/Privacy acceptance audit and owner-reviewed pages; native secure-session/lifecycle/accessibility and device launches; signing/store accounts; real admin MFA/roles/audit; private photos and normalization; Persona start/signed webhooks; PostGIS and discovery; transactional matching/outbox; restricted Stream sending/revocation; report operations; deletion/export jobs; push; recovery; staffing and staged release QA.
 
-Real Supabase migration reset/deployment and shared-domain bundling; live JWT/PostgREST checks; actual OTP/SMTP delivery; native secure-session/keyboard/accessibility/lifecycle testing; MFA/admin review; real photo processing and Persona; preferences/PostGIS/discovery; matching and managed chat/revocation; reports/block/delete/export; legal acceptance audit; staffed support/moderation; staged release QA. Credentials and owner-reviewed legal/support pages are absent.
+A browser demo, local SQL tests and JavaScript exports do not complete those gates. No production release, paid vendor commitment or real-member beta has occurred.
 
-Do not call Milestone A or the dating MVP complete. No live-member beta or production publishing is authorized by this checkpoint.
+## Local evidence
 
-## Next action
-
-Prove the hosted development onboarding and native runtime when owner-controlled accounts/tooling are available. The next feature ticket is the MFA/admin permission spine, followed by photo/Persona prerequisites. Continue other locally verifiable tickets within the accepted contract without pretending external gates have passed.
-
-Setup and contracts: docs/LOCAL_SETUP.md. Task card: docs/ONBOARDING_TASK_CARD.md. Previous scaffold evidence: docs/F01_VERIFICATION.md.
+32 tests, all workspace typing/lint, Deno Edge typecheck, admin build, original onboarding browser regression, full synthetic demo browser walkthrough, and iOS/Android JavaScript exports pass. The demo browser validates zero external requests and its downloaded synthetic export. See docs/DEMO.md for the scope and current follow-up evidence.
