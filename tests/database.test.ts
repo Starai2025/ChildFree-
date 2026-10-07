@@ -21,6 +21,7 @@ before(async () => {
     create function auth.uid() returns uuid language sql stable as $$ select (auth.jwt()->>'sub')::uuid $$;
     insert into auth.users values('${A}'),('${B}'),('${C}'),('${D}');`);
   await db.exec(await readFile(new URL('../supabase/migrations/202610060001_onboarding.sql',import.meta.url),'utf8'));
+  await db.exec(await readFile(new URL('../supabase/migrations/202610070001_humor_prompts.sql',import.meta.url),'utf8'));
 });
 after(async () => {await db?.close();});
 async function actor<T>(id: string | null, fn: (tx: Transaction) => Promise<T>, role='authenticated', anonymous=false) {
@@ -100,6 +101,11 @@ test('a material pledge update prevents protected saves', async () => {
   await assert.rejects(draft(A,2,{display_name:'Jordan'}),/STALE_PLEDGE/);
   await assert.rejects(pledge(A),/STALE_PLEDGE/);
   assert.equal((await rpc(A,'public.api_accept_pledge(2)')).pledge.accepted,true);
+});
+test('humor prompts are published at version 1 alongside the original catalog', async () => {
+  const rows=(await db.query<{id:string}>(`select id from private.prompt_catalog where enabled and version=1 order by id`)).rows.map(r=>r.id);
+  for (const id of ['auntie_asks','rather_raise','cookout_dish','dink_vacation','reunion_shirt','college_fund','joy']) assert.ok(rows.includes(id),id);
+  assert.equal(rows.length,14);
 });
 test('published catalog content must be versioned, and disabled prompts cannot be newly saved', async () => {
   await assert.rejects(db.exec(`update private.prompt_catalog set text='Mutated' where id='joy'`),/new version/);

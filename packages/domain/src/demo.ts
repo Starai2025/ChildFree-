@@ -11,6 +11,12 @@ export const demoPrompts = [
   {id: 'culture', version: 1, text: "A part of my culture I'd love to share is…"},
   {id: 'partnership', version: 1, text: 'A strong partnership means…'},
   {id: 'joy', version: 1, text: 'Something that always brings me joy is…'},
+  {id: 'auntie_asks', version: 1, text: "When Auntie asks ‘So when are y'all having kids?’ I say…"},
+  {id: 'rather_raise', version: 1, text: "Things I'd rather raise than children…"},
+  {id: 'cookout_dish', version: 1, text: "The cookout dish I'm trusted to bring is…"},
+  {id: 'dink_vacation', version: 1, text: 'Our future DINK vacation is…'},
+  {id: 'reunion_shirt', version: 1, text: "The family reunion T-shirt I'd design for us says…"},
+  {id: 'college_fund', version: 1, text: "Instead of a college fund, I'm funding…"},
 ];
 export const demoPledge = "I will be truthful about my identity, relationship history and decision not to become a parent. I will respect other members' boundaries and accept a no. I will not pressure anyone to change their childfree choice. I will not harass, threaten, discriminate, impersonate others, solicit money or send sexual content. I will use reporting when something is wrong and understand that violations can lead to removal.";
 export const cities = {

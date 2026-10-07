@@ -8,7 +8,12 @@
   const clone = value => JSON.parse(JSON.stringify(value));
   const listeners = new Map();
   const stamp = Date.now();
-  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:[{id:'ordinary_sunday',a:'Coffee, the farmers market, and a long walk with nowhere to rush.'},{id:'partnership',a:'Choosing each other. Being kind, being honest, and making room to grow.'}],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
+  const humor = {
+    malik: [{id:'auntie_asks',a:"\"Same day you return my Tupperware, Auntie.\" She's had it since 2014. We're both safe."},{id:'cookout_dish',a:'Baked mac and cheese. Three cheeses, a crispy top, and extra foil because folks take plates home.'}],
+    zuri: [{id:'rather_raise',a:"My credit score, a monstera named Denzel, and a 401(k) that's finally doing its job."},{id:'dink_vacation',a:'December in Accra, then Lisbon just because we can. Zero car seats to check at the gate.'}],
+    amara: [{id:'reunion_shirt',a:'"The Childfree Ones: Ask Us About Our Quiet Weekends." Front and back. Auntie gets an XL.'},{id:'college_fund',a:'A passport full of stamps, a paid-off car, and an emergency fund that is an actual fund.'}]
+  };
+  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:humor[name.toLowerCase()],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
   function fixtures(fresh = false) {
     const seeded = new Map();
     seeded.set('profiles/malik', profile('Malik','Man'));

@@ -411,7 +411,12 @@ body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding
   const clone = value => JSON.parse(JSON.stringify(value));
   const listeners = new Map();
   const stamp = Date.now();
-  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:[{id:'ordinary_sunday',a:'Coffee, the farmers market, and a long walk with nowhere to rush.'},{id:'partnership',a:'Choosing each other. Being kind, being honest, and making room to grow.'}],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
+  const humor = {
+    malik: [{id:'auntie_asks',a:"\"Same day you return my Tupperware, Auntie.\" She's had it since 2014. We're both safe."},{id:'cookout_dish',a:'Baked mac and cheese. Three cheeses, a crispy top, and extra foil because folks take plates home.'}],
+    zuri: [{id:'rather_raise',a:"My credit score, a monstera named Denzel, and a 401(k) that's finally doing its job."},{id:'dink_vacation',a:'December in Accra, then Lisbon just because we can. Zero car seats to check at the gate.'}],
+    amara: [{id:'reunion_shirt',a:'"The Childfree Ones: Ask Us About Our Quiet Weekends." Front and back. Auntie gets an XL.'},{id:'college_fund',a:'A passport full of stamps, a paid-off car, and an emergency fund that is an actual fund.'}]
+  };
+  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:humor[name.toLowerCase()],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
   function fixtures(fresh = false) {
     const seeded = new Map();
     seeded.set('profiles/malik', profile('Malik','Man'));
@@ -520,7 +525,13 @@ const CATALOG = [
   ["building","The life I want to build with someone is…"],
   ["culture","A part of my culture I'd love to share is…"],
   ["partnership","A strong partnership means…"],
-  ["joy","Something that always brings me joy is…"]
+  ["joy","Something that always brings me joy is…"],
+  ["auntie_asks","When Auntie asks ‘So when are y'all having kids?’ I say…"],
+  ["rather_raise","Things I'd rather raise than children…"],
+  ["cookout_dish","The cookout dish I'm trusted to bring is…"],
+  ["dink_vacation","Our future DINK vacation is…"],
+  ["reunion_shirt","The family reunion T-shirt I'd design for us says…"],
+  ["college_fund","Instead of a college fund, I'm funding…"]
 ];
 const PROMPT = Object.fromEntries(CATALOG);
 const HEIGHTS = Array.from({length:27}, (_,i) => 58 + i); // 4'10" to 7'0"

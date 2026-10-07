@@ -324,6 +324,12 @@ Require two distinct prompt answers, each 20–200 characters after trimming whi
 | culture | A part of my culture I'd love to share is… |
 | partnership | A strong partnership means… |
 | joy | Something that always brings me joy is… |
+| auntie_asks | When Auntie asks ‘So when are y'all having kids?’ I say… |
+| rather_raise | Things I'd rather raise than children… |
+| cookout_dish | The cookout dish I'm trusted to bring is… |
+| dink_vacation | Our future DINK vacation is… |
+| reunion_shirt | The family reunion T-shirt I'd design for us says… |
+| college_fund | Instead of a college fund, I'm funding… |
 
 All start at version 1. Catalog changes create a new immutable version; existing approved profiles render the original referenced prompt. Disabling a prompt prevents new selection without corrupting previously approved profiles. Submission accepts an already-selected retired version only if it belongs to the member's existing approved revision; otherwise require an enabled version. No AI-written profiles, hidden personality scores or invented compatibility claims.
 
