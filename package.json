@@ -1,0 +1,34 @@
+{
+  "name": "black-childfree-app",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "packageManager": "npm@11.9.0",
+  "scripts": {
+    "dev:mobile": "npm run start --workspace @black-childfree/mobile",
+    "dev:admin": "npm run dev --workspace @black-childfree/admin",
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "npm run lint --workspaces",
+    "build:admin": "npm run build --workspace @black-childfree/admin",
+    "export:mobile:web": "npm run export:web --workspace @black-childfree/mobile",
+    "export:mobile:native": "npm run export:native --workspace @black-childfree/mobile",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check": "npm run typecheck && npm run lint && npm test && npm run check:edge && npm run build:admin",
+    "check:edge": "deno check --node-modules-dir=manual --config supabase/functions/onboarding/deno.json supabase/functions/onboarding/index.ts",
+    "test:ui": "node tests/ui-smoke.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@sparticuz/chromium": "153.0.0",
+    "deno": "2.9.6",
+    "playwright-core": "1.63.0",
+    "tar-fs": "3.1.3",
+    "tsx": "4.21.0"
+  }
+}
