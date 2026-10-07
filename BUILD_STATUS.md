@@ -18,4 +18,4 @@ A browser demo, local SQL tests and JavaScript exports do not complete those gat
 
 ## Local evidence
 
-32 tests, all workspace typing/lint, Deno Edge typecheck, admin build, original onboarding browser regression, full synthetic demo browser walkthrough, and iOS/Android JavaScript exports pass. The demo browser validates zero external requests and its downloaded synthetic export. See docs/DEMO.md for the scope and current follow-up evidence.
+32 tests, all workspace typing/lint, Deno Edge typecheck, admin build, original onboarding browser regression, full synthetic demo browser walkthrough, production-stage route guard and iOS/Android JavaScript exports pass. The demo browser validates zero external requests, its downloaded synthetic export, draft preservation and failed-storage recovery. Independent A6 review accepted the repaired implementation. Actual Metro browser and Vite startup checks pass. Tested cloud install/start instructions are saved as a configuration draft requiring Review/Save and Publish. See docs/DEMO.md for the evidence and limits.

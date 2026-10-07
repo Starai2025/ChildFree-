@@ -20,7 +20,7 @@ EXPO_NO_TELEMETRY=1 npm run dev:mobile
 For Expo web in the cloud machine:
 
 ```sh
-EXPO_NO_TELEMETRY=1 CI=1 npm run start --workspace @black-childfree/mobile -- --web --host localhost --offline --port 8081
+env -u CI BROWSER=none EXPO_PUBLIC_APP_ENV=development EXPO_NO_TELEMETRY=1 npm run start --workspace @black-childfree/mobile -- --web --offline --clear --port 8081
 ```
 
 Select **Explore the demo**. Start as Amara, Pass on Imani and Like Malik to try the seeded mutual-match flow. In **Settings**, select **Start a new demo profile** for the full six-step journey. After submission, use **Simulated review console** to approve the fixture, then return to Discover. Settings also contains fixture switching, reset, pause, export and deletion. The console uses the same local demo state; it is not production admin access or MFA.

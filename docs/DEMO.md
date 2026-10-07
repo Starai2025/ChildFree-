@@ -48,7 +48,7 @@ New dependencies are AsyncStorage 2.2.0 and @expo/vector-icons 15.0.2. The Expo 
 npm ci --cache /workspace/scratch/npm-cache
 EXPO_NO_TELEMETRY=1 npm run check
 EXPO_NO_TELEMETRY=1 npm run test:ui
-EXPO_NO_TELEMETRY=1 CI=1 npm run export:native --workspace @black-childfree/mobile -- --max-workers 2
+EXPO_PUBLIC_APP_ENV=development EXPO_NO_TELEMETRY=1 CI=1 npm run export:native --workspace @black-childfree/mobile -- --max-workers 2 --clear
 ```
 
 The UI runner records current screenshots under `docs/evidence/demo`. It asserts that the demo makes no external requests. Database tests use isolated PGlite/auth emulation; the original browser onboarding uses synthetic Supabase interception. These checks do not prove hosted integrations or native device behavior.
@@ -72,3 +72,9 @@ The first stage-switch export also reused stale public-environment transforms. T
 The production-stage guard now passes in an actual rendered production export: the root has no demo entry, and a direct /demo/review request redirects to /member. The tested reusable installation script refreshes 863 packages with npm ci and passes the complete 32-test/check command, leaving the committed lockfile unchanged.
 
 Independent review of implementation commit `2f0b57d` requested one repair: onboarding's header Back discarded an unfinished form. The header now uses the same awaited persistence operation as Save for later, disables while saving, and only leaves on success. Added browser regression coverage confirms Back/reload/resume retains an incomplete profile and an injected storage rejection keeps the edited form visible with an error notice. The updated full demo walkthrough passes, and all 32 domain/SQL/Edge tests, typecheck, lint and admin build pass after this repair.
+
+Independent A6 review accepted repaired commit `7699cb0b8138a05d686e260716d755a4b7142e99` after separately reproducing both browser regression checks. No further findings were reported. The repaired full UI suite, including the rendered production-stage redirect guard, passes.
+
+Final development-stage iOS/Android Hermes exports pass after the repair and URL-validator change. Actual reload-enabled Metro startup passes `node scripts/smoke-dev.mjs`, rendering Discover and persisting a Pass decision without browser errors. Vite responds with the expected application root and transformed source on port 5173. The headless startup command uses `BROWSER=none`; SDK57's `--offline` cannot be combined with `--host`. Optional React Native DevTools download falls back because the home cache is read-only; no debugger/device capability is inferred.
+
+Using `cloud-environment-onboarding:setup`, the tested installation script and service start instructions were saved as an environment configuration draft. Repository membership, proxy policy and secrets were preserved. The draft is confirmed saved and requires user Review/Save and Publish in environment settings to activate. Saving the draft does not deploy the app or prove restoration into a fresh task.
