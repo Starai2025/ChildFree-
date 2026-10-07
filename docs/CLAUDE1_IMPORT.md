@@ -6,7 +6,7 @@ ZIP SHA-256: `3bef01d3a8e1515f52ff2e13b66a4c87c157fe04ba07a704ea2a683eecb0147d`.
 
 ## Imported files
 
-These four additions are byte-for-byte copies of the uploaded files:
+These four additions were byte-for-byte copies of the uploaded files at import commit `23e5672`. The prototype HTML and its README have since been redesigned at the user's request; their original bytes remain in Git history:
 
 - [Claude Code kickoff](../START_HERE_CLAUDE_CODE.md)
 - [Supplied decision document](DECISIONS_2026-10-07.md)

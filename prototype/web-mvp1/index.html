@@ -6,30 +6,16 @@
 <title>Black Childfree — founding beta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink:#1B2350; --paper:#F4F5F9; --surface:#FFFFFF; --mist:#DCE0EC; --slate:#4A5070;
-  --marigold:#E9A12B; --berry:#9C2F5E; --berry-ink:#FFFFFF; --ok:#2E6B4F; --warn:#9A5B00; --bad:#A3283A;
-  --text:#1B2350; --muted:#5A6080; --line:#DCE0EC; --chip:#EEF0F7;
-  --serif:"Young Serif",Georgia,"Times New Roman",serif;
-  --sans:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --ink:#222328; --paper:#FFFFFF; --surface:#FFFFFF; --mist:#F2F3F6; --slate:#6F727A;
+  --marigold:#FFE2D2; --berry:#CB4708; --berry-ink:#FFFFFF; --ok:#287447; --warn:#9A5B00; --bad:#BC3434;
+  --text:#222328; --muted:#71747D; --line:#EBEDF1; --chip:#F3F4F7;
+  --serif:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
   color-scheme:light;
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --paper:#11152B; --surface:#1A1F3C; --mist:#2A3158; --slate:#B9BFDA; --text:#EEF0F8; --muted:#A4AAC8;
-    --line:#2C3360; --chip:#242A4E; --berry:#C24A7D; --ink:#EEF0F8; --marigold:#F0B24A; --ok:#6CC59A; --warn:#F0B24A; --bad:#F07A8A;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#11152B; --surface:#1A1F3C; --mist:#2A3158; --slate:#B9BFDA; --text:#EEF0F8; --muted:#A4AAC8;
-  --line:#2C3360; --chip:#242A4E; --berry:#C24A7D; --ink:#EEF0F8; --marigold:#F0B24A; --ok:#6CC59A; --warn:#F0B24A; --bad:#F07A8A;
-  color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:inherit}
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -302,12 +288,115 @@ img:not([src]){visibility:hidden}
   .match{animation:pop .35s ease-out}
   @keyframes pop{from{opacity:0;transform:scale(1.04)}to{opacity:1;transform:none}}
 }
+
+/* October 2026 redesign — supplied LOML screenshot reference. */
+html{background:#F4F5F7;scroll-padding-top:90px}
+body{background:#F4F5F7;font-size:14px;line-height:1.6;letter-spacing:-.015em}
+.app{max-width:480px;background:var(--paper);min-height:100dvh;box-shadow:0 0 0 1px #EBEDF1}
+header.top{position:sticky;top:0;z-index:10;min-height:76px;padding:calc(12px + env(safe-area-inset-top,0px)) 20px 12px;background:var(--berry);color:#fff;gap:12px}
+.wordmark{color:#fff;font-family:var(--sans);font-size:20px;font-weight:800;letter-spacing:-.8px;line-height:1.2}
+.wordmark small{font-size:10px;font-weight:500;letter-spacing:.5px;color:#fff;opacity:.92;margin-top:5px}
+.brand-heart{display:inline-block;margin-left:3px;vertical-align:-2px}
+#hdr button{border:1px solid #fff;color:var(--berry);background:#fff;border-radius:10px;font-size:12px}
+main{padding:20px 20px 115px}
+main:focus{outline:none}
+h1{font-family:var(--sans);font-weight:750;font-size:27px;line-height:1.25;letter-spacing:-1px;margin:6px 0 12px}
+h2{font-family:var(--sans);font-weight:700;font-size:20px;letter-spacing:-.6px;margin:24px 0 10px}
+h3{font-size:14px;font-weight:700;margin:22px 0 10px}
+p{margin-bottom:12px}
+.small{font-size:13px}.tiny{font-size:11px;line-height:1.6}
+button,.btn{border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13px;min-height:46px;padding:11px 16px;font-weight:600;transition:background .15s,box-shadow .15s,transform .15s}
+button:hover{background:#F7F8FA}button:active{transform:translateY(1px)}
+.btn-primary{background:var(--berry);border-color:var(--berry);color:#fff;box-shadow:0 3px 9px #D84B0818}
+.btn-primary:hover{background:#C74100;border-color:#C74100}
+.btn-quiet{background:#F5F6F9;border-color:transparent;color:#555B66}
+.btn-quiet:hover{background:#EAEDF2}
+.btn-link{background:none;border:0;color:var(--berry);padding:6px 0;min-height:32px}
+.btn-link:hover{background:none;text-decoration:underline}
+.btn-danger{color:var(--bad);border-color:#F2DADA;background:#FFF8F8}
+:focus-visible{outline:3px solid #2474D6;outline-offset:3px}
+input[type=text],input[type=date],input[type=number],select,textarea{background:#F3F5F9;border:1px solid transparent;border-radius:9px;font-size:14px;padding:13px 14px;min-height:46px}
+input:focus,select:focus,textarea:focus{background:#fff;border-color:#F5651C;outline:3px solid #FFE2D2}
+label{font-size:13px;margin:17px 0 7px}.hint{font-size:11px;display:block;margin-top:3px}
+.panel{border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 3px 14px #20232B04}
+.q{padding:18px 0}.q-text{font-size:13px;line-height:1.55}
+.seg label{font-size:12px;border:1px solid var(--line);border-radius:9px;padding:11px;background:#F8F9FB}
+.seg label:has(input:checked),.pick label:has(input:checked){background:#FFF0E8;color:#B43D06;border-color:#FAB18D}
+.pick label{font-size:12px;min-height:40px;padding:9px 13px;border-radius:24px;border-width:1px}
+.checks label{font-size:13px}.pledge{font-size:16px;line-height:1.85;font-weight:500}
+.errors{border:1px solid #E9B1B1;background:#FFF5F5;font-size:13px}
+.ph{border-radius:12px;background:#F3F5F9;border-color:#D7DCE5}
+.ph button.add{font-size:12px;color:#71747D}
+.ph .x{font-size:10px}.photos{gap:9px}
+.card{border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px #171B2408;margin:12px 0 16px}
+.card-photo{aspect-ratio:3/4;max-height:500px;background:#F1F2F5}
+.card-photo::after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.65));pointer-events:none}
+.photo-identity{position:absolute;bottom:20px;left:20px;right:74px;color:#fff;z-index:1;pointer-events:none}
+.photo-identity h2{font-size:28px;letter-spacing:-.8px;line-height:1.2;color:#fff;margin:0 0 5px}
+.photo-identity p{font-size:11px;color:#fff;margin:0;opacity:.95}
+.photo-identity .intent-label{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.4px;margin-bottom:7px;padding:4px 8px;border-radius:5px;background:#ffffff26;backdrop-filter:blur(6px)}
+.dots{top:12px;left:12px;right:12px;z-index:1}.dots i{height:3px}
+.card-photo .nav{z-index:1}
+.photo-like{display:flex;align-items:center;justify-content:center;width:44px;height:44px;right:16px;bottom:22px;padding:0;border-radius:50%;color:var(--berry);z-index:2;box-shadow:0 3px 12px #0002}
+.card-body{padding:18px 18px 8px}.card-sub{font-size:12px;margin:0 0 13px;color:var(--muted)}
+.card-name{font-size:26px}.basics,.interests,.chips{gap:6px}
+.basics span,.interests span,.chip{font-size:10px;line-height:1.4;padding:6px 10px;border-radius:6px;border:0;background:#F1F3F8;color:#626A79}
+.interests span.shared{background:#FFF0E8;color:#AB3A08;font-weight:600}
+.prompt{padding:18px 0}.prompt .pq{font-size:11px;font-weight:500;color:#848994;margin-bottom:8px}
+.prompt .pa{font-size:18px;line-height:1.5;font-weight:600;letter-spacing:-.4px}
+.likeon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;padding:0;background:#FFF0E8;border:0;color:var(--berry);margin:0 0 4px 10px}
+.bio{font-size:13px;color:#646A74;line-height:1.8}
+.discover-heading{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
+.discover-heading h1{font-size:24px;margin:0 0 4px}.discover-heading p{font-size:11px;color:var(--muted);margin:0}
+.section-kicker{text-transform:uppercase;letter-spacing:1.5px;font-weight:600;font-size:9px;color:var(--berry);margin-bottom:6px}
+.disc-top{margin:10px 0;gap:8px}.disc-top button{min-height:36px;font-size:11px;padding:7px 12px;border-radius:8px}.disc-top .small{font-size:11px}
+.toppick{background:#FFF3EB;color:#A13A0D;border-radius:9px;padding:10px 12px;font-size:12px;border:1px solid #FFE5D5;margin:10px 0}.toppick small{font-size:10px;color:#A56F57;font-weight:400;margin-top:2px}
+.toppick::before{content:"✦";font-size:20px;line-height:1}
+body[data-route=discover] .card-actions,body[data-route=view] .card-actions{position:fixed;bottom:calc(76px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:min(440px,calc(100% - 40px));z-index:9;padding:9px!important;background:#ffffffed;border-radius:14px;box-shadow:0 4px 24px #20232B1A;backdrop-filter:blur(12px);gap:10px}
+.card-actions button{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;border-radius:10px;font-size:13px}.card-actions .pass{background:#F1F3F7;border:0;color:#6D7584}.card-actions .like{flex:1.2}
+body[data-route=discover] main,body[data-route=view] main{padding-bottom:175px}
+body[data-route=discover] .card-photo,body[data-route=view] .card-photo{height:clamp(200px,calc(100svh - 450px),460px);aspect-ratio:auto}
+.under{gap:24px}.under button{font-size:11px}.swipe-hint{font-size:10px;line-height:1.6}
+.list{margin-top:8px}.item{padding:15px 0;gap:12px;border-bottom:1px solid #F1F2F5;background:transparent;font-size:13px}.item:hover{background:#FAFBFD}
+.item .t{font-size:13px;font-weight:600;margin-bottom:4px}.item .s{font-size:11px;max-width:100%;color:#9297A2}.item .tiny{font-size:9px}
+.avatar{width:52px;height:52px;border-radius:50%;background:#F0F2F6}.dot{width:8px;height:8px;background:var(--berry)}
+.newm{gap:17px;padding:8px 0 16px}.newm button{width:62px;font-size:10px;gap:8px;background:transparent;overflow:visible}.newm img{width:58px;height:58px;border:2px solid #F5651C;outline:3px solid #FFF2EB;outline-offset:2px}.newm .lk img{border-color:#F5651C}
+nav.tabs{left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:480px;box-shadow:0 -3px 18px #20232B05;border-top:1px solid var(--line);background:#fff;padding-top:5px}
+nav.tabs .in{max-width:480px}nav.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:66px;font-size:9px;line-height:1;color:#8D929D;background:transparent;overflow:visible}
+nav.tabs button svg{width:22px;height:22px}nav.tabs button[aria-current=page]{color:var(--berry);font-weight:600}nav.tabs button[aria-current=page]::before{display:none}
+nav.tabs .badge{position:absolute;right:calc(50% - 16px);top:8px;width:7px;min-width:7px;height:7px;border:2px solid #fff;box-sizing:content-box;background:var(--berry);margin:0}
+.scrim{background:#161A2866;backdrop-filter:blur(3px)}.sheet{max-width:480px;background:#fff;border-radius:20px 20px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px))}.sheet h2{font-size:22px}.sheet .row{flex-wrap:wrap}.sheet .row>*{min-width:100px}
+.toast{font-size:12px;background:#272A32;color:#fff;box-shadow:0 6px 24px #0002;border-radius:10px}
+.tabs-inline{padding:4px;background:#F3F5F8;border-radius:10px;gap:4px}.tabs-inline button{border:0;background:transparent;min-height:36px;font-size:11px;border-radius:7px}.tabs-inline button[aria-pressed=true]{background:#fff;color:var(--berry);box-shadow:0 2px 7px #20232B08}
+.stat{background:#F9FAFC;border-color:var(--line);border-radius:12px}.stat b{font-size:25px;font-weight:700}.stat span{font-size:10px}
+.fcount,.pcount{background:#fff;border-bottom:1px solid var(--line);top:76px;font-size:12px}.pcount b{font-size:12px}
+.savebar{background:#ffffffed;backdrop-filter:blur(12px);max-width:480px;left:50%;right:auto;transform:translateX(-50%);width:100%}.savebar .in{max-width:440px}
+.status{padding:20px;background:#FFF6F0;border:1px solid #FFE5D5;border-radius:12px;margin:12px 0}.status.bad{background:#FFF6F6;border-color:#F2DADA}
+.announce{background:#FFF3EB;color:#8E3D18;border-radius:10px;border:1px solid #FFE5D5;font-size:12px}.announce b{font-size:10px}.announce button{color:#8E3D18;font-size:10px}
+.liked-you,.ctx{background:#F5F6F9;border:0;border-radius:10px;font-size:11px;color:#838996}.ctx q{font-size:14px;color:#515765}.liked-you q{font-size:14px}
+.event{border-radius:12px;box-shadow:none}.event .date{font-size:11px}.event h2{font-size:18px}.event .meta{font-size:12px}
+body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding-top:0;background:#fff;min-height:100dvh}
+.chat-head{position:sticky;top:0;z-index:10;min-height:78px;margin:0 -20px;padding:calc(13px + env(safe-area-inset-top,0px)) 15px 13px;background:var(--berry);border:0;color:#fff;gap:10px}
+.chat-head .avatar{width:40px;height:40px;border:2px solid #ffffff60}.chat-head .tiny{color:#fff;font-size:10px;opacity:.9}.chat-head .grow>div:first-child{font-size:15px!important;font-weight:700;line-height:1.4}
+.chat-head button{padding:8px!important;background:transparent;color:#fff;border:0;min-width:32px}.chat-head .btn-link{font-size:22px}.chat-head .btn-quiet{font-size:22px;line-height:1}
+.msgs{padding:24px 0 150px;gap:7px}.b{max-width:80%;font-size:13px;line-height:1.65;padding:12px 14px;border-radius:12px}.b.me{background:#FFF0E7;border:1px solid #FFE3D2;color:#674330;border-bottom-right-radius:3px}.b.them{background:#F2F4F8;color:#454C57;border:0;border-bottom-left-radius:3px}.when{font-size:9px;color:#A1A6AF}.seen{font-size:9px}.typing{font-size:10px;min-height:12px}
+.composer{left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #EDF0F4;padding:9px 14px calc(14px + env(safe-area-inset-bottom,0px));z-index:12}.composer textarea{background:#F1F3F7;border:0;height:44px;min-height:44px;padding:12px 14px;border-radius:24px;font-size:12px;resize:none}.composer .ph-btn,.composer .btn-primary{flex:none;width:44px;height:44px;min-height:44px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center}.composer .ph-btn{background:#F4F6F9;border:0;color:#9198A5}.composer .btn-primary{background:var(--berry);color:#fff;border:0;box-shadow:none}
+.match{background:linear-gradient(150deg,#CB4708,#AE3504);padding:28px;overflow-y:auto}.match h1{font-size:38px;font-weight:800}.match .pair{margin-bottom:30px}.match .av{width:116px;height:116px;border:5px solid #fff;box-shadow:0 10px 35px #8A280F33;background:#FD9972}.match .note{font-size:16px}.match .shared span{font-size:11px}.match .actions{width:100%;max-width:320px}.match .actions button{width:100%;border-radius:12px;font-size:13px}.match .btn-primary{color:#C74100;background:#fff}.match .actions button:last-child{border-color:#ffffff50;background:transparent}
+.welcome{padding:14px 0}.welcome-art{height:176px;background:#FFF3EB;border-radius:22px;display:flex;align-items:center;justify-content:center;margin-bottom:30px;position:relative;overflow:hidden}.welcome-art::before,.welcome-art::after{content:"";position:absolute;border:1px solid #F9D3BF;border-radius:50%;width:230px;height:230px;left:-125px;top:-80px}.welcome-art::after{left:auto;right:-130px;top:60px}.welcome-art svg{width:80px;height:80px;color:#F5651C;stroke-width:1.2}.welcome h1{font-size:34px;letter-spacing:-1.3px;max-width:310px}.welcome>p{font-size:13px;line-height:1.85;color:var(--muted)}.welcome .welcome-note{font-size:10px;line-height:1.8;color:#71747D;padding:14px 0}.welcome-facts{display:flex;gap:7px;margin:20px 0}.welcome-facts span{flex:1;text-align:center;background:#F7F8FA;border-radius:8px;padding:10px 5px;font-size:10px;color:#747B88}.welcome .btn-primary{margin-top:10px!important}
+/* The date planner uses the same white/orange system as the rest of the app. */
+.planner{background:#fff;color:var(--text);max-width:480px;left:50%;right:auto;transform:translateX(-50%);width:100%;padding-top:calc(20px + env(safe-area-inset-top,0px))}.planner .phead button{color:var(--berry)}.planner h1{color:var(--text);font-size:28px}.planner h2,.planner p,.planner label{color:var(--text)}.planner .pm{color:var(--muted)}.planner select,.planner input[type=text],.planner input[type=time],.planner input[type=datetime-local]{background:#F3F5F9;color:var(--text);border:1px solid var(--line)}
+.pchips button,.days button{background:#F7F8FA;color:var(--text);border-color:var(--line);font-size:12px}.pchips button[aria-pressed=true],.days button[aria-pressed=true],.topt label:has(input:checked){background:#FFF0E8;border-color:#F8B998;color:#B43D06}.days button b{font-size:20px}.opt{background:#F3F5F9;color:var(--text)}.opt input[type=time]{background:#fff}.opt button,.opt.add{color:var(--muted)}.opt.add{border-color:#D7DCE5}
+.btn-go,.btn-gold{background:var(--berry);border-color:var(--berry);color:#fff}.btn-ghost{background:#F6F7F9;border-color:var(--line);color:var(--text)}.btn-mute{color:var(--muted)}.pbar{max-width:480px;width:100%;left:50%;right:auto;transform:translateX(-50%);background:#fff;border-color:var(--line)}
+.card.vcard{background:#fff;color:var(--text);border:1px solid var(--line)}.vcard .vphoto{background:#FFF3EB;color:var(--berry)}.vcard h3{color:var(--text);font-size:22px;font-weight:700}.vmeta,.vprog{color:var(--muted);font-size:12px}.vtags span{border-color:var(--line);font-size:10px;background:#F5F6F9}.vcard a{color:var(--berry)}.vact .vlike{background:var(--berry);color:#fff;border-color:var(--berry)}.vact .vpass{border-color:#F2DADA;background:#FFF8F8;color:var(--bad)}
+.topt label,.dblock,.ditem{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px}.dblock.gold{border-color:#F9C8AE;background:#FFF8F3}.dblock .lbl,.dblock a{color:var(--berry)}.dblock p{color:var(--text)}.dblock .sub,.ditem .s{color:var(--muted)}.dblock .big{font-size:18px;font-weight:600}.dpin{background:#FFF4EC;color:#704F3D;border-color:#FFD7BF;font-size:11px}.dpin b,.dpin button{color:var(--berry)}.topt input:focus-visible+span{outline:3px solid #2474D6}.topt label:has(input:focus-visible){outline-color:#2474D6}
+@media(max-width:360px){main{padding-left:16px;padding-right:16px}.chat-head{margin-left:-16px;margin-right:-16px}.card-photo{aspect-ratio:3/4}.wordmark{font-size:18px}.photo-identity h2{font-size:24px}.card-actions button{font-size:12px}nav.tabs button{font-size:8px}.newm{gap:12px}}
+@media(prefers-reduced-motion:reduce){button,.btn{transition:none}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
-    <div class="wordmark">Black Childfree<small>Atlanta founding beta</small></div>
+    <div class="wordmark">black childfree <svg class="brand-heart" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg><small>ATLANTA · CHILD FREE, FULL OF POSSIBILITY</small></div>
     <div id="hdr"></div>
   </header>
   <main id="main" tabindex="-1"><p class="muted" style="margin-top:40px">Loading…</p></main>
@@ -698,6 +787,7 @@ function render(force){
   if (!db) return;
   if (!Object.values(S.loaded).every(Boolean)) return;
   const r = currentRoute();
+  document.body.dataset.route = r;
   if (r === "chat"){ if (force || S._last !== "chat") renderChat(); else updateChat(); }
   else if (force || S._last !== r || LIVE.includes(r)) {
     const main = $("#main"), y = window.scrollY;
@@ -712,6 +802,22 @@ function render(force){
   renderNav(r);
   renderHeader(r);
 }
+function icon(name){
+  const paths = {
+    discover:'<circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6Z"/>',
+    connections:'<path d="M20 11.5a8 8 0 0 1-8 8H5l-3 2v-6a8 8 0 1 1 18-4Z"/><path d="M7 10h8M7 14h5"/>',
+    dates:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4M17 3v4M3 11h18M8 15h2M14 15h2"/>',
+    me:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/>',
+    admin:'<path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7Z"/><path d="m8 12 3 3 5-6"/>',
+    more:'<circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>',
+    heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
+    close:'<path d="m6 6 12 12M18 6 6 18"/>',
+    send:'<path d="m21 3-7 18-4-7-7-4Z M10 14 21 3"/>',
+    attachment:'<path d="m8 13 7-7a3 3 0 0 1 4 4L9 20a5 5 0 0 1-7-7L13 2"/>',
+    arrow:'<path d="m14 5-7 7 7 7"/>'
+  };
+  return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.heart}</svg>`;
+}
 function renderHeader(r){
   $("#hdr").innerHTML = owner && r !== "admin" ? `<button class="btn-quiet" style="min-height:40px;padding:8px 14px" data-act="go" data-r="admin">Review</button>` : "";
 }
@@ -722,18 +828,23 @@ function renderNav(r){
   if (r === "admin" && !myProfile()){ nav.hidden = true; return; }
   nav.hidden = false;
   const anyUnread = matchIds().some(unread) || likesYou().some(id => likedMe(id).at > (S.priv.likesSeen||0));
-  const tab = (key,label,extra="") => `<button data-act="go" data-r="${key}" ${r===key?'aria-current="page"':""}>${label}${extra}</button>`;
+  const tab = (key,label,extra="") => `<button data-act="go" data-r="${key}" ${r===key?'aria-current="page"':""} aria-label="${label}">${icon(key)}<span>${label}</span>${extra}</button>`;
   nav.innerHTML = `<div class="in">${tab("discover","Discover")}${tab("connections","Matches", anyUnread?'<span class="badge" aria-label="unread messages"></span>':"")}${tab("dates","Dates", matchIds().some(planNeedsMe) ? '<span class="badge" aria-label="date plans need you"></span>' : "")}${tab("me","Profile")}${owner?tab("admin","Review"):""}</div>`;
 }
 
 // ---------- Views ----------
 const VIEWS = {};
 VIEWS.welcome = () => `
-  <h1>Dating for Black adults who are childfree for life.</h1>
-  <p>This community is for Black adults who have never been married, have no children, never want to be parents and want a Black partner.</p>
-  <p class="muted">You must be 18 or older. Every profile is reviewed by a person before anyone can see it. Matching and messaging are free.</p>
-  <button class="btn-primary btn-block" style="margin-top:22px" data-act="go" data-r="eligibility">Check if I'm eligible</button>
-  <p class="tiny muted" style="margin-top:22px">Founding beta prototype. Profiles and messages are stored in this app's shared beta database, so don't share anything sensitive like your address or financial details.</p>`;
+  <section class="welcome">
+    <div class="welcome-art" aria-hidden="true">${icon("heart")}</div>
+    <div class="section-kicker">A shared choice. A new connection.</div>
+    <h1>Your kind of connection.</h1>
+    <p>Meet Black adults who are childfree for life. A full life, a thoughtful partner, and room for the things you love.</p>
+    <div class="welcome-facts"><span>Intentional dating</span><span>Mutual matches</span><span>Free conversations</span></div>
+    <button class="btn-primary btn-block" data-act="go" data-r="eligibility">Check if I'm eligible</button>
+    <p class="welcome-note">18+ · Never married · No children or parental role · Never seeking parenthood · Seeking a Black partner. Every profile is reviewed by a person before discovery.</p>
+    <p class="tiny muted">Founding beta prototype. Profiles and messages are stored in this app's shared beta database. Avoid sensitive details such as your address or financial information.</p>
+  </section>`;
 
 VIEWS.eligibility = () => {
   if (!S.elig){
@@ -902,16 +1013,16 @@ function card(id, likeable){
       ${img(id, i)}
       <div class="dots" id="dots">${Array.from({length:n},(_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</div>
       ${n>1?`<button class="nav prev" data-act="photo-step" data-d="-1" data-id="${esc(id)}" aria-label="Previous photo"></button><button class="nav next" data-act="photo-step" data-d="1" data-id="${esc(id)}" aria-label="Next photo"></button>`:""}
-      ${likeable?`<button class="photo-like" data-act="like-on" data-id="${esc(id)}" data-on="photo">Like photo</button>`:""}
+      ${likeable?`<button class="photo-like" data-act="like-on" data-id="${esc(id)}" data-on="photo" aria-label="Like photo">${icon("heart")}</button>`:""}
+      <div class="photo-identity"><span class="intent-label">${p.ineligible ? "PROFILE HIDDEN" : "CHILDFREE BY CHOICE"}</span><h2>${esc(p.name)}, ${p.age}</h2><p>${esc(p.city)} · ${esc(p.gender)}</p></div>
     </div>
     <div class="card-body">
-      <h2 class="card-name">${esc(p.name)}, ${p.age}</h2>
       <p class="card-sub">${esc(p.city)} · ${esc(p.gender)}${p.marriage?` · ${esc(p.marriage)}`:""}</p>
       ${likeable ? likeBanner(id) : ""}
       ${basicsRow(p)}
       ${interestsRow(id)}
       <div class="chips">${reasons(id).map(r=>`<span class="chip">${esc(r)}</span>`).join("")}</div>
-      ${p.prompts.map(pr => `<div class="prompt">${likeable?`<button class="likeon" data-act="like-on" data-id="${esc(id)}" data-on="prompt:${esc(pr.id)}" aria-label="Like this prompt and add a comment">Like</button>`:""}<div class="pq">${esc(PROMPT[pr.id]||"")}</div><div class="pa">${esc(pr.a)}</div></div>`).join("")}
+      ${p.prompts.map(pr => `<div class="prompt">${likeable?`<button class="likeon" data-act="like-on" data-id="${esc(id)}" data-on="prompt:${esc(pr.id)}" aria-label="Like this prompt and add a comment">${icon("heart")}</button>`:""}<div class="pq">${esc(PROMPT[pr.id]||"")}</div><div class="pa">${esc(pr.a)}</div></div>`).join("")}
       ${p.bio?`<div class="bio">${esc(p.bio)}</div>`:""}
     </div>
   </article>`;
@@ -994,12 +1105,12 @@ VIEWS.discover = () => {
   const id = D[0];
   const dd = S.priv.disc || {}, isTop = dd.day === dayKey() && dd.top === id;
   const why = isTop ? reasons(id).filter(r => r !== "In each other's age range").slice(0,2).join(" · ") : "";
-  return `${discTop(`${D.length} ${D.length===1?"person":"people"} waiting for you`)}
+  return `<div class="discover-heading"><div><h1>Discover</h1><p>Atlanta, Georgia · Your daily introductions</p></div></div>${discTop(`${D.length} ${D.length===1?"person":"people"} waiting for you`)}
     ${isTop ? `<div class="toppick" role="note"><div>Today's top pick<small>${esc(why || "Picked from your preferences and recent activity")}</small></div></div>` : ""}
     ${card(id, true)}
     <div class="card-actions" style="padding:0 0 6px;border:0">
-      <button class="pass" data-act="react" data-k="pass" data-id="${esc(id)}">Pass</button>
-      <button class="like btn-primary" data-act="react" data-k="like" data-id="${esc(id)}">Like</button>
+      <button class="pass" data-act="react" data-k="pass" data-id="${esc(id)}">${icon("close")} Pass</button>
+      <button class="like btn-primary" data-act="react" data-k="like" data-id="${esc(id)}">${icon("heart")} Like</button>
     </div>
     <div class="under"><button data-act="report" data-id="${esc(id)}">Report</button><button data-act="block" data-id="${esc(id)}">Block</button></div>
     <p class="swipe-hint">Swipe right to like, left to pass. Arrow keys work too.</p>`;
@@ -1129,8 +1240,8 @@ VIEWS.view = () => {
   return `<button class="btn-link" data-act="go" data-r="connections">Back to matches</button>
     ${card(id, true)}
     <div class="card-actions" style="padding:0 0 6px;border:0">
-      <button class="pass" data-act="react" data-k="pass" data-id="${esc(id)}">Pass</button>
-      <button class="like btn-primary" data-act="react" data-k="like" data-id="${esc(id)}">Like back</button>
+      <button class="pass" data-act="react" data-k="pass" data-id="${esc(id)}">${icon("close")} Pass</button>
+      <button class="like btn-primary" data-act="react" data-k="like" data-id="${esc(id)}">${icon("heart")} Like back</button>
     </div>
     <div class="under"><button data-act="report" data-id="${esc(id)}">Report</button><button data-act="block" data-id="${esc(id)}">Block</button></div>
     <p class="swipe-hint">Swipe right to like, left to pass. Arrow keys work too.</p>`;
@@ -1165,19 +1276,19 @@ function renderChat(){
   const id = S.chatWith, p = S.profiles[id];
   $("#main").innerHTML = `
     <div class="chat-head">
-      <button class="btn-link" data-act="go" data-r="connections" aria-label="Back to matches">Back</button>
+      <button class="btn-link" data-act="go" data-r="connections" aria-label="Back to matches">${icon("arrow")}</button>
       ${img(id,0,"avatar")}
       <div class="grow"><div style="font-family:var(--serif);font-size:20px">${esc(p.name)}, ${p.age}</div><div class="tiny muted">${esc(p.city)}</div></div>
-      <button class="btn-quiet" style="min-height:40px;padding:8px 12px" data-act="chat-menu" data-id="${esc(id)}">Options</button>
+      <button class="btn-quiet" style="min-height:40px;padding:8px 12px" data-act="chat-menu" data-id="${esc(id)}" aria-label="Conversation options">${icon("more")}</button>
     </div>
     <div id="dpin"></div>
     <div class="msgs" id="msgs" aria-live="polite"></div>
     <div class="composer"><div class="in" style="flex-direction:column;align-items:stretch;gap:4px">
       <div class="typing" id="typing" aria-live="polite"></div>
       <div style="display:flex;gap:8px;align-items:flex-end">
-        <button class="ph-btn" data-act="chat-photo" aria-label="Send a photo">Photo</button>
+        <button class="ph-btn" data-act="chat-photo" aria-label="Send a photo">${icon("attachment")}</button>
         <textarea id="compose" maxlength="1000" placeholder="Write a message" aria-label="Message"></textarea>
-        <button class="btn-primary" data-act="send">Send</button>
+        <button class="btn-primary" data-act="send" aria-label="Send message">${icon("send")}</button>
       </div>
       <input type="file" id="chatfile" accept="image/*" hidden>
     </div></div>`;

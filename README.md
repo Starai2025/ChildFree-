@@ -46,3 +46,5 @@ When changing public settings or app stage, restart Metro with `--clear`. The UI
 ## Additional Claude prototype
 
 The user-supplied `BlackChildfreeAppclaude1.zip` is also preserved as a [separate Claude web prototype](prototype/web-mvp1/README.md) and accompanying documents. It depends on Claude's artifact runtime and is not part of the Expo demo. See the [import record](docs/CLAUDE1_IMPORT.md) for exact files, supplied decision notes and runtime limits. The existing MVP1 implementation remains intact.
+
+The Claude prototype now has a redesigned orange/white interface based on the user's Figma screenshot. Open its [standalone design preview](prototype/web-mvp1/design-preview.html) without a Claude account; it displays static screens with synthetic data. The updated functional HTML must be applied separately to the hosted Claude artifact.

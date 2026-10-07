@@ -1,6 +1,18 @@
 # Web prototype (MVP1 founding beta)
 
-`index.html` is the clickable, working prototype built in Claude and published as a claude.ai artifact:
+## Redesigned copy and preview
+
+The repository copy was redesigned on October 7, 2026, using the user's LOML Figma screenshot as its visual reference: orange/white screens, photo-overlay profile names, persistent Like/Pass buttons, icon navigation, compact forms and a matching conversation composer. Direct Figma access was unavailable; no editable Figma nodes or template assets were imported.
+
+Open [design-preview.html](design-preview.html) in a browser to compare Welcome, Onboarding, Discover, Filters, Mutual Match, Conversation, Safety, Date Planner, Matches, Profile and Review. It is a self-contained, static preview with clearly labeled synthetic people/messages and generated fictional portraits. It requires no account, Claude APIs, internet connection or backend. Its controls select screen snapshots; it does not perform real app actions.
+
+The working `index.html` continues to require Claude's runtime and members' uploaded photos. To update the hosted Claude artifact, replace its HTML with this file in Claude. A GitHub push does not update the separately hosted artifact.
+
+Run `node tests/claude-prototype-ui.mjs` from the repository root to exercise the actual HTML using a Playwright-only, synthetic in-memory Claude API adapter, regenerate the static preview and capture screenshots under `docs/evidence/claude-redesign`. The fixture adapter is confined to the test; it is not included in `index.html` or the static preview. Local checks cover navigation, eligibility errors, discovery/mutual match, text send/reply, safety/planner, profile/review, narrow layouts and standalone-preview switching. Real Claude account/storage/room integration is not verified by these checks.
+
+## Original artifact reference
+
+The supplied ZIP references this original Claude artifact; it has not been updated by the repository redesign:
 https://claude.ai/artifact/N7SbnP4m7YqKfYyQaevAJo
 
 It is a single self-contained HTML file. It only runs inside claude.ai, where it uses the artifact
