@@ -1,8 +1,6 @@
 # Coding-agent entrypoint
 
-Current implementation: the complete synthetic MVP1 demo documented in BUILD_STATUS.md and docs/DEMO.md. The additional Claude prototype/uploaded instructions are reference material documented in docs/CLAUDE1_IMPORT.md; importing them does not execute their kickoff or replace the running demo.
-
-Read AGENTS.md, BUILD_STATUS.md, docs/Native_Dating_MVP_Build_Spec.md, docs/MVP1_Agent_Execution_Plan.md and docs/LOCAL_SETUP.md.
+Read AGENTS.md, BUILD_STATUS.md, docs/DECISIONS_2026-10-07.md (overrides the spec where they conflict), docs/Native_Dating_MVP_Build_Spec.md, docs/MVP1_Agent_Execution_Plan.md and docs/LOCAL_SETUP.md.
 
 Codex has implemented the foundation and the first owner-only onboarding slice. Keep the code and lockfile; do not regenerate the project. Starr authorized locally verifiable work while native tooling is unavailable. Native and hosted-provider gates remain unresolved and must not be marked passed from JavaScript exports or synthetic fixtures.
 

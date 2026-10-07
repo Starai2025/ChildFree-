@@ -12,6 +12,8 @@ See docs/DEMO.md for the implementation task card, walkthrough, isolation bounda
 
 ## Remaining live gates
 
+The separately uploaded Claude prototype and planning documents are now included as reference material; see docs/CLAUDE1_IMPORT.md. The supplied decision document proposes Supabase Realtime chat and manual beta review. Importing it does not implement those changes or supersede the evidence for the current demo. The original incoming build status is archived under docs/imports/claude1 rather than replacing this checkpoint.
+
 Hosted Supabase reset/deployment and JWT checks; real OTP/SMTP; Terms/Privacy acceptance audit and owner-reviewed pages; native secure-session/lifecycle/accessibility and device launches; signing/store accounts; real admin MFA/roles/audit; private photos and normalization; Persona start/signed webhooks; PostGIS and discovery; transactional matching/outbox; restricted Stream sending/revocation; report operations; deletion/export jobs; push; recovery; staffing and staged release QA.
 
 A browser demo, local SQL tests and JavaScript exports do not complete those gates. No production release, paid vendor commitment or real-member beta has occurred.

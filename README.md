@@ -42,3 +42,7 @@ Native exports compile iOS/Android JavaScript; they are not signed binaries or p
 The design adapts the user's LOML screenshot into original components and illustrated assets. Template assets were not copied. The mobile shell retains its Expo MIT notice in `apps/mobile/LICENSE`; the application has no public source-code license selected.
 
 When changing public settings or app stage, restart Metro with `--clear`. The UI runners clear the cache when switching between QA and production-stage guard exports.
+
+## Additional Claude prototype
+
+The user-supplied `BlackChildfreeAppclaude1.zip` is also preserved as a [separate Claude web prototype](prototype/web-mvp1/README.md) and accompanying documents. It depends on Claude's artifact runtime and is not part of the Expo demo. See the [import record](docs/CLAUDE1_IMPORT.md) for exact files, supplied decision notes and runtime limits. The existing MVP1 implementation remains intact.
