@@ -25,4 +25,4 @@ The supplied documents describe changes to the future live beta, including Supab
 
 ## Verification
 
-All six copied files were checked against the ZIP bytes. The standalone inline JavaScript passes `node --check`. Repository checks and independent import review are recorded in the commit handoff; syntax validation does not prove Claude-runtime functionality.
+All six copied files were checked against the ZIP bytes. The standalone inline JavaScript passes `node --check`. `npm run check` passes workspace typecheck/lint, all 32 tests, Edge typecheck and the admin build. Independent read-only A6 review accepted import commit `23e5672e99c287e4d69dc1093ec6b4af931cefe9`, separately confirming file fidelity, scope and preservation of the existing app. Syntax validation does not prove Claude-runtime functionality.
