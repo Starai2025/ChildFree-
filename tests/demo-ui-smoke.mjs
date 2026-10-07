@@ -65,6 +65,25 @@ try {
   for (let i = 0; i < 6; i++) await yes.nth(i).click();
   await checkbox('I agree to the Community Pledge.').click(); await button('Save and continue').click();
   await page.getByRole('textbox', {name: 'Display name', exact: true}).fill('Zuri');
+  // The header back action saves incomplete drafts before navigating.
+  await button('Go back').click(); await page.reload(); await button('Continue onboarding or view review status').click();
+  assert.equal(await page.getByRole('textbox', {name: 'Display name', exact: true}).inputValue(), 'Zuri');
+  // Storage rejection must preserve the edited form and prevent navigation.
+  await page.getByRole('textbox', {name: 'Display name', exact: true}).fill('Zuri unsaved');
+  await page.evaluate(() => {
+    const original = Storage.prototype.setItem;
+    window.restoreDemoStorage = () => {Storage.prototype.setItem = original;};
+    Storage.prototype.setItem = function(key, value) {
+      if (key === 'blackchildfree.synthetic-demo.v1') throw new Error('Simulated storage rejection');
+      return original.call(this, key, value);
+    };
+  });
+  await button('Go back').click();
+  await page.getByRole('alert').filter({hasText: 'Simulated storage rejection'}).waitFor();
+  assert.equal(await page.getByRole('textbox', {name: 'Display name', exact: true}).inputValue(), 'Zuri unsaved');
+  assert.equal((await state()).members.find(m => m.id === 'new').profile.display_name, 'Zuri');
+  await page.evaluate(() => window.restoreDemoStorage());
+  await page.getByRole('textbox', {name: 'Display name', exact: true}).fill('Zuri');
   await page.getByRole('textbox', {name: 'Prompt 1 answer (20–200 characters)', exact: true}).fill('A long walk, a good record, and cooking brunch together.');
   await page.getByRole('textbox', {name: 'Prompt 2 answer (20–200 characters)', exact: true}).fill('An intentional partnership with kindness and room for adventure.');
   await button('Save for later').click(); await page.reload(); await button('Continue onboarding or view review status').click();
@@ -95,7 +114,7 @@ try {
   await page.getByText('You’re all caught up.', {exact: true}).filter({visible: true}).waitFor(); await screenshot('empty');
   assert.equal(external.length, 0, `Demo made external requests: ${external.join(', ')}`);
   assert.equal(errors.length, 0, errors.join('\n'));
-  console.log('PASS: complete synthetic demo UI — discovery persistence, mutual match, failed-send retry, conversation grouping, report/block/unblock, six-step onboarding/resume/review, pause, export screen, delete/reset and empty pool. No external requests.');
+  console.log('PASS: complete synthetic demo UI — discovery persistence, mutual match, failed-send retry, conversation grouping, report/block/unblock, onboarding header-back/resume and storage rejection, six-step review, pause, downloaded export, delete/reset and empty pool. No external requests.');
 } catch (error) {
   if (page) {await mkdir('docs/evidence/demo', {recursive: true}); await page.screenshot({path: 'docs/evidence/demo/debug.png', fullPage: true});}
   throw error;

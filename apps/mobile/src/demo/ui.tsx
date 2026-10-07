@@ -23,12 +23,12 @@ export function Heading({eyebrow, title, subtitle}: {eyebrow?: string; title: st
 export function Card({children}: {children: ReactNode}) {return <View style={s.card}>{children}</View>;}
 export function Note({children, error = false}: {children: ReactNode; error?: boolean}) {return <Text accessibilityRole={error ? 'alert' : undefined} accessibilityLiveRegion="polite" style={[s.note, error && {color: '#A12D27', backgroundColor: '#FFF0ED'}]}>{children}</Text>;}
 export function Avatar({photo = 0, size = 56}: {photo?: number; size?: number}) {return <Image source={portraits[photo] ?? portraits[0]} accessibilityLabel="Original illustrated demo avatar" style={{width: size, height: size, borderRadius: size / 2, backgroundColor: palette.peach}} />;}
-export function Screen({children, back, tabs = true}: {children: ReactNode; back?: string; tabs?: boolean}) {
+export function Screen({children, back, onBack, tabs = true}: {children: ReactNode; back?: string; onBack?: () => void; tabs?: boolean}) {
   const path = usePathname(); const {loading, busy, error, clearError} = useDemo();
   const links = [{path: '/demo/discover', icon: 'compass-outline', text: 'Discover'}, {path: '/demo/connections', icon: 'chatbubbles-outline', text: 'Connections'}, {path: '/demo/profile', icon: 'person-outline', text: 'Profile'}, {path: '/demo/settings', icon: 'options-outline', text: 'Settings'}] as const;
   return <SafeAreaView style={s.safe}>
     <View style={s.frame}>
-      <View style={s.topbar}>{back ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => navigate(back)} style={s.back}><Text style={s.backText}>‹</Text></Pressable> : <Text style={s.brandMark}>b.</Text>}<Text style={s.brand}>black childfree<Text style={{color: palette.orange}}> ♥</Text></Text><Text style={s.demoTag}>DEMO</Text></View>
+      <View style={s.topbar}>{back ? <Pressable accessibilityRole="button" accessibilityLabel="Go back" accessibilityState={{disabled: busy || loading}} disabled={busy || loading} onPress={onBack ?? (() => navigate(back))} style={s.back}><Text style={s.backText}>‹</Text></Pressable> : <Text style={s.brandMark}>b.</Text>}<Text style={s.brand}>black childfree<Text style={{color: palette.orange}}> ♥</Text></Text><Text style={s.demoTag}>DEMO</Text></View>
       <View style={s.demoStrip}><Text style={s.demoStripText}>A preview of possibility. All people and activity are synthetic.</Text></View>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{flex: 1}}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.content}>

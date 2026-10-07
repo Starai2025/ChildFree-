@@ -9,7 +9,7 @@ const genderNames = {woman: 'Woman', man: 'Man', nonbinary: 'Nonbinary', self_de
 const steps = ['Eligibility', 'Your story', 'Photos', 'Preferences', 'Identity', 'Review'];
 export function Onboarding() {
   const {state, act, busy, loading} = useDemo(); const person = member(state);
-  return <Screen tabs={false} back="/demo/settings">{!loading && <OnboardingForm key={`${person.id}/${person.step}`} person={person} act={act} busy={busy} />}</Screen>;
+  return loading ? <Screen tabs={false} back="/demo/settings">{null}</Screen> : <OnboardingForm key={`${person.id}/${person.step}`} person={person} act={act} busy={busy} />;
 }
 function OnboardingForm({person, act, busy}: {person: DemoMember; act: ReturnType<typeof useDemo>['act']; busy: boolean}) {
   const {width} = useWindowDimensions();
@@ -40,8 +40,9 @@ function OnboardingForm({person, act, busy}: {person: DemoMember; act: ReturnTyp
     }
     setPendingIdentity(false);
   }
-  if (['deleted', 'suspended'].includes(person.lifecycle)) return <Card><Heading title="This account needs attention." subtitle={`Demo status: ${person.lifecycle}. Settings, support information, and deletion remain accessible.`} /><Action onPress={() => navigate('/demo/settings')}>Open settings</Action></Card>;
-  return <>
+  async function leave() {if (await save(step)) navigate('/demo/settings');}
+  if (['deleted', 'suspended'].includes(person.lifecycle)) return <Screen tabs={false} back="/demo/settings"><Card><Heading title="This account needs attention." subtitle={`Demo status: ${person.lifecycle}. Settings, support information, and deletion remain accessible.`} /><Action onPress={() => navigate('/demo/settings')}>Open settings</Action></Card></Screen>;
+  return <Screen tabs={false} back="/demo/settings" onBack={() => {void leave();}}>
     <View style={s.row}>{steps.map((title, i) => <View key={title} style={{flex: 1, height: 4, borderRadius: 3, backgroundColor: i <= step ? '#E95D2A' : '#E9E1D7'}} />)}</View>
     <Heading eyebrow={`${steps[step].toUpperCase()} · STEP ${step + 1} OF 6`} title={['A shared choice.', 'Make room for your story.', 'A little more you.', 'Your kind of connection.', 'A thoughtful introduction.', 'Ready for a new chapter.'][step]} subtitle="This is a synthetic walkthrough. Progress is saved on this device." />
     {step === 0 && <>
@@ -69,8 +70,8 @@ function OnboardingForm({person, act, busy}: {person: DemoMember; act: ReturnTyp
     {!!error && <Note error>{error}</Note>}
     {step < 5 && <Action disabled={busy} onPress={() => {void save(step + 1);}}>Save and continue</Action>}
     {step > 0 && <Action secondary disabled={busy} onPress={() => {void save(step - 1);}}>Save and go back</Action>}
-    <Action secondary disabled={busy} onPress={() => {void save(step).then(result => {if (result) navigate('/demo/settings');});}}>Save for later</Action>
-  </>;
+    <Action secondary disabled={busy} onPress={() => {void leave();}}>Save for later</Action>
+  </Screen>;
 }
 export function PreferencesFields({value, onChange}: {value: Preferences; onChange: (value: Preferences) => void}) {
   return <><Text style={s.label}>Partner genders</Text><View style={s.row}>{genderSchema.options.map(g => <Chip key={g} selected={value.genders.includes(g)} onPress={() => onChange({...value, genders: value.genders.includes(g) ? value.genders.filter(x => x !== g) : [...value.genders, g]})}>{genderNames[g]}</Chip>)}</View>
