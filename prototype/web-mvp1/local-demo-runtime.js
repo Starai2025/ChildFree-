@@ -14,9 +14,9 @@
     amara: [{id:'reunion_shirt',a:'"The Childfree Ones: Ask Us About Our Quiet Weekends." Front and back. Auntie gets an XL.'},{id:'college_fund',a:'A passport full of stamps, a paid-off car, and an emergency fund that is an actual fund.'}]
   };
   const basics = {
-    malik: {orientation:'Straight',education:"Bachelor's degree",industry:'Tech',politics:'Moderate',beliefs:['Pro-Black / Pan-African','Progressive'],social:'Ambivert',pets:['Dog parent']},
-    zuri: {orientation:'Bisexual',education:"Master's degree",industry:'Healthcare',politics:'Liberal',beliefs:['Spiritual, not religious'],social:'Always outside',pets:['Cat parent'],hidden:['orientation']},
-    amara: {orientation:'Straight',education:"Master's degree",industry:'Creative',politics:'Liberal',beliefs:['Pro-Black / Pan-African'],social:'Strict homebody',pets:['Pet-free home']}
+    malik: {job:'Software engineer',school:'Morehouse College',orientation:'Straight',education:"Bachelor's degree",industry:'Tech',politics:'Moderate',beliefs:['Pro-Black / Pan-African','Progressive'],social:'Ambivert',pets:['Dog parent']},
+    zuri: {job:'Nurse practitioner',school:'Spelman College',orientation:'Bisexual',education:"Master's degree",industry:'Healthcare',politics:'Liberal',beliefs:['Spiritual, not religious'],social:'Always outside',pets:['Cat parent'],hidden:['orientation']},
+    amara: {job:'Brand designer',school:'Howard University',orientation:'Straight',education:"Master's degree",industry:'Creative',politics:'Liberal',beliefs:['Pro-Black / Pan-African'],social:'Strict homebody',pets:['Pet-free home']}
   };
   const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:humor[name.toLowerCase()],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums'],...basics[name.toLowerCase()]},lastActive:stamp});
   function fixtures(fresh = false) {

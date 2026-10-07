@@ -426,9 +426,9 @@ body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding
     amara: [{id:'reunion_shirt',a:'"The Childfree Ones: Ask Us About Our Quiet Weekends." Front and back. Auntie gets an XL.'},{id:'college_fund',a:'A passport full of stamps, a paid-off car, and an emergency fund that is an actual fund.'}]
   };
   const basics = {
-    malik: {orientation:'Straight',education:"Bachelor's degree",industry:'Tech',politics:'Moderate',beliefs:['Pro-Black / Pan-African','Progressive'],social:'Ambivert',pets:['Dog parent']},
-    zuri: {orientation:'Bisexual',education:"Master's degree",industry:'Healthcare',politics:'Liberal',beliefs:['Spiritual, not religious'],social:'Always outside',pets:['Cat parent'],hidden:['orientation']},
-    amara: {orientation:'Straight',education:"Master's degree",industry:'Creative',politics:'Liberal',beliefs:['Pro-Black / Pan-African'],social:'Strict homebody',pets:['Pet-free home']}
+    malik: {job:'Software engineer',school:'Morehouse College',orientation:'Straight',education:"Bachelor's degree",industry:'Tech',politics:'Moderate',beliefs:['Pro-Black / Pan-African','Progressive'],social:'Ambivert',pets:['Dog parent']},
+    zuri: {job:'Nurse practitioner',school:'Spelman College',orientation:'Bisexual',education:"Master's degree",industry:'Healthcare',politics:'Liberal',beliefs:['Spiritual, not religious'],social:'Always outside',pets:['Cat parent'],hidden:['orientation']},
+    amara: {job:'Brand designer',school:'Howard University',orientation:'Straight',education:"Master's degree",industry:'Creative',politics:'Liberal',beliefs:['Pro-Black / Pan-African'],social:'Strict homebody',pets:['Pet-free home']}
   };
   const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:humor[name.toLowerCase()],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums'],...basics[name.toLowerCase()]},lastActive:stamp});
   function fixtures(fresh = false) {
@@ -572,6 +572,7 @@ const INDUSTRIES = ["Tech","Healthcare","Creative","Finance","Education","Trades
   "Manufacturing","Marketing","Media","Military","Music and entertainment","Nonprofit","Real estate","Retail",
   "Sales","Science and research","Social work","Sports","Transportation","Student","Other"];
 const COMMON_INDUSTRIES = 7;
+const HEARD = ["Instagram","TikTok","Facebook","X (Twitter)","YouTube","A podcast","A friend or family member","An event","Google search","News or an article","Other"];
 // [key, label, options, {multi, max, privacy}] — multi values are stored as arrays.
 const DETAILS = [
   ["orientation","Sexual identity",["Straight","Bisexual","Pansexual","Queer","Lesbian","Gay"],{privacy:true}],
@@ -582,9 +583,9 @@ const DETAILS = [
   ["beliefs","Core beliefs & culture",["Faith-centered","Pro-Black / Pan-African","Traditional","Progressive","Spiritual, not religious"],{multi:true,max:3}],
   ["social","Social vibe",["Strict homebody","Ambivert","Always outside"]],
   ["pets","Pets",["Dog parent","Cat parent","Other pets","Pet-free home"],{multi:true,max:3,solo:"Pet-free home"}],
-  ["drinking","Drinking",["Never","Socially","Regularly"]],
-  ["smoking","Smoking",["Never","Sometimes","Regularly"]],
-  ["cannabis","Cannabis",["Never","Sometimes","Regularly"]]
+  ["drinking","Do you drink?",["Never","Socially","Regularly"]],
+  ["smoking","Do you smoke?",["Never","Sometimes","Regularly"]],
+  ["cannabis","420 friendly?",["Yes","Sometimes","No"]]
 ];
 const GENDERS = ["Woman","Man","Non-binary"];
 const GOALS = ["A committed relationship","A life partner"];
@@ -612,6 +613,8 @@ function valOf(p, k){
 function cleanDetails(d){
   const out = {};
   if (HEIGHTS.includes(+d.height)) out.height = +d.height;
+  // Free text shown to members; it is part of the reviewed profile, not the instant-save basics.
+  [["job",60],["school",80]].forEach(([k,max]) => { const v = String(d[k]||"").replace(/[\u0000-\u001f]/g," ").replace(/\s+/g," ").trim().slice(0,max); if (v) out[k] = v; });
   DETAILS.forEach(([k,,opts,meta]) => {
     if (meta && meta.multi){ let vs = opts.filter(o => (d[k]||[]).includes(o)).slice(0, meta.max); if (meta.solo && vs.length > 1) vs = vs.filter(o => o !== meta.solo); if (vs.length) out[k] = vs; }
     else if (opts.includes(d[k])) out[k] = d[k];
@@ -1072,6 +1075,11 @@ VIEWS.editor = () => {
   <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin:16px 0 6px">I'd like to meet</legend>
   <div class="checks">${GENDERS.map(g => `<label><input type="checkbox" data-f="partnerGenders" value="${g}" ${D.partnerGenders.includes(g)?"checked":""}> ${({"Woman":"Women","Man":"Men","Non-binary":"Non-binary people"})[g]}</label>`).join("")}</div></fieldset>
 
+  <label for="f-job">Job title <span class="hint">Optional</span></label>
+  <input type="text" id="f-job" data-f="d:job" maxlength="60" value="${esc((D.details||{}).job||"")}" placeholder="Nurse practitioner" autocomplete="organization-title">
+  <label for="f-school">Where you went to school <span class="hint">Optional</span></label>
+  <input type="text" id="f-school" data-f="d:school" maxlength="80" value="${esc((D.details||{}).school||"")}" placeholder="Spelman College">
+
   <h2>Your prompts</h2>
   <p class="small muted">Answer at least two different prompts, and up to four, in 20–200 characters each. Members can like a prompt and comment on it.</p>
   ${[1,2,3,4].map(n => `
@@ -1109,6 +1117,12 @@ VIEWS.editor = () => {
   <p class="small muted">Add 2 to 6 clear photos of you. Location data is removed from each photo.</p>
   <div class="photos" id="photos"><p class="muted small">Loading photos…</p></div>
   <input type="file" id="file" accept="image/*" hidden>
+
+  ${editing ? "" : `<h2>One last thing</h2>
+  <label for="f-heard">How did you hear about us? <span class="hint">Optional · private, never on your profile</span></label>
+  <select id="f-heard" data-f="heard"><option value="">Choose one</option>${HEARD.map(o => `<option value="${esc(o)}" ${D.heard===o?"selected":""}>${esc(o)}</option>`).join("")}</select>
+  <div id="heard-other-wrap" ${D.heard==="Other"?"":"hidden"}><label for="f-heard-other">Tell us where</label>
+  <input type="text" id="f-heard-other" data-f="heardOther" maxlength="80" value="${esc(D.heardOther||"")}"></div>`}
 
   <div id="ed-err"></div>
   <button class="btn-primary btn-block" style="margin-top:22px" data-act="submit-profile">${editing ? "Save and send for review" : "Submit for review"}</button>`;
@@ -1180,13 +1194,15 @@ function card(id, likeable){
 }
 function basicsRow(p){
   const d = p.details || {}, items = [];
+  if (d.job) items.push(d.job);
+  if (d.school) items.push(d.school);
   if (d.height) items.push(ftin(d.height));
   ["orientation","education","industry","politics","faith"].forEach(k => { if (d[k] && !isHidden(p,k)) items.push(d[k]); });
   ["beliefs","pets"].forEach(k => { (d[k]||[]).forEach(x => items.push(x)); });
   if (d.social) items.push(d.social);
   if (d.drinking) items.push(d.drinking === "Never" ? "Doesn't drink" : `Drinks ${d.drinking.toLowerCase()}`);
   if (d.smoking) items.push(d.smoking === "Never" ? "Doesn't smoke" : `Smokes ${d.smoking.toLowerCase()}`);
-  if (d.cannabis) items.push(d.cannabis === "Never" ? "No cannabis" : `Cannabis ${d.cannabis.toLowerCase()}`);
+  if (d.cannabis) items.push(({Yes:"420 friendly",Sometimes:"420 friendly sometimes",No:"Not 420 friendly"})[d.cannabis] || "");
   return items.length ? `<div class="basics">${items.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : "";
 }
 function interestsRow(id){
@@ -1792,7 +1808,8 @@ const A = {
       await db.doc(`profiles/${uid}`).set(profile);
       S.profiles[uid] = profile;
       S.photoCache[uid] = {rev, list:photos.slice()};
-      await savePriv({draft:null});
+      const heard = !prev && HEARD.includes(D.heard) ? {source:D.heard, other:D.heard === "Other" ? trim(D.heardOther||"").slice(0,80) : "", at:now()} : null;
+      await savePriv(heard ? {draft:null, heard} : {draft:null});
       S.draft = null; S.route = "discover";
       if (!prev){ S.route = "passions"; S.passionsOnboard = true; S.pdraft = null; }
       toast(prev ? "Changes sent for review." : "Profile submitted for review.");
@@ -2254,6 +2271,7 @@ document.addEventListener("change", e => {
   if (t.dataset.fv !== undefined && S.f){
     VALUE_KEYS.forEach(k => { S.f[k] = S.f[k] || {vals:[]}; S.f[k].strict = t.checked; const b = document.querySelector(`[data-fs="${k}"]`); if (b) b.checked = t.checked; });
   }
+  if (t.id === "f-heard"){ const w = $("#heard-other-wrap"); if (w) w.hidden = t.value !== "Other"; }
   if (t.dataset.fx === "showAll") document.querySelectorAll(".fsection").forEach(x => x.classList.toggle("dim", t.checked));
   if (t.dataset.fl || t.dataset.fs || t.dataset.fh || t.dataset.fx || t.dataset.fa || t.dataset.fv !== undefined) filterChanged(t);
   if (t.dataset.e === "q" && S.elig) S.elig.a[+t.dataset.i] = t.value;
