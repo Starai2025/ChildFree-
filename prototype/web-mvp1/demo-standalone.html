@@ -405,14 +405,14 @@ body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding
   --native-card-radius:24px;--native-radius-sm:14px;--native-pill-radius:999px;
   --native-demo-inset:0px;--native-space:8px;--native-shadow:0 1px 2px #1111110F,0 16px 40px #1111111A;
 }
-body:is([data-route=welcome],[data-route=discover]){
+body[data-midnight]{
   --text:var(--native-obsidian);--muted:var(--native-ink-2);--paper:var(--native-ivory);
   --berry:var(--native-terracotta);--line:var(--native-hair);--chip:var(--native-wash);
   --sans:var(--native-sans);background:var(--native-obsidian);color:var(--native-obsidian);
   font-family:var(--native-sans);font-weight:500;letter-spacing:0;
 }
-body:is([data-route=welcome],[data-route=discover]) .app{box-shadow:none;background:var(--native-ivory)}
-body:is([data-route=welcome],[data-route=discover]) :focus-visible,.native-match :focus-visible{outline:3px solid var(--native-gold);outline-offset:3px}
+body[data-midnight] .app{box-shadow:none;background:var(--native-ivory)}
+body[data-midnight] :focus-visible,.native-match :focus-visible{outline:3px solid var(--native-gold);outline-offset:3px}
 
 /* Lockup */
 .native-logo{display:inline-flex;align-items:center;gap:10px;color:inherit;line-height:1}
@@ -457,15 +457,16 @@ body[data-route=welcome] .welcome .welcome-note{color:var(--native-on-dark-2);fo
 body[data-route=welcome] .native-welcome-copy .native-welcome-disclosure{font-size:12px;line-height:1.5;font-weight:500;margin:12px 0 0;color:var(--native-on-dark-2);text-align:center}
 
 /* Discover: header */
-body[data-route=discover] header.top{position:sticky;z-index:6;min-height:64px;padding:12px 20px;background:var(--native-ivory);color:var(--native-obsidian);border:0;border-bottom:1px solid var(--native-hair)}
-body[data-route=discover] .wordmark{position:static;transform:none;color:var(--native-obsidian)}
-body[data-route=discover] header.top .brand-emblem{width:32px;height:32px}
-body[data-route=discover] header.top .native-word{font-size:14px}
-body[data-route=discover] #hdr{margin-left:auto}
-body[data-route=discover] #hdr button{background:transparent;color:var(--native-ink-2);border:1px solid var(--native-hair);min-height:36px!important;padding:6px 14px!important;border-radius:var(--native-pill-radius);font-size:13px;font-weight:600}
+body[data-midnight] header.top{position:sticky;z-index:6;min-height:64px;padding:12px 20px;background:var(--native-ivory);color:var(--native-obsidian);border:0;border-bottom:1px solid var(--native-hair)}
+body[data-midnight] .wordmark{position:static;transform:none;color:var(--native-obsidian)}
+body[data-midnight] header.top .brand-emblem{width:32px;height:32px}
+body[data-midnight] header.top .native-word{font-size:14px}
+body[data-midnight] #hdr{margin-left:auto}
+body[data-midnight] #hdr button{background:transparent;color:var(--native-ink-2);border:1px solid var(--native-hair);min-height:36px!important;padding:6px 14px!important;border-radius:var(--native-pill-radius);font-size:13px;font-weight:600}
 
 /* Discover: page */
-body[data-route=discover] main{padding:0 20px 200px}
+body[data-midnight] main{padding:0 20px 120px}
+body:is([data-route=discover],[data-route=view]) main{padding-bottom:200px}
 body[data-route=discover] .discover-heading{margin:20px 0 0}
 body[data-route=discover] .discover-heading h1{font-family:var(--native-sans);font-size:28px;line-height:1.15;color:var(--native-obsidian);font-weight:700;letter-spacing:-.01em;margin:0}
 body[data-route=discover] .discover-heading p{font-size:14px;line-height:1.4;color:var(--native-ink-2);font-weight:500;margin:4px 0 0}
@@ -474,78 +475,78 @@ body[data-route=discover] .disc-top .small{color:var(--native-obsidian);font-siz
 body[data-route=discover] main .disc-top button{background:transparent;border:1px solid var(--native-hair);color:var(--native-obsidian);border-radius:var(--native-pill-radius);min-height:40px;padding:8px 18px;font-size:14px;font-weight:600}
 
 /* Discover: card */
-body[data-route=discover] .card{background:var(--native-ivory);border:1px solid var(--native-hair);border-radius:var(--native-card-radius);box-shadow:var(--native-shadow);overflow:hidden;margin:0 0 16px}
-body[data-route=discover] .card>.card-photo{height:clamp(300px,calc(100svh - 380px - var(--native-demo-inset)),560px);aspect-ratio:auto;max-height:none;background:var(--native-emerald);border-radius:0}
-body[data-route=discover] .card-photo>img{object-position:center 25%}
-body[data-route=discover] .card-photo::after{content:"";display:block;position:absolute;inset:45% 0 0;background:linear-gradient(180deg,#11111100,#11111199 45%,#111111E6);pointer-events:none}
-body[data-route=discover] .dots{top:12px;left:16px;right:16px}
-body[data-route=discover] .dots i{height:3px;background:#F6F0E866}body[data-route=discover] .dots i.on{background:var(--native-ivory)}
-body[data-route=discover] .photo-identity{position:absolute;left:20px;right:20px;bottom:20px;z-index:1;pointer-events:none;color:var(--native-ivory);padding:0}
-body[data-route=discover] .photo-identity h2{font-family:var(--native-sans);font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--native-ivory);margin:0 0 4px}
-body[data-route=discover] .photo-identity p{font-size:16px;font-weight:500;color:var(--native-on-dark-2);opacity:1;margin:0 0 12px}
-body[data-route=discover] .photo-identity .native-badge.soft{background:#F6F0E829;color:var(--native-ivory);box-shadow:inset 0 0 0 1px var(--native-on-dark-hair);backdrop-filter:blur(8px)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .card{background:var(--native-ivory);border:1px solid var(--native-hair);border-radius:var(--native-card-radius);box-shadow:var(--native-shadow);overflow:hidden;margin:0 0 16px}
+body:is([data-route=discover],[data-route=view]) .card>.card-photo{height:clamp(300px,calc(100svh - 380px - var(--native-demo-inset)),560px);aspect-ratio:auto;max-height:none;background:var(--native-emerald);border-radius:0}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .card-photo>img{object-position:center 25%}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .card-photo::after{content:"";display:block;position:absolute;inset:45% 0 0;background:linear-gradient(180deg,#11111100,#11111199 45%,#111111E6);pointer-events:none}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .dots{top:12px;left:16px;right:16px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .dots i{height:3px;background:#F6F0E866}body:is([data-route=discover],[data-route=view],[data-route=me]) .dots i.on{background:var(--native-ivory)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity{position:absolute;left:20px;right:20px;bottom:20px;z-index:1;pointer-events:none;color:var(--native-ivory);padding:0}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity h2{font-family:var(--native-sans);font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.02em;color:var(--native-ivory);margin:0 0 4px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity p{font-size:16px;font-weight:500;color:var(--native-on-dark-2);opacity:1;margin:0 0 12px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity .native-badge.soft{background:#F6F0E829;color:var(--native-ivory);box-shadow:inset 0 0 0 1px var(--native-on-dark-hair);backdrop-filter:blur(8px)}
 .native-toppick{position:absolute;z-index:1;top:28px;left:16px;display:inline-flex;align-items:center;gap:8px;margin:0;pointer-events:none;padding:6px 12px 6px 10px;border-radius:var(--native-pill-radius);background:#111111B3;box-shadow:inset 0 0 0 1px #C89A2B99;color:var(--native-gold);font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;backdrop-filter:blur(8px)}
 .native-toppick::before{content:"";width:12px;height:12px;background:var(--native-gold);clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%)}
-body[data-route=discover] .photo-like{top:28px;bottom:auto;right:16px;width:44px;height:44px;background:var(--native-ivory);color:var(--native-obsidian);border:0;box-shadow:0 4px 16px #11111133}
-body[data-route=discover] .photo-like:hover{background:var(--native-ivory);color:var(--native-terracotta)}
-body[data-route=discover] .stamp{background:var(--native-ivory)}
-body[data-route=discover] .stamp.like{color:var(--native-emerald);border-color:var(--native-emerald)}
-body[data-route=discover] .stamp.pass{color:var(--native-obsidian);border-color:var(--native-obsidian)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-like{top:28px;bottom:auto;right:16px;width:44px;height:44px;background:var(--native-ivory);color:var(--native-obsidian);border:0;box-shadow:0 4px 16px #11111133}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-like:hover{background:var(--native-ivory);color:var(--native-terracotta)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .stamp{background:var(--native-ivory)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .stamp.like{color:var(--native-emerald);border-color:var(--native-emerald)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .stamp.pass{color:var(--native-obsidian);border-color:var(--native-obsidian)}
 
 /* Discover: card body */
-body[data-route=discover] .card-body{padding:20px 20px 24px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .card-body{padding:20px 20px 24px}
 .native-why{display:block;margin:0 0 20px;padding:14px 16px;border-radius:var(--native-radius-sm);background:#C89A2B1F;border-left:3px solid var(--native-gold)}
 .native-why b{display:block;margin:0 0 4px;color:var(--native-emerald);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .native-why span{display:block;font-size:16px;line-height:1.45;font-weight:600;color:var(--native-obsidian)}
-body[data-route=discover] .card-sub{color:var(--native-obsidian);font-size:16px;font-weight:600;margin:0 0 16px}
-body[data-route=discover] .liked-you{margin:0 0 20px;padding:14px 16px;border-radius:var(--native-radius-sm);border:0;border-left:3px solid var(--native-emerald);background:#0F5C4D12;color:var(--native-emerald);font-size:16px}
-body[data-route=discover] .liked-you b{font-weight:700}
-body[data-route=discover] .liked-you q{font-family:var(--native-serif);font-size:18px;color:var(--native-obsidian)}
-body[data-route=discover] .basics,body[data-route=discover] .interests,body[data-route=discover] .chips{gap:8px;margin:0 0 16px}
-body[data-route=discover] .basics span,body[data-route=discover] .interests span,body[data-route=discover] .chip{font-size:14px;line-height:1.3;font-weight:600;padding:8px 14px;border-radius:var(--native-pill-radius);color:var(--native-obsidian)}
-body[data-route=discover] .basics span{background:transparent;border:1px solid var(--native-hair)}
-body[data-route=discover] .interests span,body[data-route=discover] .chip{background:var(--native-wash);border:0}
-body[data-route=discover] .interests span.shared{background:var(--native-emerald);color:var(--native-ivory)}
-body[data-route=discover] .compat-summary h3{font-family:var(--native-sans);font-size:22px;font-weight:700;color:var(--native-emerald)}
-body[data-route=discover] .compat-summary :is(summary,dt,dd),body[data-route=discover] .prompt .pq,body[data-route=discover] .bio{color:var(--native-obsidian)}
-body[data-route=discover] .compat-summary dt{font-size:14px;color:var(--native-ink-2)}
-body[data-route=discover] .compat-summary dd{font-size:16px;font-weight:600}
-body[data-route=discover] .compat-summary{margin:24px 0 8px}
-body[data-route=discover] .compat-summary h3{margin:0 0 8px}
-body[data-route=discover] .compat-summary .chips{display:grid;gap:0;margin:0 0 12px}
-body[data-route=discover] .compat-summary .chip{position:relative;display:block;padding:12px 0 12px 32px;border-radius:0;background:transparent;border-bottom:1px solid var(--native-hair);font-size:16px;font-weight:600;line-height:1.4}
-body[data-route=discover] .compat-summary .chip::before{content:"";position:absolute;left:2px;top:15px;width:18px;height:18px;border-radius:50%;background:var(--native-emerald)}
-body[data-route=discover] .compat-summary .chip::after{content:"";position:absolute;left:8px;top:18px;width:5px;height:9px;border-right:2px solid var(--native-ivory);border-bottom:2px solid var(--native-ivory);transform:rotate(45deg)}
-body[data-route=discover] .compat-summary summary{min-height:44px;display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--native-emerald);cursor:pointer}
-body[data-route=discover] .prompt{padding:20px 0;border-top:1px solid var(--native-hair)}
-body[data-route=discover] .prompt .pq{font-size:14px;font-weight:600;color:var(--native-ink-2);margin-bottom:8px}
-body[data-route=discover] .prompt .pa{font-family:var(--native-sans);font-size:22px;line-height:1.35;font-weight:600;letter-spacing:-.01em}
-body[data-route=discover] .bio{font-size:16px;line-height:1.6;font-weight:500}
-body[data-route=discover] .likeon{width:40px;height:40px;background:var(--native-ivory);color:var(--native-terracotta);box-shadow:inset 0 0 0 1px var(--native-hair)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .card-sub{color:var(--native-obsidian);font-size:16px;font-weight:600;margin:0 0 16px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .liked-you{margin:0 0 20px;padding:14px 16px;border-radius:var(--native-radius-sm);border:0;border-left:3px solid var(--native-emerald);background:#0F5C4D12;color:var(--native-emerald);font-size:16px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .liked-you b{font-weight:700}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .liked-you q{font-family:var(--native-serif);font-size:18px;color:var(--native-obsidian)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .basics,body:is([data-route=discover],[data-route=view],[data-route=me]) .interests,body:is([data-route=discover],[data-route=view],[data-route=me]) .chips{gap:8px;margin:0 0 16px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .basics span,body:is([data-route=discover],[data-route=view],[data-route=me]) .interests span,body:is([data-route=discover],[data-route=view],[data-route=me]) .chip{font-size:14px;line-height:1.3;font-weight:600;padding:8px 14px;border-radius:var(--native-pill-radius);color:var(--native-obsidian)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .basics span{background:transparent;border:1px solid var(--native-hair)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .interests span,body:is([data-route=discover],[data-route=view],[data-route=me]) .chip{background:var(--native-wash);border:0}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .interests span.shared{background:var(--native-emerald);color:var(--native-ivory)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary h3{font-family:var(--native-sans);font-size:22px;font-weight:700;color:var(--native-emerald)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary :is(summary,dt,dd),body:is([data-route=discover],[data-route=view],[data-route=me]) .prompt .pq,body:is([data-route=discover],[data-route=view],[data-route=me]) .bio{color:var(--native-obsidian)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary dt{font-size:14px;color:var(--native-ink-2)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary dd{font-size:16px;font-weight:600}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary{margin:24px 0 8px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary h3{margin:0 0 8px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary .chips{display:grid;gap:0;margin:0 0 12px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary .chip{position:relative;display:block;padding:12px 0 12px 32px;border-radius:0;background:transparent;border-bottom:1px solid var(--native-hair);font-size:16px;font-weight:600;line-height:1.4}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary .chip::before{content:"";position:absolute;left:2px;top:15px;width:18px;height:18px;border-radius:50%;background:var(--native-emerald)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary .chip::after{content:"";position:absolute;left:8px;top:18px;width:5px;height:9px;border-right:2px solid var(--native-ivory);border-bottom:2px solid var(--native-ivory);transform:rotate(45deg)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .compat-summary summary{min-height:44px;display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--native-emerald);cursor:pointer}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .prompt{padding:20px 0;border-top:1px solid var(--native-hair)}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .prompt .pq{font-size:14px;font-weight:600;color:var(--native-ink-2);margin-bottom:8px}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .prompt .pa{font-family:var(--native-sans);font-size:22px;line-height:1.35;font-weight:600;letter-spacing:-.01em}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .bio{font-size:16px;line-height:1.6;font-weight:500}
+body:is([data-route=discover],[data-route=view],[data-route=me]) .likeon{width:40px;height:40px;background:var(--native-ivory);color:var(--native-terracotta);box-shadow:inset 0 0 0 1px var(--native-hair)}
 
 /* Discover: actions sit on a fade so they never cover readable text */
-body[data-route=discover] .card-actions{bottom:calc(84px + env(safe-area-inset-bottom,0px));width:auto;padding:0!important;align-items:center;justify-content:center;gap:24px;background:transparent;border-radius:0;box-shadow:none;backdrop-filter:none}
-body[data-route=discover] .card-actions button{flex:none;flex-direction:column;gap:2px;padding:8px;border:0;border-radius:50%;font-size:12px;font-weight:700;letter-spacing:.02em;box-shadow:0 8px 20px #11111133}
-body[data-route=discover] .card-actions .pass{width:60px;height:60px;min-height:60px;background:var(--native-obsidian);color:var(--native-ivory)}
-body[data-route=discover] .card-actions .like{width:72px;height:72px;min-height:72px;background:var(--native-terracotta);color:var(--native-ivory)}
-body[data-route=discover] .card-actions svg{width:24px;height:24px}
-body[data-route=discover] .card-actions .like svg{width:28px;height:28px;fill:var(--native-ivory);stroke:var(--native-ivory)}
-body[data-route=discover] .under{margin:8px 0 4px}
-body[data-route=discover] .under button,body[data-route=discover] .swipe-hint{color:var(--native-ink-2);font-size:14px;font-weight:600}
-body[data-route=discover] .swipe-hint{font-weight:500;line-height:1.5}
-body[data-route=discover] main button:not(.pass):not(.like):not(.photo-like):not(.likeon):not(.nav){background:var(--native-ivory);color:var(--native-obsidian)}
-body[data-route=discover] .btn-primary:not(.like){background:var(--native-terracotta);color:var(--native-ivory);border-color:var(--native-terracotta)}
-body[data-route=discover] .announce,body[data-route=discover] .status{background:#0F5C4D12;border-color:#0F5C4D40;color:var(--native-obsidian);font-size:14px}
-body[data-route=discover] .announce button{color:var(--native-emerald)}
+body:is([data-route=discover],[data-route=view]) .card-actions{bottom:calc(84px + env(safe-area-inset-bottom,0px));width:auto;padding:0!important;align-items:center;justify-content:center;gap:24px;background:transparent;border-radius:0;box-shadow:none;backdrop-filter:none}
+body:is([data-route=discover],[data-route=view]) .card-actions button{flex:none;flex-direction:column;gap:2px;padding:8px;border:0;border-radius:50%;font-size:12px;font-weight:700;letter-spacing:.02em;box-shadow:0 8px 20px #11111133}
+body:is([data-route=discover],[data-route=view]) .card-actions .pass{width:60px;height:60px;min-height:60px;background:var(--native-obsidian);color:var(--native-ivory)}
+body:is([data-route=discover],[data-route=view]) .card-actions .like{width:72px;height:72px;min-height:72px;background:var(--native-terracotta);color:var(--native-ivory)}
+body:is([data-route=discover],[data-route=view]) .card-actions svg{width:24px;height:24px}
+body:is([data-route=discover],[data-route=view]) .card-actions .like svg{width:28px;height:28px;fill:var(--native-ivory);stroke:var(--native-ivory)}
+body:is([data-route=discover],[data-route=view]) .under{margin:8px 0 4px}
+body:is([data-route=discover],[data-route=view]) .under button,body:is([data-route=discover],[data-route=view]) .swipe-hint{color:var(--native-ink-2);font-size:14px;font-weight:600}
+body:is([data-route=discover],[data-route=view]) .swipe-hint{font-weight:500;line-height:1.5}
+body:is([data-route=discover],[data-route=view]) main button:not(.pass):not(.like):not(.photo-like):not(.likeon):not(.nav){background:var(--native-ivory);color:var(--native-obsidian)}
+body[data-midnight] .btn-primary:not(.like){background:var(--native-terracotta);color:var(--native-ivory);border-color:var(--native-terracotta)}
+body[data-midnight] .announce,body[data-midnight] .status{background:#0F5C4D12;border-color:#0F5C4D40;color:var(--native-obsidian);font-size:14px}
+body[data-midnight] .announce button{color:var(--native-emerald)}
 
 /* Discover: tab bar */
-body[data-route=discover] nav.tabs{background:var(--native-ivory);border-top:1px solid var(--native-hair);box-shadow:none}
-body[data-route=discover] nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:132px;background:linear-gradient(180deg,#F6F0E800,#F6F0E8F2 62%,var(--native-ivory));pointer-events:none}
-body[data-route=discover] nav.tabs button{color:var(--native-ink-2);font-size:12px;font-weight:600;gap:6px}
-body[data-route=discover] nav.tabs button svg{width:24px;height:24px}
-body[data-route=discover] nav.tabs button[aria-current=page]{color:var(--native-emerald);font-weight:700}
-body[data-route=discover] nav.tabs button[aria-current=page]::before{display:block;top:0;left:32%;right:32%;height:3px;border-radius:0 0 3px 3px;background:var(--native-emerald)}
-body[data-route=discover] nav.tabs .badge{background:var(--native-terracotta);border-color:var(--native-ivory)}
+body[data-midnight] nav.tabs{background:var(--native-ivory);border-top:1px solid var(--native-hair);box-shadow:none}
+body:is([data-route=discover],[data-route=view]) nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:132px;background:linear-gradient(180deg,#F6F0E800,#F6F0E8F2 62%,var(--native-ivory));pointer-events:none}
+body[data-midnight] nav.tabs button{color:var(--native-ink-2);font-size:12px;font-weight:600;gap:6px}
+body[data-midnight] nav.tabs button svg{width:24px;height:24px}
+body[data-midnight] nav.tabs button[aria-current=page]{color:var(--native-emerald);font-weight:700}
+body[data-midnight] nav.tabs button[aria-current=page]::before{display:block;top:0;left:32%;right:32%;height:3px;border-radius:0 0 3px 3px;background:var(--native-emerald)}
+body[data-midnight] nav.tabs .badge{background:var(--native-terracotta);border-color:var(--native-ivory)}
 
 /* Match */
 .native-match.match{left:max(0px,calc((100% - 480px)/2));right:max(0px,calc((100% - 480px)/2));top:var(--native-demo-inset);padding:40px 24px 32px;min-height:0;overflow-y:auto;justify-content:safe center;font-family:var(--native-sans);font-weight:500;letter-spacing:0;color:var(--native-ivory);background:radial-gradient(130% 60% at 50% 0%,var(--native-emerald) 0%,#0F5C4D00 72%),var(--native-obsidian);isolation:isolate}
@@ -570,15 +571,82 @@ body[data-route=discover] nav.tabs .badge{background:var(--native-terracotta);bo
 .native-match.match .actions .native-pill{width:100%;min-width:0;margin:0;background:var(--native-terracotta);color:var(--native-ivory);border:0;border-radius:var(--native-pill-radius);font-size:18px;font-weight:700;min-height:56px}
 .native-match.match .actions .native-dismiss{background:transparent;border:0;border-radius:0;min-width:0;text-decoration:underline;text-decoration-color:var(--native-gold);text-underline-offset:6px;color:var(--native-ivory);font-size:16px;font-weight:600;min-height:48px;margin:8px 0 0}
 
+/* Tab pages (Matches, Dates, Profile): same system as Discover. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+body[data-midnight] main>h1,.native-page-head h1{font-family:var(--native-sans);font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-.01em;color:var(--native-obsidian);margin:20px 0 4px}
+body[data-midnight] main>h2{font-family:var(--native-sans);font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.01em;color:var(--native-obsidian);margin:32px 0 12px}
+body[data-midnight] main>h3{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--native-emerald);margin:28px 0 12px}
+:where(body[data-midnight]) main p{font-size:16px;line-height:1.5}
+:where(body[data-midnight]) .muted{color:var(--native-ink-2)}
+:where(body[data-midnight]) .small{font-size:14px}
+:where(body[data-midnight]) .tiny{font-size:13px;line-height:1.5;color:var(--native-ink-2)}
+body[data-midnight] main .btn-link{color:var(--native-emerald);font-size:16px;font-weight:700;border:0;background:transparent;padding:8px 0;min-height:44px}
+
+/* Buttons */
+body[data-midnight] main .btn-block{min-height:52px;border-radius:var(--native-pill-radius);font-size:16px;font-weight:700;border:1px solid var(--native-hair);background:transparent;color:var(--native-obsidian);box-shadow:none}
+body[data-midnight] main .btn-block.btn-primary{background:var(--native-terracotta);border-color:var(--native-terracotta);color:var(--native-ivory);box-shadow:0 8px 24px #8A332440}
+body[data-midnight] main .btn-block.btn-danger{background:transparent;border-color:#8A332466;color:var(--native-terracotta)}
+body[data-midnight] main .btn-quiet:not(.btn-block){background:transparent;border:1px solid var(--native-hair);color:var(--native-obsidian);border-radius:var(--native-pill-radius);font-size:14px;font-weight:600}
+
+/* Empty states */
+.native-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;margin:12px 0 8px;padding:28px 24px;border-radius:var(--native-card-radius);border:1px dashed #11111133;background:#C89A2B0F}
+.native-empty img{width:44px;height:44px;margin-bottom:4px}
+.native-empty b{font-size:18px;font-weight:700;color:var(--native-obsidian)}
+body[data-midnight] .native-empty p{margin:0;font-size:15px;color:var(--native-ink-2);max-width:300px}
+
+/* Matches */
+body[data-midnight] .newm{gap:16px;padding:4px 2px 12px}
+body[data-midnight] .newm button{width:76px;gap:10px;font-size:14px;font-weight:600;color:var(--native-obsidian);background:transparent;border:0}
+body[data-midnight] .newm img{width:68px;height:68px;border:3px solid var(--native-ivory);outline:2px solid var(--native-gold);outline-offset:0;background:var(--native-emerald)}
+body[data-midnight] .newm .lk img{outline-color:var(--native-terracotta)}
+body[data-midnight] .newm .tiny{font-size:12px}
+body[data-midnight] .list{margin-top:0}
+body[data-midnight] .item{padding:14px 0;gap:14px;border-bottom:1px solid var(--native-hair);background:transparent;color:var(--native-obsidian);font-size:16px}
+body[data-midnight] .item:hover{background:#1111110A}
+body[data-midnight] .item .t{font-size:16px;font-weight:700;margin-bottom:2px}
+body[data-midnight] .item .s{font-size:14px;color:var(--native-ink-2)}
+body[data-midnight] .item .tiny{font-size:12px}
+body[data-midnight] .avatar{width:56px;height:56px;background:var(--native-emerald)}
+body[data-midnight] .dot{width:10px;height:10px;background:var(--native-terracotta)}
+
+/* Dates */
+body[data-midnight] .ditem{gap:14px;margin:0 0 12px;padding:14px 16px;border-radius:20px;border:1px solid var(--native-hair);background:var(--native-ivory);color:var(--native-obsidian);box-shadow:var(--native-shadow)}
+body[data-midnight] .ditem .t{font-size:16px;font-weight:700}
+body[data-midnight] .ditem .s{font-size:14px;color:var(--native-ink-2)}
+body[data-midnight] .ditem .st{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:var(--native-pill-radius);font-size:12px;font-weight:700;letter-spacing:.04em}
+body[data-midnight] .ditem .st.mine{background:var(--native-terracotta);color:var(--native-ivory)}
+body[data-midnight] .ditem .st.wait{background:var(--native-wash);color:var(--native-ink-2)}
+body[data-midnight] .ditem .st.locked{background:var(--native-emerald);color:var(--native-ivory)}
+body[data-midnight] .event{margin:0 0 12px;padding:20px;border-radius:var(--native-card-radius);border:1px solid var(--native-hair);background:var(--native-ivory);box-shadow:var(--native-shadow)}
+body[data-midnight] .event .date{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--native-emerald)}
+body[data-midnight] main .event h2{font-size:22px;margin:6px 0 4px}
+body[data-midnight] .event .meta{font-size:14px;color:var(--native-ink-2)}
+body[data-midnight] .event .going{font-size:14px;font-weight:600}
+
+/* Profile */
+body[data-midnight] main>h1+h2{margin-top:24px!important}
+body[data-route=view] main>.btn-link{display:inline-flex;align-items:center;gap:8px;margin-top:12px;color:var(--native-emerald)!important;background:transparent!important}
+body[data-route=view] main>.btn-link::before{content:"";width:8px;height:8px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg)}
+.native-page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 0 16px}
+body[data-midnight] .native-page-head h1{margin:0}
+.native-status{display:inline-flex;align-items:center;gap:8px;margin:0;padding:6px 14px;border-radius:var(--native-pill-radius);background:var(--native-wash);font-size:14px!important;font-weight:700;color:var(--native-obsidian)}
+.native-status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--native-ink-2)}
+.native-status.live{background:#0F5C4D1A;color:var(--native-emerald)}
+.native-status.live::before{background:var(--native-emerald)}
+body[data-route=me] .card>.card-photo{aspect-ratio:4/5;height:auto;max-height:520px}
+.native-rows .native-row{min-height:56px}
+.native-rows .native-row::after{content:"";flex:none;width:8px;height:8px;margin-right:6px;border-right:2px solid var(--native-ink-2);border-bottom:2px solid var(--native-ink-2);transform:rotate(-45deg)}
+body[data-midnight] main .native-invite{margin-top:20px;border-color:var(--native-gold);color:var(--native-obsidian);background:#C89A2B14}
+body[data-midnight] .sep{height:1px;background:var(--native-hair);margin:28px 0}
 @media(max-height:740px){
-  body[data-route=discover] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
+  body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   body[data-route=discover] .discover-heading{margin-top:12px}
   body[data-route=discover] .discover-heading p{display:none}
   body[data-route=discover] .disc-top{margin:8px 0 12px}
-  body[data-route=discover] .card>.card-photo{height:clamp(260px,calc(100svh - 330px - var(--native-demo-inset)),560px)}
-  body[data-route=discover] .card-photo>img{object-position:center 40%}
-  body[data-route=discover] .photo-identity h2{font-size:28px}
-  body[data-route=discover] .photo-identity p{margin-bottom:8px}
+  body:is([data-route=discover],[data-route=view]) .card>.card-photo{height:clamp(260px,calc(100svh - 330px - var(--native-demo-inset)),560px)}
+  body:is([data-route=discover],[data-route=view],[data-route=me]) .card-photo>img{object-position:center 40%}
+  body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity h2{font-size:28px}
+  body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity p{margin-bottom:8px}
   body[data-route=welcome] .welcome{padding-top:16px;gap:24px}
   body[data-route=welcome] .welcome h1{font-size:clamp(30px,9.4vw,40px)}
   .native-welcome-copy>p{font-size:16px}
@@ -598,10 +666,10 @@ body[data-route=discover] nav.tabs .badge{background:var(--native-terracotta);bo
 @media(max-width:360px){
   body[data-route=welcome] .welcome{padding-left:20px;padding-right:20px}
   body[data-route=welcome] .welcome h1{font-size:32px}
-  body[data-route=discover] main{padding-left:16px;padding-right:16px}
-  body[data-route=discover] header.top{padding-left:16px;padding-right:16px}
-  body[data-route=discover] header.top .native-word{font-size:13px;letter-spacing:.14em}
-  body[data-route=discover] .photo-identity h2{font-size:28px}
+  body[data-midnight] main{padding-left:16px;padding-right:16px}
+  body[data-midnight] header.top{padding-left:16px;padding-right:16px}
+  body[data-midnight] header.top .native-word{font-size:13px;letter-spacing:.14em}
+  body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity h2{font-size:28px}
   .native-match.match{padding-left:20px;padding-right:20px}
   .native-match.match .av{width:100px;height:100px}
 }
@@ -1312,6 +1380,8 @@ function go(route, extra){
   if (route === "eligibility") S.elig = null;
   render(true);
 }
+// Routes drawn with the Midnight Luxe v2 system. Others keep the legacy look until the founder approves them.
+const MIDNIGHT = ["welcome","discover","view","connections","dates","events","me"];
 const LIVE = ["discover","connections","me","admin","welcome","ineligible","view","events","dates"];
 
 function render(force){
@@ -1319,6 +1389,7 @@ function render(force){
   if (!Object.values(S.loaded).every(Boolean)) return;
   const r = currentRoute();
   document.body.dataset.route = r;
+  document.body.toggleAttribute("data-midnight", MIDNIGHT.includes(r));
   if (r === "chat"){ if (force || S._last !== "chat") renderChat(); else updateChat(); }
   else if (force || S._last !== r || LIVE.includes(r)) {
     const main = $("#main"), y = window.scrollY;
@@ -1356,11 +1427,12 @@ const FREE_MIDNIGHT_MARK = window.__FREE_MIDNIGHT_MARK__; delete window.__FREE_M
 function nativeLogo(arrangement="row"){
   return `<div class="native-logo ${arrangement}" aria-label="FREE MIDNIGHT"><img class="brand-emblem" src="${FREE_MIDNIGHT_MARK}" alt="" aria-hidden="true"><span class="native-word" aria-hidden="true">FREE MIDNIGHT</span></div>`;
 }
+function nativeEmpty(title,text){ return `<div class="native-empty" role="note"><img src="${FREE_MIDNIGHT_MARK}" alt="" aria-hidden="true"><b>${esc(title)}</b><p>${esc(text)}</p></div>`; }
 function nativeBadge(label,soft=false){ return `<span class="native-badge${soft?" soft":""}">${esc(label)}</span>`; }
 function nativePrimary(label,attrs){ return `<button class="btn-primary native-pill" ${attrs}>${esc(label)}<svg class="native-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>`; }
 const originalWordmark = $(".wordmark").innerHTML;
 function renderHeader(r){
-  $(".wordmark").innerHTML = r === "discover" ? nativeLogo() : originalWordmark;
+  $(".wordmark").innerHTML = MIDNIGHT.includes(r) ? nativeLogo() : originalWordmark;
   $("#hdr").innerHTML = owner && r !== "admin" ? `<button class="btn-quiet" style="min-height:40px;padding:8px 14px" data-act="go" data-r="admin">Review</button>` : "";
 }
 function renderNav(r){
@@ -1594,7 +1666,7 @@ async function writeDraftPhotos(){
 function card(id, likeable, pick){
   const p = S.profiles[id], list = photosOf(id), n = list ? list.length : (p.photoCount||1);
   const i = Math.min(S.cardPhoto, Math.max(0,n-1));
-  const nativeDiscover = currentRoute() === "discover";
+  const nativeDiscover = ["discover","view","me"].includes(currentRoute());
   const nativeIdentity = `<div class="photo-identity"><h2>${esc(p.name)}, ${p.age}</h2><p>${esc(p.city)} · ${esc(p.gender)}</p><div class="native-profile-badges">${nativeBadge(p.ineligible?"Profile hidden":"Childfree by choice")}${p.goal?nativeBadge(p.goal,true):""}</div></div>`;
   return `
   <article class="card" ${likeable?`data-swipe="${esc(id)}"`:""} aria-label="${esc(p.name)}, ${p.age}">
@@ -1794,7 +1866,7 @@ function eventsList(){
           : mine ? `<button class="btn-block" data-act="rsvp" data-id="${esc(e.id)}" data-v="0">You're going · Cancel RSVP</button>`
           : full ? `<button class="btn-block" disabled>Full</button>`
           : `<button class="btn-block btn-primary" data-act="rsvp" data-id="${esc(e.id)}" data-v="1">I'm going</button>`}
-      </article>`; }).join("") : `<p>No events are scheduled yet. The founding team will post the first Atlanta meetup here.</p>`}
+      </article>`; }).join("") : nativeEmpty("No events yet","The founding team will post the first Atlanta meetup here.")}
     <p class="tiny muted">Meet in public places and tell a friend where you'll be. Members only see how many people are going, not who.</p>`;
 }
 VIEWS.dates = () => {
@@ -1814,12 +1886,12 @@ VIEWS.dates = () => {
       pickTime: st.iAmInit ? `Waiting on ${n} to pick a time` : `Pick a time with ${n} at ${esc(st.venue ? st.venue.name : "your spot")}`,
       counter: st.iAmInit ? `${n} suggested ${esc(fmtAt(st.time))}` : `Waiting on ${n} to confirm the time`
     }[st.stage];
-    return `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">${txt}</div><div class="st" style="color:${mine ? "#FFB800" : "#8E8E93"}">${mine ? "Your turn" : "Proposing"}</div></div></button>`;
+    return `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">${txt}</div><div class="st ${mine ? "mine" : "wait"}">${mine ? "Your turn" : "Proposing"}</div></div></button>`;
   };
   return `${announceBanner()}<h1>Dates</h1>
     <h2 style="margin-top:6px">Upcoming dates</h2>
-    ${upcoming.length ? upcoming.map(x => `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">Date with ${esc(S.profiles[x.id].name)}</div><div class="s">${esc(x.st.venue ? x.st.venue.name : "Your spot")} · ${esc(fmtAt(x.st.time))}</div><div class="st" style="color:#00A859">Locked</div></div></button>`).join("")
-      : `<p class="muted">No dates yet. After you've chatted with a match, tap Plan a date in your conversation.</p>`}
+    ${upcoming.length ? upcoming.map(x => `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">Date with ${esc(S.profiles[x.id].name)}</div><div class="s">${esc(x.st.venue ? x.st.venue.name : "Your spot")} · ${esc(fmtAt(x.st.time))}</div><div class="st locked">Locked</div></div></button>`).join("")
+      : nativeEmpty("No dates yet","After you've chatted with a match, tap Plan a date in your conversation.")}
     ${past ? `<p class="tiny muted">${past} past ${past===1?"date":"dates"}</p>` : ""}
     ${pending.length ? `<h2>Pending proposals</h2>${pending.map(line).join("")}` : ""}
     <h2>Community events</h2>
@@ -1845,7 +1917,7 @@ VIEWS.connections = () => {
   const pending = Object.entries(myR()).filter(([id,r]) => r.k === "like" && !ids.includes(id) && S.profiles[id] && now() - r.at < 30*86400000).length;
   const ly = likesYou();
   const lySection = ly.length ? `<h3>Likes you</h3><p class="small muted" style="margin:-4px 0 8px">Like them back to match.</p><div class="newm">${ly.map(id => { const t = likedMe(id); return `<button class="lk" data-act="view-like" data-id="${esc(id)}">${img(id,0)}<span>${esc(S.profiles[id].name)}</span>${t.note?'<span class="tiny muted">Left a comment</span>':""}</button>`; }).join("")}</div>` : "";
-  if (!ids.length) return `<h1>Matches</h1>${lySection}<p>When someone you like likes you back, they'll show up here.</p>${pending?`<p class="muted small">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>`:""}`;
+  if (!ids.length) return `<h1>Matches</h1>${lySection}${nativeEmpty("No matches yet","When someone you like likes you back, they'll show up here.")}${pending?`<p class="muted small">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>`:""}`;
   return `${announceBanner()}<h1>Matches</h1>${lySection}
     ${fresh.length ? `<h3>New matches</h3><div class="newm">${fresh.map(id => `<button data-act="open-chat" data-id="${esc(id)}">${img(id,0)}<span>${esc(S.profiles[id].name)}</span></button>`).join("")}</div>` : ""}
     <h3>Conversations</h3>
@@ -1970,16 +2042,20 @@ VIEWS.me = () => {
   else if (a && a.revision === p.revision && a.status === "approved") status = p.paused ? "Paused" : "Live";
   else if (a && a.revision === p.revision && a.status === "changes") status = "Changes requested";
   const blocked = Object.entries(myR()).filter(([,r]) => r.k === "block").map(([id]) => id);
-  return `<h1>Your profile</h1>
-    <p><b>Status:</b> ${esc(status)}</p>
+  const live = status === "Live";
+  const row = (attrs,label) => `<li><button class="item native-row" ${attrs}><span class="grow t">${label}</span></button></li>`;
+  return `<div class="native-page-head"><h1>Your profile</h1><p class="native-status${live?" live":""}"><span class="sr-only">Status: </span>${esc(status)}</p></div>
     ${card(uid).replace('class="card"','class="card" style="margin-top:0"')}
-    <button class="btn-block" data-act="go" data-r="editor">Edit profile</button>
-    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="edit-compatibility">Edit compatibility answers</button>
-    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="passions">${(((p.details||{}).interests)||[]).length ? "Edit passions" : "Add your passions"}</button>
-    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="details">Edit the basics (no review needed)</button>
-    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="filters">Discovery filters</button>
-    <button class="btn-block btn-primary" style="margin-top:10px" data-act="invite">Invite a friend</button>
-    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="pause">${p.paused?"Resume my profile":"Pause my profile"}</button>
+    <button class="btn-block btn-primary native-pill" data-act="go" data-r="editor">Edit profile</button>
+    <h3>Profile details</h3>
+    <ul class="list native-rows">
+      ${row('data-act="edit-compatibility"',"Edit compatibility answers")}
+      ${row('data-act="go" data-r="passions"',(((p.details||{}).interests)||[]).length ? "Edit passions" : "Add your passions")}
+      ${row('data-act="go" data-r="details"',"Edit the basics (no review needed)")}
+      ${row('data-act="go" data-r="filters"',"Discovery filters")}
+      ${row('data-act="pause"',p.paused?"Resume my profile":"Pause my profile")}
+    </ul>
+    <button class="btn-block native-invite" data-act="invite">Invite a friend</button>
     <h2>Settings</h2>
     <ul class="list">
       <li><button class="item" data-act="go" data-r="eligibility"><div class="grow"><div class="t">Eligibility answers</div><div class="s">Update your answers if something changed</div></div></button></li>

@@ -1,6 +1,6 @@
 # FREE MIDNIGHT · typography, identity and burnt sienna
 
-## v2 polish (October 8, 2026) — awaiting founder sign-off
+## v2 polish (October 8, 2026) — approved by the founder the same day
 
 Founder feedback: logo placement was off, type was hard to read, the app looked basic. Scope stays Welcome, Discover and Match; other screens are untouched until sign-off. Same five hues.
 
@@ -66,3 +66,14 @@ Only `prototype/web-mvp1/free-midnight-preview.html` was added on `preview/free-
 [Interactive review demo](https://raw.githack.com/Starai2025/ChildFree-/b7b0367fe6f52eb9755d0616fe1e5f25af6c660a/prototype/web-mvp1/free-midnight-preview.html). Public GitHub raw returns the exact reviewed bytes; this environment blocks CDN access, so CDN browser rendering is unverified here. The actual app was tested locally, including the standalone/offline copy.
 
 `/workspace/exports/Free-Midnight-demo.html` and `Free-Midnight-demo.zip` contain the reviewed HTML; the ZIP includes a walkthrough and both font licenses. Size12,115,580 bytes; SHA-256 `e38c2602d84f537afd95227bf990e4cbbde354f7c60aa7346197210343d611df`. The `free-midnight-review.json` manifest records source/preview commits, public-byte verification and pending visual approval.
+
+## v2 rollout: Matches, Dates and Profile tabs (October 8, 2026) — awaiting founder sign-off
+
+The tab screens now use the approved v2 system: ivory page, the same header lockup, DM Sans headings, emerald section labels, and the emerald active-tab marker. Routes drawn with v2 are listed in the `MIDNIGHT` constant and flagged on `<body data-midnight>`; every other screen keeps the legacy look until it is approved.
+
+- **Matches:** gold-ringed avatars (sienna for "Likes you"), roomier conversation rows, and a branded empty state.
+- **Dates:** date rows become ivory cards. Status pills replace off-palette inline colours: "Your turn" is sienna, "Proposing" is neutral and "Locked" is emerald. Events are cards too, and both empty states are branded.
+- **Profile:** a "Live" status pill sits beside the title, and the photo card matches Discover. The single primary action is "Edit profile", other edits are chevron rows, "Invite a friend" is a gold outline, and "Delete my account" is a sienna outline.
+- The "Likes you" profile view uses the Discover card.
+
+Evidence: `docs/evidence/midnight-tabs/`. The design, full-browser and prototype tests pass.
