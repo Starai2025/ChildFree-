@@ -1,5 +1,19 @@
 # FREE MIDNIGHT · typography, identity and burnt sienna
 
+## v2 polish (October 8, 2026) — awaiting founder sign-off
+
+Founder feedback: logo placement was off, type was hard to read, the app looked basic. Scope stays Welcome, Discover and Match; other screens are untouched until sign-off. Same five hues.
+
+- **Emblem:** `free-midnight-emblem.png` is now a cleaned 288px version (solid body, halo removed, trimmed to the mark; 89 KB instead of 1.4 MB). The supplied file is kept as `free-midnight-emblem-source.png`.
+- **Lockup:** one-line `FREE MIDNIGHT` wordmark (DM Sans 800, 0.18em tracking). "Row" arrangement (emblem beside the name) top-left on Welcome and in the Discover header; "stack" arrangement (emblem above) on Match. The emblem never sits over a face.
+- **Type scale:** 12 / 14 / 16 / 18 / 22 / 28 / 32+ px. 12px is used only for short uppercase labels; body copy is 14px or larger. Lora Bold for the Welcome and Match headlines, DM Sans for everything else.
+- **Colour use:** secondary text is obsidian at 72% (≈7:1 on ivory); dark-screen secondary text is ivory at 80%. Sienna is reserved for primary actions, gold for accents and labels, and emerald for "childfree by choice", shared items and the active tab.
+- **Discover:** name, age, location and badges sit on the photo over a dark fade. "Today's top pick" is a gold chip at the photo's top-left, and its reasons appear in a "Why {name}" note. The repeated city/gender line is gone. Shared-life answers are a checked list, and Pass/Like float over an ivory fade so they never cover readable text.
+- **Match:** emblem, photos, headline, then a "What you share" section with a single Say Hello action.
+- **Demo bar:** text raised from 8px/10px to 10px/12px.
+
+Checks: the design, full-browser and prototype tests all passed against local Chrome on Windows, at 320×667, 390×844, 768×844 and 1280×900 layouts.
+
 The founder refined the first Midnight Luxe checkpoint: make the fonts easier to read and bolder, replace the orange-looking accent with true burnt sienna, and rename the app **FREE MIDNIGHT** using the supplied gold/emerald crescent-heart emblem. These instructions supersede the previous Native name, Cormorant typography and `#C56445` primary accent. Other locked colors and the staged approval gate remain in force.
 
 ## Implemented review slice
