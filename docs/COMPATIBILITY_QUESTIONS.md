@@ -2,6 +2,8 @@
 
 User-authorized addition to the selected browser prototype. The user subsequently instructed: **do not push until after they see the full demo**. This implementation is a local review candidate; GitHub remains at the previous checkpoint until that instruction is satisfied and a push is authorized.
 
+Delivery exception: the user then explicitly authorized uploading **only the reviewed demo HTML on a separate preview branch**, while keeping `main` unchanged. Preview branch `preview/compatibility-questions-831fb91`, commit `aaa8ed7be87788822adcd3d689b22b097e1dbcfa`, adds just `prototype/web-mvp1/compatibility-preview.html` to public baseline `637ceb3518705cdb29c373481908e333809e2d72`. The public HTML returns HTTP 200 and exactly matches the reviewed package (SHA256 `4416b5625fe6824664ac305b4b351fabe67406d36a10793b6f1326a71e1d8f20`). Public `main` is verified unchanged. [Browser preview](https://raw.githack.com/Starai2025/ChildFree-/aaa8ed7be87788822adcd3d689b22b097e1dbcfa/prototype/web-mvp1/compatibility-preview.html) uses the same delivery method as the earlier app; this environment's proxy blocks checking CDN rendering. The source implementation still awaits user review before publishing to `main`.
+
 ## Member experience
 
 In **Profile → Edit compatibility answers**, or during profile creation, open **The life you'd share**. The section presents one question at a time, progress, Back/Next, Skip, and a final answer review. Every answer is optional and can be cleared. Chosen answers appear on the submitted profile. Saving profile edits uses the existing resubmission/review behavior; draft saves alone do not publish changes.
