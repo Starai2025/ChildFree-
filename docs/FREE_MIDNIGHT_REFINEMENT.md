@@ -89,3 +89,13 @@ Matches and Profile now borrow the approved screens' visual language:
 - **Profile:** the photo card overlaps the hero. Detail and setting rows sit in raised cards with gold-tinted icons, and "Invite a friend" is a dark feature card.
 
 Dates still has the interim flat styling and is the next screen to redesign.
+
+### Founder feedback: "too many logos, too much going on" (October 8, 2026)
+
+New rule: **one logo per screen.** The emblem appears only in the header lockup (or the stacked lockup on Match), never inside cards or empty states.
+
+What changed:
+- Matches: the hero is now just the title and one line. The eyebrow label and stat pills are gone.
+- The dark "Room for more" and "No matches yet" feature cards are removed. A quiet note or a plain empty state replaces them.
+- "Invite a friend" is now a row in Profile details.
+- Row icons are plain emerald line icons without tinted boxes.
