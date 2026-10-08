@@ -1,12 +1,12 @@
 # Black Childfree: product and UI improvement plan
 
-Revised after the founder's design consultation. Target: the imported Claude web prototype and its separate browser-demo copies. This replaces the earlier screen-cleanup plan. The three visual directions remain proposed. The ten-question compatibility collection and profile comparison now exist as a local review candidate; see [implementation and evidence](COMPATIBILITY_QUESTIONS.md). The user requires trying the full demo before any push.
+Revised after the founder's design consultation. Target: the imported Claude web prototype and its separate browser-demo copies. The founder has now locked **Native Dating / Midnight Luxe**, using the supplied image and five exact brand colors; this supersedes the earlier three-direction exploration. Welcome, Discover and Match are the first local screenshot checkpoint; see [design system, scope and evidence](NATIVE_MIDNIGHT_LUXE.md). The ten-question compatibility collection and profile comparison remain implemented; see [implementation and evidence](COMPATIBILITY_QUESTIONS.md). Public main must remain unchanged until full demo review; the separately authorized artifact-only preview is the delivery exception.
 
 ## Confirmed brief
 
 - **Memorable promise:** “These people want the same kind of life I do.”
 - **First cohort:** Black adults aged 25–70 who enthusiastically do not want children, seek compatible lifestyles, and want matches to become actual dates.
-- **Visual direction:** explore three distinct directions before choosing. Orange is an option, not a fixed requirement.
+- **Visual direction:** Native Dating / Midnight Luxe is locked. Obsidian `#111111`, emerald `#0F5C4D`, gold `#C89A2B`, ivory `#F6F0E8`, terracotta `#C56445`; no hue substitutions. Extend beyond Welcome, Discover and Match only after screenshot approval.
 - **Existing launch context:** Atlanta and committed relationships remain the working assumptions from the earlier brief.
 - **Product continuity:** the cohort focus does not change the existing 18+ membership contract. Eligibility, inclusive partner preferences, free mutual-match messaging and safety remain foundational.
 - **Consultation preference:** ask the founder one question at a time; make recommendations for routine decisions.

@@ -5,7 +5,8 @@ import {createServer} from 'node:http';
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
 import {launchBrowser} from './browser-runtime.mjs';
 
-const html = await readFile('prototype/web-mvp1/index.html', 'utf8');
+const hero = `data:image/png;base64,${(await readFile('prototype/web-mvp1/preview-assets/synthetic-native-couple.png')).toString('base64')}`;
+const html = (await readFile('prototype/web-mvp1/index.html', 'utf8')).replace('preview-assets/synthetic-native-couple.png',hero).replace('preview-assets/CormorantGaramond.ttf',`data:font/ttf;base64,${(await readFile('prototype/web-mvp1/preview-assets/CormorantGaramond.ttf')).toString('base64')}`);
 const images = Object.fromEntries(await Promise.all(['amara', 'malik'].map(async name => [name, `data:image/png;base64,${(await readFile(`prototype/web-mvp1/preview-assets/synthetic-${name}.png`)).toString('base64')}`])));
 const server = createServer((request, response) => response.writeHead(200, {'Content-Type':'text/html'}).end(html));
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -67,13 +68,14 @@ try {
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.locator('img[src]').evaluateAll(async els=>Promise.all(els.map(el=>el.decode().catch(()=>{}))));
     await mkdir('docs/evidence/claude-redesign',{recursive:true});
-    await page.screenshot({path:`docs/evidence/claude-redesign/${key}.png`});
+    await page.evaluate(()=>document.fonts.ready);
+    await page.screenshot({path:`docs/evidence/claude-redesign/${key}.png`,animations:'disabled'});
     shots[key]={label,...await page.evaluate(()=>({route:document.body.dataset.route||'welcome',body:document.querySelector('.app').outerHTML+document.querySelector('#tabs').outerHTML+document.querySelector('#layer').outerHTML}))};
     for (const [name,src] of Object.entries(images)) shots[key].body=shots[key].body.replaceAll(src,`__PORTRAIT_${name}__`);
   };
-  await page.goto(url+'?new=1'); await action('go').filter({hasText:"Check if I'm eligible"}).waitFor();
+  await page.goto(url+'?new=1'); await action('go').filter({hasText:"Join Native"}).waitFor();
   await capture('welcome','Welcome');
-  await action('go').filter({hasText:"Check if I'm eligible"}).click();
+  await action('go').filter({hasText:"Join Native"}).click();
   await page.locator('#dob').waitFor();await capture('onboarding','Onboarding');
   await action('submit-elig').click();assert.ok(await page.locator('#elig-err').innerText());
   await page.goto(url);
@@ -116,7 +118,7 @@ try {
   assert.ok(external.every(url=>url.startsWith('https://fonts.googleapis.com/')||url.startsWith('https://fonts.gstatic.com/')),'Unexpected external requests');
   const css=html.match(/<style>([\s\S]*?)<\/style>/)[1];
   const json=value=>JSON.stringify(value).replaceAll('<','\\u003c');
-  const preview=`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Black Childfree — design preview</title><style>body{margin:0;background:#F4F5F7;font:14px system-ui;color:#222328}header{max-width:940px;margin:28px auto;padding:0 20px}h1{font-size:24px;letter-spacing:-.8px;margin:0 0 8px}p{font-size:12px;color:#71747D;line-height:1.8}nav{display:flex;gap:6px;flex-wrap:wrap;margin:20px 0}button{border:1px solid #E3E6ED;background:#fff;color:#626976;border-radius:8px;padding:10px 14px;cursor:pointer}button[aria-pressed=true]{background:#CB4708;color:#fff;border-color:#CB4708}iframe{display:block;width:min(390px,100%);height:844px;border:1px solid #E3E6ED;border-radius:18px;background:white;margin:24px auto 40px;box-shadow:0 12px 60px #28304412}</style><header><h1>black childfree <span style="color:#CB4708">♡</span></h1><p>Design preview · Synthetic people and conversations. These are static screen previews; no account is created. The working prototype requires Claude's artifact runtime.</p><nav id="views"></nav></header><iframe id="phone" title="Selected app screen" sandbox="allow-same-origin"></iframe><script>const shots=${json(shots)},css=${json(css)},images=${json(images)};function show(key){const view=shots[key];let body=view.body;for(const[name,src]of Object.entries(images))body=body.replaceAll('__PORTRAIT_'+name+'__',src);document.querySelector('#phone').srcdoc='<html><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+css+'</style><body data-route="'+view.route+'">'+body+'</body></html>';document.querySelectorAll('#views button').forEach(button=>button.setAttribute('aria-pressed',button.dataset.key===key))}for(const[key,view]of Object.entries(shots)){const button=document.createElement('button');button.textContent=view.label;button.dataset.key=key;button.onclick=()=>show(key);document.querySelector('#views').append(button)}show('discover');</script></html>`;
+  const preview=`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Native Dating — staged design preview</title><style>body{margin:0;background:#111111;font:14px system-ui;color:#F6F0E8}header{max-width:940px;margin:28px auto;padding:0 20px}h1{font-size:24px;letter-spacing:-.8px;margin:0 0 8px}p{font-size:12px;color:#F6F0E8;line-height:1.8}nav{display:flex;gap:6px;flex-wrap:wrap;margin:20px 0}button{border:1px solid #C89A2B;background:#111111;color:#F6F0E8;border-radius:8px;padding:10px 14px;cursor:pointer}button[aria-pressed=true]{background:#0F5C4D;color:#F6F0E8;border-color:#0F5C4D}iframe{display:block;width:min(390px,100%);height:844px;border:1px solid #C89A2B;border-radius:24px;background:#F6F0E8;margin:24px auto 40px;box-shadow:0 12px 60px #28304412}</style><header><h1>Native Dating</h1><p>Midnight Luxe checkpoint: Welcome, Discover and Match. Other screens retain the previous design pending approval. Synthetic people and conversations. These are static screen previews; no account is created. The working prototype requires Claude's artifact runtime.</p><nav id="views"></nav></header><iframe id="phone" title="Selected app screen" sandbox="allow-same-origin"></iframe><script>const shots=${json(shots)},css=${json(css)},images=${json(images)};function show(key){const view=shots[key];let body=view.body;for(const[name,src]of Object.entries(images))body=body.replaceAll('__PORTRAIT_'+name+'__',src);document.querySelector('#phone').srcdoc='<html><meta name="viewport" content="width=device-width,initial-scale=1"><style>'+css+'</style><body data-route="'+view.route+'">'+body+'</body></html>';document.querySelectorAll('#views button').forEach(button=>button.setAttribute('aria-pressed',button.dataset.key===key))}for(const[key,view]of Object.entries(shots)){const button=document.createElement('button');button.textContent=view.label;button.dataset.key=key;button.onclick=()=>show(key);document.querySelector('#views').append(button)}show('discover');</script></html>`;
   await writeFile('prototype/web-mvp1/design-preview.html',preview);
   // The bundled single-process Chromium uses one context; this fresh page has
   // no page-level fixture initialization, proving the preview needs no APIs.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Black Childfree — founding beta</title>
+<title>Native Dating — founding beta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -392,6 +392,127 @@ body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding
 .topt label,.dblock,.ditem{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px}.dblock.gold{border-color:#F9C8AE;background:#FFF8F3}.dblock .lbl,.dblock a{color:var(--berry)}.dblock p{color:var(--text)}.dblock .sub,.ditem .s{color:var(--muted)}.dblock .big{font-size:18px;font-weight:600}.dpin{background:#FFF4EC;color:#704F3D;border-color:#FFD7BF;font-size:11px}.dpin b,.dpin button{color:var(--berry)}.topt input:focus-visible+span{outline:3px solid #2474D6}.topt label:has(input:focus-visible){outline-color:#2474D6}
 @media(max-width:360px){main{padding-left:16px;padding-right:16px}.chat-head{margin-left:-16px;margin-right:-16px}.card-photo{aspect-ratio:3/4}.wordmark{font-size:18px}.photo-identity h2{font-size:24px}.card-actions button{font-size:12px}nav.tabs button{font-size:8px}.newm{gap:12px}}
 @media(prefers-reduced-motion:reduce){button,.btn{transition:none}}
+/* Native Dating / Midnight Luxe. Phase 1: Welcome, Discover and Match only.
+   The five brand colors below are locked. Transparency uses these same colors. */
+@font-face{font-family:"Native Cormorant";src:url("preview-assets/CormorantGaramond.ttf") format("truetype");font-style:normal;font-weight:300 700;font-display:swap}
+:root{
+  --native-obsidian:#111111;--native-emerald:#0F5C4D;--native-gold:#C89A2B;
+  --native-ivory:#F6F0E8;--native-terracotta:#C56445;
+  --native-serif:"Native Cormorant",Georgia,"Times New Roman",serif;
+  --native-sans:var(--sans);--native-card-radius:24px;--native-pill-radius:999px;
+  --native-demo-inset:0px;--native-space:8px;--native-shadow:0 12px 32px #11111112;
+}
+body:is([data-route=welcome],[data-route=discover]){
+  --text:var(--native-obsidian);--muted:var(--native-obsidian);--paper:var(--native-ivory);
+  --berry:var(--native-terracotta);--line:#11111119;--chip:var(--native-ivory);
+  background:var(--native-obsidian);color:var(--native-obsidian);
+}
+body:is([data-route=welcome],[data-route=discover]) .app{box-shadow:none;background:var(--native-ivory)}
+body:is([data-route=welcome],[data-route=discover]) :focus-visible,.native-match :focus-visible{outline-color:var(--native-gold)}
+.native-logo{display:inline-flex;position:relative;flex-direction:column;align-items:center;color:inherit;line-height:1;text-align:center}
+.native-logo .native-word{position:relative;font-family:var(--native-serif);font-size:60px;font-weight:700;letter-spacing:-4px;line-height:.95}
+.native-logo .native-heart{position:absolute;width:19px;height:19px;top:-11px;left:46%;color:var(--native-gold);fill:currentColor;stroke:none}
+.native-logo .native-sub{font-family:var(--native-sans);font-size:10px;letter-spacing:6px;font-weight:500;margin-top:10px;padding-left:6px}
+.native-pill{display:inline-flex;align-items:center;justify-content:center;gap:16px;min-height:56px;border:0;border-radius:var(--native-pill-radius);padding:14px 24px;background:var(--native-terracotta);color:var(--native-ivory);font-size:20px;font-weight:700;box-shadow:none}
+.native-pill:hover,.native-pill:active{background:var(--native-terracotta);color:var(--native-ivory);box-shadow:0 6px 24px #11111126}
+.native-arrow{font-size:24px;font-weight:400;line-height:1}
+.native-circle{display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.native-badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border-radius:var(--native-pill-radius);font-size:11px;line-height:1.3;font-weight:500;background:var(--native-emerald);color:var(--native-ivory)}
+.native-badge.soft{color:var(--native-obsidian);background:#1111110A}
+body[data-route=welcome] header.top{display:none}
+body[data-route=welcome] .app{min-height:calc(100dvh - var(--native-demo-inset))}
+body[data-route=welcome] main{padding:0}
+body[data-route=welcome] .welcome{position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;min-height:calc(100svh - var(--native-demo-inset));padding:52px 28px 24px;background:var(--native-obsidian);color:var(--native-ivory);overflow:hidden}
+.native-welcome-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 32%;z-index:-2}
+body[data-route=welcome] .welcome::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(#11111160 0%,#11111100 28%,#11111115 42%,#111111DC 76%,#111111 100%)}
+body[data-route=welcome] .welcome .native-logo{align-self:center}
+.native-welcome-copy{margin-top:250px}
+body[data-route=welcome] .welcome h1{font-family:var(--native-serif);font-size:clamp(38px,10.7vw,49px);font-weight:700;letter-spacing:-1.7px;line-height:1.07;max-width:none;margin:0 0 13px}
+.native-welcome-copy h1 span{display:block;color:var(--native-gold)}
+.native-welcome-copy>p{font-size:16px;line-height:1.5;margin:0 0 22px;color:var(--native-ivory)}
+.native-welcome-copy .native-pill{width:100%;margin:0}
+body[data-route=welcome] .welcome .welcome-note{color:var(--native-ivory);font-size:11px;line-height:1.6;padding:0;margin:14px 0 0;text-align:center}
+body[data-route=welcome] .native-welcome-copy .native-welcome-disclosure{font-size:10px;line-height:1.6;margin:14px 0 0;color:var(--native-ivory)}
+.native-eligibility-detail{font-size:10px;line-height:1.6;margin-top:12px;color:var(--native-ivory)}
+.native-eligibility-detail summary{cursor:pointer;text-align:center;padding:5px}
+.native-eligibility-detail p{margin:8px 0 0}
+body[data-route=discover] header.top{min-height:86px;padding:14px 20px;background:var(--native-ivory);color:var(--native-obsidian);border:0;position:sticky}
+body[data-route=discover] .wordmark{position:absolute;left:50%;transform:translateX(-50%);color:var(--native-obsidian)}
+body[data-route=discover] header.top .native-logo .native-word{font-size:42px;letter-spacing:-3px}
+body[data-route=discover] header.top .native-logo .native-heart{width:13px;height:13px;top:-8px}
+body[data-route=discover] header.top .native-logo .native-sub{font-size:8px;letter-spacing:4px;margin-top:6px}
+body[data-route=discover] #hdr{margin-left:auto}
+body[data-route=discover] #hdr button{background:transparent;color:var(--native-emerald);border:1px solid #0F5C4D40;min-height:32px!important;padding:5px 8px!important;border-radius:var(--native-pill-radius);font-size:10px}
+body[data-route=discover] main{padding:8px 20px 175px}
+body[data-route=discover] .discover-heading{margin:0 0 8px}
+body[data-route=discover] .discover-heading h1{font-size:16px;color:var(--native-terracotta);font-weight:600;letter-spacing:0;margin:0 0 2px}
+body[data-route=discover] .discover-heading p{font-size:10px;color:var(--native-obsidian)}
+body[data-route=discover] .disc-top{margin:0;min-height:36px}
+body[data-route=discover] .disc-top button{background:transparent;border:1px solid #11111126;color:var(--native-obsidian);border-radius:var(--native-pill-radius);padding:6px 12px;font-size:11px}
+body[data-route=discover] .disc-top .small{color:var(--native-obsidian);font-size:11px}
+body[data-route=discover] .toppick{background:transparent;color:var(--native-emerald);padding:6px 0;margin:6px 0;border:0;border-radius:0;font-size:11px;gap:8px;min-height:40px}
+body[data-route=discover] .toppick::before{content:"";width:14px;height:14px;flex-shrink:0;background:var(--native-gold);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
+body[data-route=discover] .toppick small{font-size:10px;color:var(--native-obsidian);margin:0}
+body[data-route=discover] .card{background:var(--native-ivory);border:1px solid #11111112;border-radius:var(--native-card-radius);box-shadow:var(--native-shadow);margin:8px 0 16px}
+body[data-route=discover] .card-photo{height:clamp(120px,calc(100svh - 535px - var(--native-demo-inset)),365px);max-height:none;background:var(--native-emerald);border-radius:23px 23px 0 0}
+body[data-route=discover] .card-photo>img{object-position:center 32%}
+body[data-route=discover] .card-photo::after{display:none}
+body[data-route=discover] .photo-identity{position:static;pointer-events:auto;color:var(--native-obsidian);padding:12px 14px 10px}
+body[data-route=discover] .photo-identity h2{font-size:25px;letter-spacing:-.8px;color:var(--native-obsidian);margin:0 0 3px}
+body[data-route=discover] .photo-identity p{font-size:11px;color:var(--native-obsidian);opacity:1;margin:0 0 8px}
+.native-profile-badges{display:flex;flex-wrap:wrap;gap:6px}
+body[data-route=discover] .photo-like{background:var(--native-ivory);color:var(--native-obsidian);border:1px solid #11111119;width:46px;height:46px;bottom:12px;right:12px;box-shadow:0 4px 12px #11111126}
+body[data-route=discover] .photo-like:hover{background:var(--native-ivory);color:var(--native-terracotta)}
+body[data-route=discover] .card-body{padding:8px 14px 16px}
+body[data-route=discover] .card-sub{color:var(--native-obsidian)}
+body[data-route=discover] .basics span,body[data-route=discover] .interests span,body[data-route=discover] .chip{background:#1111110A;color:var(--native-obsidian);border-radius:var(--native-pill-radius)}
+body[data-route=discover] .interests span.shared{background:var(--native-emerald);color:var(--native-ivory)}
+body[data-route=discover] .compat-summary h3{font-family:var(--native-serif);font-size:22px;color:var(--native-emerald)}
+body[data-route=discover] .compat-summary :is(summary,dt,dd),body[data-route=discover] .prompt .pq,body[data-route=discover] .bio{color:var(--native-obsidian)}
+body[data-route=discover] .prompt .pa{font-family:var(--native-serif);font-size:23px;font-weight:400;letter-spacing:-.3px}
+body[data-route=discover] .likeon{background:var(--native-emerald);color:var(--native-ivory)}
+body[data-route=discover] .liked-you{background:#0F5C4D0F;color:var(--native-emerald)}
+body[data-route=discover] .liked-you q{color:var(--native-obsidian)}
+body[data-route=discover] .dots i{background:#F6F0E880}body[data-route=discover] .dots i.on{background:var(--native-ivory)}
+body[data-route=discover] .stamp{background:var(--native-ivory)}
+body[data-route=discover] .stamp.like{color:var(--native-emerald);border-color:var(--native-emerald)}
+body[data-route=discover] .stamp.pass{color:var(--native-obsidian);border-color:var(--native-obsidian)}
+body[data-route=discover] .card-actions{bottom:calc(82px + env(safe-area-inset-bottom,0px));width:auto;padding:0!important;background:transparent;border-radius:0;box-shadow:none;backdrop-filter:none;gap:28px}
+body[data-route=discover] .card-actions button{flex:none;flex-direction:column;width:64px;height:64px;min-height:64px;padding:8px;border:0;border-radius:50%;font-size:10px;gap:3px;font-weight:600;box-shadow:0 6px 16px #11111126}
+body[data-route=discover] .card-actions svg{width:24px;height:24px}
+body[data-route=discover] .card-actions .pass{background:var(--native-obsidian);color:var(--native-ivory)}
+body[data-route=discover] .card-actions .like{background:var(--native-terracotta);color:var(--native-obsidian)}
+body[data-route=discover] .card-actions .like svg{fill:var(--native-ivory);stroke:var(--native-ivory)}
+body[data-route=discover] nav.tabs{background:var(--native-ivory);border-color:#11111119;box-shadow:none}
+body[data-route=discover] nav.tabs button{color:var(--native-obsidian);font-size:10px}
+body[data-route=discover] nav.tabs button[aria-current=page]{color:var(--native-emerald)}
+body[data-route=discover] nav.tabs .badge{background:var(--native-terracotta);border-color:var(--native-ivory)}
+body[data-route=discover] .under button,body[data-route=discover] .swipe-hint{color:var(--native-obsidian)}
+body[data-route=discover] main button:not(.pass):not(.like):not(.photo-like):not(.likeon):not(.nav){background:var(--native-ivory);color:var(--native-obsidian)}
+body[data-route=discover] .btn-primary:not(.like){background:var(--native-terracotta);color:var(--native-obsidian);border-color:var(--native-terracotta)}
+body[data-route=discover] .announce,body[data-route=discover] .status{background:#0F5C4D0F;border-color:#0F5C4D40;color:var(--native-obsidian)}
+body[data-route=discover] .announce button{color:var(--native-emerald)}
+.native-match.match{left:max(0px,calc((100% - 480px)/2));right:max(0px,calc((100% - 480px)/2));top:var(--native-demo-inset);padding:32px 24px;min-height:0;overflow-y:auto;justify-content:safe center;color:var(--native-ivory);background:radial-gradient(ellipse at 90% 0%,var(--native-emerald),var(--native-obsidian));isolation:isolate}
+.native-match::after{content:"";position:absolute;z-index:-1;bottom:-170px;right:-80px;width:540px;height:300px;border-radius:50%;transform:rotate(-32deg);border:1px solid #C89A2B60;background:#0F5C4D50;pointer-events:none}
+.native-match .native-logo{margin-bottom:34px}
+.native-match.match h1{font-family:var(--native-serif);color:var(--native-ivory);font-size:clamp(38px,10.5vw,48px);font-weight:700;letter-spacing:-1.6px;line-height:1.15}
+.native-match .native-match-sub{font-size:16px;margin:0 0 6px}
+.native-match .native-match-context{font-size:12px;margin:0 0 30px}
+.native-match.match .pair{position:relative;flex-shrink:0;margin:0 0 24px}
+.native-match.match .av{width:148px;height:148px;border:3px solid var(--native-ivory);background:var(--native-emerald);color:var(--native-ivory);box-shadow:none}
+.native-match.match .av+.av{margin-left:-20px}
+.native-match .native-match-heart{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--native-terracotta);border:3px solid var(--native-ivory);color:var(--native-ivory)}
+.native-match .native-match-heart svg{width:24px;height:24px;fill:currentColor;stroke:none}
+.native-match .native-profile-badges{justify-content:center;margin-bottom:16px}
+.native-match .native-badge{border:1px solid #F6F0E880;background:#0F5C4D80;color:var(--native-ivory)}
+.native-match.match .shared{margin:0 0 14px;gap:6px}
+.native-match.match .shared span{background:transparent;border:1px solid #C89A2B80;color:var(--native-ivory);font-size:11px;padding:5px 12px}
+.native-match.match .note{font-family:var(--native-serif);font-size:20px}
+.native-match.match .actions{margin-top:14px;max-width:340px}
+.native-match.match .actions .native-pill{background:var(--native-terracotta);color:var(--native-ivory);border:0;border-radius:var(--native-pill-radius);font-size:20px;font-weight:700;min-height:56px}
+.native-match.match .actions .native-dismiss{background:transparent;border:0;border-radius:0;text-decoration:underline;text-underline-offset:5px;color:var(--native-ivory);font-size:13px;min-height:44px;margin-top:8px}
+@media(max-height:740px){body[data-route=welcome] .welcome{padding-top:36px}.native-welcome-copy{margin-top:140px}.native-match .native-logo{margin-bottom:20px}.native-match .native-match-context{margin-bottom:20px}.native-match.match .av{width:120px;height:120px}.native-match.match .pair{margin-bottom:18px}}
+@media(max-width:360px){body[data-route=welcome] .welcome{padding-left:22px;padding-right:22px}body[data-route=welcome] .welcome h1{font-size:36px}body[data-route=discover] main{padding-left:14px;padding-right:14px}body[data-route=discover] .photo-identity h2{font-size:23px}.native-badge{font-size:10px;padding:6px 9px}.native-match.match .av{width:126px;height:126px}.native-match.match{padding-left:18px;padding-right:18px}.native-match.match .actions .native-pill{font-size:19px}}
 </style>
 </head>
 <body>
@@ -847,7 +968,16 @@ function icon(name){
   };
   return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.heart}</svg>`;
 }
+// Reusable Native presentation components. Actions and domain state remain in their existing handlers.
+const NATIVE_WELCOME_IMAGE = "preview-assets/synthetic-native-couple.png";
+function nativeLogo(){
+  return `<div class="native-logo" aria-label="Native Dating"><span class="native-word" aria-hidden="true">native<svg class="native-heart" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg></span><span class="native-sub" aria-hidden="true">DATING</span></div>`;
+}
+function nativeBadge(label,soft=false){ return `<span class="native-badge${soft?" soft":""}">${esc(label)}</span>`; }
+function nativePrimary(label,attrs){ return `<button class="btn-primary native-pill" ${attrs}>${esc(label)}<svg class="native-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>`; }
+const originalWordmark = $(".wordmark").innerHTML;
 function renderHeader(r){
+  $(".wordmark").innerHTML = r === "discover" ? nativeLogo() : originalWordmark;
   $("#hdr").innerHTML = owner && r !== "admin" ? `<button class="btn-quiet" style="min-height:40px;padding:8px 14px" data-act="go" data-r="admin">Review</button>` : "";
 }
 function renderNav(r){
@@ -865,14 +995,16 @@ function renderNav(r){
 const VIEWS = {};
 VIEWS.welcome = () => `
   <section class="welcome">
-    <div class="welcome-art" aria-hidden="true">${icon("heart")}</div>
-    <div class="section-kicker">A shared choice. A new connection.</div>
-    <h1>Your kind of connection.</h1>
-    <p>Meet Black adults who are childfree for life. A full life, a thoughtful partner, and room for the things you love.</p>
-    <div class="welcome-facts"><span>Intentional dating</span><span>Mutual matches</span><span>Free conversations</span></div>
-    <button class="btn-primary btn-block" data-act="go" data-r="eligibility">Check if I'm eligible</button>
-    <p class="welcome-note">18+ · Never married · No children or parental role · Never seeking parenthood · Seeking a Black partner. Every profile is reviewed by a person before discovery.</p>
-    <p class="tiny muted">Founding beta prototype. Profiles and messages are stored in this app's shared beta database. Avoid sensitive details such as your address or financial information.</p>
+    <img class="native-welcome-photo" src="${NATIVE_WELCOME_IMAGE}" alt="Original synthetic illustration of an affectionate Black couple" fetchpriority="high">
+    ${nativeLogo()}
+    <div class="native-welcome-copy">
+      <h1>Same future.<span>Real chemistry.</span></h1>
+      <p>Black love. Childfree by choice.</p>
+      ${nativePrimary("Join Native",'data-act="go" data-r="eligibility"')}
+      <p class="welcome-note">Intentional connections. Free conversations.</p>
+      <details class="native-eligibility-detail"><summary>Who is Native for?</summary><p>18+ · Never married · No children or parental role · Never seeking parenthood · Seeking a Black partner. Every profile is reviewed by a person before discovery.</p></details>
+      <p class="native-welcome-disclosure">Founding beta prototype. Profiles and messages are stored in this app's shared beta database. Avoid sensitive details such as your address or financial information.</p>
+    </div>
   </section>`;
 
 VIEWS.eligibility = () => {
@@ -1078,6 +1210,8 @@ async function writeDraftPhotos(){
 function card(id, likeable){
   const p = S.profiles[id], list = photosOf(id), n = list ? list.length : (p.photoCount||1);
   const i = Math.min(S.cardPhoto, Math.max(0,n-1));
+  const nativeDiscover = currentRoute() === "discover";
+  const nativeIdentity = `<div class="photo-identity"><h2>${esc(p.name)}, ${p.age}</h2><p>${esc(p.city)} · ${esc(p.gender)}</p><div class="native-profile-badges">${nativeBadge(p.ineligible?"Profile hidden":"Childfree by choice")}${p.goal?nativeBadge(p.goal,true):""}</div></div>`;
   return `
   <article class="card" ${likeable?`data-swipe="${esc(id)}"`:""} aria-label="${esc(p.name)}, ${p.age}">
     <div class="card-photo">
@@ -1086,8 +1220,9 @@ function card(id, likeable){
       <div class="dots" id="dots">${Array.from({length:n},(_,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</div>
       ${n>1?`<button class="nav prev" data-act="photo-step" data-d="-1" data-id="${esc(id)}" aria-label="Previous photo"></button><button class="nav next" data-act="photo-step" data-d="1" data-id="${esc(id)}" aria-label="Next photo"></button>`:""}
       ${likeable?`<button class="photo-like" data-act="like-on" data-id="${esc(id)}" data-on="photo" aria-label="Like photo">${icon("heart")}</button>`:""}
-      <div class="photo-identity"><span class="intent-label">${p.ineligible ? "PROFILE HIDDEN" : "CHILDFREE BY CHOICE"}</span><h2>${esc(p.name)}, ${p.age}</h2><p>${esc(p.city)} · ${esc(p.gender)}</p></div>
+      ${nativeDiscover?"":`<div class="photo-identity"><span class="intent-label">${p.ineligible ? "PROFILE HIDDEN" : "CHILDFREE BY CHOICE"}</span><h2>${esc(p.name)}, ${p.age}</h2><p>${esc(p.city)} · ${esc(p.gender)}</p></div>`}
     </div>
+    ${nativeDiscover?nativeIdentity:""}
     <div class="card-body">
       <p class="card-sub">${esc(p.city)} · ${esc(p.gender)}${p.marriage?` · ${esc(p.marriage)}`:""}</p>
       ${likeable ? likeBanner(id) : ""}
@@ -1182,8 +1317,8 @@ VIEWS.discover = () => {
     ${isTop ? `<div class="toppick" role="note"><div>Today's top pick<small>${esc(why || "Picked from your preferences and recent activity")}</small></div></div>` : ""}
     ${card(id, true)}
     <div class="card-actions" style="padding:0 0 6px;border:0">
-      <button class="pass" data-act="react" data-k="pass" data-id="${esc(id)}">${icon("close")} Pass</button>
-      <button class="like btn-primary" data-act="react" data-k="like" data-id="${esc(id)}">${icon("heart")} Like</button>
+      <button class="pass native-circle" data-act="react" data-k="pass" data-id="${esc(id)}">${icon("close")} Pass</button>
+      <button class="like btn-primary native-circle" data-act="react" data-k="like" data-id="${esc(id)}">${icon("heart")} Like</button>
     </div>
     <div class="under"><button data-act="report" data-id="${esc(id)}">Report</button><button data-act="block" data-id="${esc(id)}">Block</button></div>
     <p class="swipe-hint">Swipe right to like, left to pass. Arrow keys work too.</p>`;
@@ -2075,16 +2210,19 @@ function showMatch(id){
   const theyFinished = mine && theirs && theirs.at > mine.at;
   const shared = sharedInterests(id);
   const note = theirs && theirs.note ? theirs.note : "";
-  const back = S._last === "discover" ? "Keep swiping" : "Not now";
-  $("#layer").innerHTML = `<div class="match" role="dialog" aria-modal="true" aria-labelledby="match-title">
-    <div class="pair"><div class="av" aria-hidden="true">${esc((myProfile().name||"Y")[0])}${img(uid,0)}</div><div class="av">${esc(p.name[0])}${img(id,0)}</div></div>
+  const back = S._last === "discover" ? "Keep exploring" : "Not now";
+  $("#layer").innerHTML = `<div class="match native-match" role="dialog" aria-modal="true" aria-labelledby="match-title">
+    ${nativeLogo()}
     <h1 id="match-title" style="margin:0 0 6px">It's a match!</h1>
-    <p style="font-size:18px;margin:0 0 14px">${theyFinished ? `${esc(p.name)} liked you back.` : `You and ${esc(p.name)} liked each other.`}</p>
-    ${shared.length ? `<p style="margin:0 0 6px;font-weight:600">You both love</p><div class="shared">${shared.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
+    <p class="native-match-sub">A mutual yes. A new beginning.</p>
+    <p class="native-match-context">${theyFinished ? `${esc(p.name)} liked you back.` : `You and ${esc(p.name)} liked each other.`}</p>
+    <div class="pair"><div class="av" aria-hidden="true">${esc((myProfile().name||"Y")[0])}${img(uid,0)}</div><div class="av">${esc(p.name[0])}${img(id,0)}</div><span class="native-match-heart" aria-hidden="true">${icon("heart")}</span></div>
+    <div class="native-profile-badges">${nativeBadge("Childfree by choice")}</div>
+    ${shared.length ? `<div class="shared" aria-label="Shared interests">${shared.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
     ${note ? `<p class="note">“${esc(note)}”</p>` : ""}
     <div class="actions">
-      <button class="btn-primary" data-act="match-chat" data-id="${esc(id)}">Send a message</button>
-      <button data-act="close">${back}</button>
+      ${nativePrimary("Say Hello",`data-act="match-chat" data-id="${esc(id)}"`)}
+      <button class="native-dismiss" data-act="close">${back}</button>
     </div></div>`;
   $("#layer .btn-primary").focus();
 }

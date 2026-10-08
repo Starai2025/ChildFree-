@@ -56,5 +56,7 @@ is readable by anyone with access, so it is for invited testers only.
 
 ## Known differences from the spec
 
+The newest local visual checkpoint is **Native Dating / Midnight Luxe** for Welcome, Discover and Match. The founder's exact palette supersedes the older orange reference. Other screens retain their previous design pending screenshot approval. See [design system and actual screenshots](../../docs/NATIVE_MIDNIGHT_LUXE.md). Generated interactive copies include the existing ten-question compatibility extension and isolated synthetic runtime; public main has not received this implementation.
+
 See docs/DECISIONS_2026-10-07.md. The prototype also adds photo messages and a free "Likes you" list,
 which the original spec deferred; decide whether to keep them in the native V1.
