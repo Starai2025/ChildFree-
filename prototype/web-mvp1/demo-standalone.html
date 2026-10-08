@@ -638,6 +638,66 @@ body[data-route=me] .card>.card-photo{aspect-ratio:4/5;height:auto;max-height:52
 .native-rows .native-row::after{content:"";flex:none;width:8px;height:8px;margin-right:6px;border-right:2px solid var(--native-ink-2);border-bottom:2px solid var(--native-ink-2);transform:rotate(-45deg)}
 body[data-midnight] main .native-invite{margin-top:20px;border-color:var(--native-gold);color:var(--native-obsidian);background:#C89A2B14}
 body[data-midnight] .sep{height:1px;background:var(--native-hair);margin:28px 0}
+/* Hero pages (Matches, Profile): dark emerald hero like Match, ivory sheet rising over it. */
+body:is([data-route=connections],[data-route=me]) header.top{background:var(--native-obsidian);color:var(--native-ivory);border-bottom:1px solid #F6F0E814}
+body:is([data-route=connections],[data-route=me]) .wordmark{color:var(--native-ivory)}
+body:is([data-route=connections],[data-route=me]) #hdr button{color:var(--native-ivory);border-color:var(--native-on-dark-hair)}
+.native-hero{position:relative;isolation:isolate;overflow:hidden;margin:0 -20px;padding:28px 24px 64px;color:var(--native-ivory);background:radial-gradient(120% 90% at 88% 0%,var(--native-emerald) 0%,#0F5C4D00 66%),var(--native-obsidian)}
+.native-hero::after{content:"";position:absolute;z-index:-1;left:-30%;bottom:-60%;width:90%;height:110%;background:radial-gradient(closest-side,#C89A2B24,#C89A2B00);pointer-events:none}
+.native-hero .native-eyebrow{color:var(--native-gold);margin:0 0 8px}
+body[data-midnight] .native-hero h1{font-family:var(--native-serif);font-size:40px;line-height:1.05;font-weight:700;letter-spacing:-.02em;color:var(--native-ivory);margin:0}
+body[data-midnight] .native-hero .native-hero-sub{margin:10px 0 0;font-size:16px;line-height:1.45;color:var(--native-on-dark-2)}
+.native-hero-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.native-hero-stats span{padding:6px 12px;border-radius:var(--native-pill-radius);box-shadow:inset 0 0 0 1px #C89A2B80;font-size:13px;font-weight:600;color:var(--native-ivory)}
+.native-hero .native-status{background:#F6F0E814;color:var(--native-ivory);box-shadow:inset 0 0 0 1px var(--native-on-dark-hair)}
+.native-hero .native-status::before{background:var(--native-on-dark-2)}
+.native-hero .native-status.live{background:var(--native-emerald);color:var(--native-ivory);box-shadow:inset 0 0 0 1px #C89A2B99}
+.native-hero .native-status.live::before{background:var(--native-gold)}
+.native-hero .native-page-head{margin:0}
+.native-sheet{position:relative;margin:-32px -20px 0;padding:8px 20px 8px;border-radius:28px 28px 0 0;background:var(--native-ivory)}
+.native-hero-profile{padding-bottom:128px}
+.native-sheet-profile{padding-top:0}
+.native-sheet-profile>.card{position:relative;z-index:1;margin-top:-104px!important}
+.native-sheet-profile>.native-pill{width:100%;margin:4px 0 0}
+
+/* Section headings inside the sheet */
+.native-section-head{margin:28px 0 12px}
+.native-section-head h3{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--native-emerald)}
+.native-section-head h2{margin:0;font-family:var(--native-sans);font-size:22px;font-weight:700;letter-spacing:-.01em;color:var(--native-obsidian)}
+body[data-midnight] .native-section-head p{margin:4px 0 0;font-size:14px;color:var(--native-ink-2)}
+body[data-midnight] .native-footnote{margin:12px 0 0;font-size:14px;line-height:1.5;color:var(--native-ink-2);text-align:center}
+
+/* Photo tiles */
+.native-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.native-strip{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 8px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.native-strip .native-tile{flex:none;width:132px;scroll-snap-align:start}
+body[data-midnight] .native-tile{position:relative;display:block;aspect-ratio:3/4;min-height:0;padding:0;border:0;border-radius:20px;overflow:hidden;background:var(--native-emerald);box-shadow:var(--native-shadow);text-align:left;color:var(--native-ivory)}
+.native-tile>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%}
+.native-tile::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,#11111100 45%,#111111D9);box-shadow:inset 0 0 0 1px #C89A2B59}
+.native-tile-chip{position:absolute;z-index:1;top:10px;left:10px;padding:4px 10px;border-radius:var(--native-pill-radius);background:var(--native-terracotta);color:var(--native-ivory);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.native-strip .native-tile-chip{background:var(--native-gold);color:var(--native-obsidian)}
+.native-tile-name{position:absolute;z-index:1;left:14px;right:14px;bottom:12px;font-size:18px;font-weight:700;line-height:1.2}
+.native-tile-note{position:absolute;z-index:1;left:14px;right:14px;bottom:36px;font-size:12px;font-weight:600;color:var(--native-on-dark-2)}
+.native-tile:has(.native-tile-note) .native-tile-name{bottom:12px}
+
+/* Grouped lists */
+body[data-midnight] .native-group{margin:0;padding:0 16px;border-radius:20px;border:1px solid var(--native-hair);background:var(--native-ivory);box-shadow:var(--native-shadow)}
+body[data-midnight] .native-group>li:last-child>.item,body[data-midnight] .native-group>li.item:last-child{border-bottom:0}
+body[data-midnight] .native-convo .avatar{box-shadow:0 0 0 2px var(--native-ivory),0 0 0 3.5px var(--native-gold)}
+.native-convo-meta{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+body[data-midnight] .native-convo.unread .t{font-weight:800}
+body[data-midnight] .native-convo.unread .s{color:var(--native-obsidian);font-weight:600}
+.native-ico{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:#C89A2B24;color:var(--native-emerald)}
+.native-ico svg{width:20px;height:20px}
+
+/* Dark feature card (empty Matches, Invite) */
+.native-feature{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;margin:24px 0 8px;padding:28px 24px;border-radius:var(--native-card-radius);text-align:center;color:var(--native-ivory);background:radial-gradient(120% 100% at 50% 0%,var(--native-emerald),var(--native-obsidian));box-shadow:inset 0 0 0 1px #C89A2B59,var(--native-shadow)}
+.native-feature img{width:48px;height:48px;margin-bottom:4px}
+.native-feature b{font-family:var(--native-serif);font-size:24px;line-height:1.2;font-weight:700}
+body[data-midnight] .native-feature p{margin:0 0 12px;font-size:15px;color:var(--native-on-dark-2);max-width:280px}
+body[data-midnight] .native-feature .native-pill{min-height:52px;padding:12px 28px;font-size:17px}
+.native-danger{margin:40px 0 16px;padding-top:24px;border-top:1px solid var(--native-hair)}
+@media(max-width:360px){body[data-midnight] .native-hero h1{font-size:34px}.native-hero{padding-left:20px;padding-right:20px}}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   body[data-route=discover] .discover-heading{margin-top:12px}
@@ -1416,7 +1476,13 @@ function icon(name){
     close:'<path d="m6 6 12 12M18 6 6 18"/>',
     send:'<path d="m21 3-7 18-4-7-7-4Z M10 14 21 3"/>',
     attachment:'<path d="m8 13 7-7a3 3 0 0 1 4 4L9 20a5 5 0 0 1-7-7L13 2"/>',
-    arrow:'<path d="m14 5-7 7 7 7"/>'
+    arrow:'<path d="m14 5-7 7 7 7"/>',
+    compat:'<circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/>',
+    edit:'<path d="M4 20h4L19 9l-4-4L4 16Z"/><path d="m13 7 4 4"/>',
+    sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+    pause:'<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>',
+    pledge:'<path d="M7 3h10v18l-5-3-5 3Z"/><path d="m9.5 9.5 2 2 3.5-4"/>',
+    help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>'
   };
   return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.heart}</svg>`;
 }
@@ -1916,13 +1982,19 @@ VIEWS.connections = () => {
   const fresh = ids.filter(id => !convo(id).length);
   const pending = Object.entries(myR()).filter(([id,r]) => r.k === "like" && !ids.includes(id) && S.profiles[id] && now() - r.at < 30*86400000).length;
   const ly = likesYou();
-  const lySection = ly.length ? `<h3>Likes you</h3><p class="small muted" style="margin:-4px 0 8px">Like them back to match.</p><div class="newm">${ly.map(id => { const t = likedMe(id); return `<button class="lk" data-act="view-like" data-id="${esc(id)}">${img(id,0)}<span>${esc(S.profiles[id].name)}</span>${t.note?'<span class="tiny muted">Left a comment</span>':""}</button>`; }).join("")}</div>` : "";
-  if (!ids.length) return `<h1>Matches</h1>${lySection}${nativeEmpty("No matches yet","When someone you like likes you back, they'll show up here.")}${pending?`<p class="muted small">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>`:""}`;
-  return `${announceBanner()}<h1>Matches</h1>${lySection}
-    ${fresh.length ? `<h3>New matches</h3><div class="newm">${fresh.map(id => `<button data-act="open-chat" data-id="${esc(id)}">${img(id,0)}<span>${esc(S.profiles[id].name)}</span></button>`).join("")}</div>` : ""}
-    <h3>Conversations</h3>
-    ${withMsgs.length ? `<ul class="list">${withMsgs.map(id => { const last = convo(id).slice(-1)[0]; return `<li><button class="item" data-act="open-chat" data-id="${esc(id)}">${img(id,0,"avatar")}<div class="grow"><div class="t">${esc(S.profiles[id].name)}</div><div class="s">${last.me?"You: ":""}${last.img?"Sent a photo":esc(last.t)}</div></div>${unread(id)?'<span class="dot" aria-label="unread"></span>':`<span class="tiny muted">${ago(last.at)}</span>`}</button></li>`; }).join("")}</ul>` : `<p class="muted">Say hi to a new match to start a conversation.</p>`}
-    ${pending?`<p class="muted small" style="margin-top:18px">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>`:""}`;
+  const stat = (n, one, many) => n ? `<span>${n} ${n===1?one:many}</span>` : "";
+  const stats = [stat(ly.length,"like waiting","likes waiting"), stat(ids.length,"match","matches"), stat(withMsgs.length,"conversation","conversations")].join("");
+  const hero = `<section class="native-hero"><p class="native-eyebrow">Your connections</p><h1>Matches</h1><p class="native-hero-sub">People who said yes to the same kind of life.</p>${stats?`<div class="native-hero-stats">${stats}</div>`:""}</section>`;
+  const tile = (id, attrs, chip, extra="") => `<button class="native-tile" ${attrs}>${img(id,0)}<span class="native-tile-chip">${chip}</span><span class="native-tile-name">${esc(S.profiles[id].name)}, ${S.profiles[id].age}</span>${extra}</button>`;
+  const lySection = ly.length ? `<div class="native-section-head"><h3>Likes you</h3><p>Like them back to match.</p></div><div class="native-tiles">${ly.map(id => tile(id,`data-act="view-like" data-id="${esc(id)}"`,"Liked you",likedMe(id).note?'<span class="native-tile-note">Left a comment</span>':"")).join("")}</div>` : "";
+  const waiting = pending ? `<p class="native-footnote">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>` : "";
+  if (!ids.length) return `${hero}<div class="native-sheet">${lySection}<div class="native-feature" role="note"><img src="${FREE_MIDNIGHT_MARK}" alt="" aria-hidden="true"><b>No matches yet</b><p>When someone you like likes you back, they'll show up here.</p><button class="native-pill" data-act="go" data-r="discover">Keep exploring</button></div>${waiting}</div>`;
+  return `${hero}<div class="native-sheet">${announceBanner()}${lySection}
+    ${fresh.length ? `<div class="native-section-head"><h3>New matches</h3><p>Say hello while it's fresh.</p></div><div class="native-strip">${fresh.map(id => tile(id,`data-act="open-chat" data-id="${esc(id)}"`,"New")).join("")}</div>` : ""}
+    <div class="native-section-head"><h3>Conversations</h3></div>
+    ${withMsgs.length ? `<ul class="list native-group">${withMsgs.map(id => { const last = convo(id).slice(-1)[0], u = unread(id); return `<li><button class="item native-convo${u?" unread":""}" data-act="open-chat" data-id="${esc(id)}">${img(id,0,"avatar")}<div class="grow"><div class="t">${esc(S.profiles[id].name)}</div><div class="s">${last.me?"You: ":""}${last.img?"Sent a photo":esc(last.t)}</div></div><div class="native-convo-meta"><span class="tiny">${ago(last.at)}</span>${u?'<span class="dot" aria-label="unread"></span>':""}</div></button></li>`; }).join("")}</ul>` : `<p class="native-footnote">Say hi to a new match to start a conversation.</p>`}
+    ${withMsgs.length + fresh.length < 3 ? `<div class="native-feature" role="note"><img src="${FREE_MIDNIGHT_MARK}" alt="" aria-hidden="true"><b>Room for more</b><p>New introductions arrive in Discover every day.</p><button class="native-pill" data-act="go" data-r="discover">Keep exploring</button></div>` : ""}
+    ${waiting}</div>`;
 };
 
 function likeContext(id){
@@ -2043,30 +2115,33 @@ VIEWS.me = () => {
   else if (a && a.revision === p.revision && a.status === "changes") status = "Changes requested";
   const blocked = Object.entries(myR()).filter(([,r]) => r.k === "block").map(([id]) => id);
   const live = status === "Live";
-  const row = (attrs,label) => `<li><button class="item native-row" ${attrs}><span class="grow t">${label}</span></button></li>`;
-  return `<div class="native-page-head"><h1>Your profile</h1><p class="native-status${live?" live":""}"><span class="sr-only">Status: </span>${esc(status)}</p></div>
+  const row = (ico, attrs, label, sub="") => `<li><button class="item native-row" ${attrs}><span class="native-ico">${icon(ico)}</span><div class="grow"><div class="t">${label}</div>${sub?`<div class="s">${sub}</div>`:""}</div></button></li>`;
+  return `<section class="native-hero native-hero-profile"><div class="native-page-head"><h1>Your profile</h1><p class="native-status${live?" live":""}"><span class="sr-only">Status: </span>${esc(status)}</p></div><p class="native-hero-sub">This is how members see you.</p></section>
+    <div class="native-sheet native-sheet-profile">
     ${card(uid).replace('class="card"','class="card" style="margin-top:0"')}
     <button class="btn-block btn-primary native-pill" data-act="go" data-r="editor">Edit profile</button>
-    <h3>Profile details</h3>
-    <ul class="list native-rows">
-      ${row('data-act="edit-compatibility"',"Edit compatibility answers")}
-      ${row('data-act="go" data-r="passions"',(((p.details||{}).interests)||[]).length ? "Edit passions" : "Add your passions")}
-      ${row('data-act="go" data-r="details"',"Edit the basics (no review needed)")}
-      ${row('data-act="go" data-r="filters"',"Discovery filters")}
-      ${row('data-act="pause"',p.paused?"Resume my profile":"Pause my profile")}
+    <div class="native-section-head"><h3>Profile details</h3></div>
+    <ul class="list native-group native-rows">
+      ${row("compat",'data-act="edit-compatibility"',"Edit compatibility answers")}
+      ${row("heart",'data-act="go" data-r="passions"',(((p.details||{}).interests)||[]).length ? "Edit passions" : "Add your passions")}
+      ${row("edit",'data-act="go" data-r="details"',"Edit the basics (no review needed)")}
+      ${row("sliders",'data-act="go" data-r="filters"',"Discovery filters")}
+      ${row("pause",'data-act="pause"',p.paused?"Resume my profile":"Pause my profile")}
     </ul>
-    <button class="btn-block native-invite" data-act="invite">Invite a friend</button>
-    <h2>Settings</h2>
-    <ul class="list">
-      <li><button class="item" data-act="go" data-r="eligibility"><div class="grow"><div class="t">Eligibility answers</div><div class="s">Update your answers if something changed</div></div></button></li>
-      <li><button class="item" data-act="show-pledge"><div class="grow"><div class="t">Community Pledge</div><div class="s">Accepted ${S.priv.pledge?new Date(S.priv.pledge.at).toLocaleDateString():""}</div></div></button></li>
-      <li><button class="item" data-act="help"><div class="grow"><div class="t">Help and support</div><div class="s">Get help or appeal a decision</div></div></button></li>
+    <div class="native-feature native-invite-card"><img src="${FREE_MIDNIGHT_MARK}" alt="" aria-hidden="true"><b>Know someone raising the bar?</b><p>Invite a friend to the founding cohort.</p><button class="native-pill" data-act="invite">Invite a friend</button></div>
+    <div class="native-section-head"><h3>Settings</h3></div>
+    <ul class="list native-group native-rows">
+      ${row("admin",'data-act="go" data-r="eligibility"',"Eligibility answers","Update your answers if something changed")}
+      ${row("pledge",'data-act="show-pledge"',"Community Pledge",`Accepted ${S.priv.pledge?new Date(S.priv.pledge.at).toLocaleDateString():""}`)}
+      ${row("help",'data-act="help"',"Help and support","Get help or appeal a decision")}
     </ul>
-    <h3>Blocked members</h3>
-    ${blocked.length ? `<ul class="list">${blocked.map(id => `<li class="item" style="cursor:default"><div class="grow"><div class="t">${esc((S.profiles[id]||{}).name || "Former member")}</div></div><button class="btn-quiet" style="min-height:38px;padding:6px 12px" data-act="unblock" data-id="${esc(id)}">Unblock</button></li>`).join("")}</ul><p class="tiny muted">Unblocking doesn't restore a match.</p>` : `<p class="muted small">You haven't blocked anyone.</p>`}
-    <div class="sep"></div>
-    <button class="btn-block btn-danger" data-act="delete-account">Delete my account</button>
-    <p class="tiny muted" style="margin-top:10px">Deleting removes your profile, photos, likes and messages you sent. Reports you filed are kept for safety review.</p>`;
+    <div class="native-section-head"><h3>Blocked members</h3></div>
+    ${blocked.length ? `<ul class="list native-group">${blocked.map(id => `<li class="item" style="cursor:default"><div class="grow"><div class="t">${esc((S.profiles[id]||{}).name || "Former member")}</div></div><button class="btn-quiet" style="min-height:38px;padding:6px 12px" data-act="unblock" data-id="${esc(id)}">Unblock</button></li>`).join("")}</ul><p class="native-footnote">Unblocking doesn't restore a match.</p>` : `<p class="native-footnote">You haven't blocked anyone.</p>`}
+    <div class="native-danger">
+      <button class="btn-block btn-danger" data-act="delete-account">Delete my account</button>
+      <p class="native-footnote">Deleting removes your profile, photos, likes and messages you sent. Reports you filed are kept for safety review.</p>
+    </div>
+    </div>`;
 };
 
 VIEWS.admin = () => {

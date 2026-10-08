@@ -77,3 +77,15 @@ The tab screens now use the approved v2 system: ivory page, the same header lock
 - The "Likes you" profile view uses the Discover card.
 
 Evidence: `docs/evidence/midnight-tabs/`. The design, full-browser and prototype tests pass.
+
+### Founder feedback and rework: Matches and Profile (October 8, 2026)
+
+The founder judged the first tab pass well below the quality of Welcome, Discover and Match: flat ivory pages, small circular photos and plain headings. We agreed to redesign two screens at a time.
+
+Matches and Profile now borrow the approved screens' visual language:
+- **Hero:** a dark emerald-to-obsidian hero under a dark header, with a gold eyebrow, a Lora headline and gold-outlined stat pills.
+- **Sheet:** an ivory sheet with rounded top corners rises over the hero.
+- **Matches:** large portrait photo tiles ("Liked you" in sienna, "New" in gold), conversation rows in a raised card with gold-ringed avatars, and a dark feature card with a Keep exploring action for empty or quiet states.
+- **Profile:** the photo card overlaps the hero. Detail and setting rows sit in raised cards with gold-tinted icons, and "Invite a friend" is a dark feature card.
+
+Dates still has the interim flat styling and is the next screen to redesign.
