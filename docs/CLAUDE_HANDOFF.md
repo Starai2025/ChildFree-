@@ -4,7 +4,7 @@ You are continuing the existing Starai2025/ChildFree- app. Read this first, then
 
 ## Which version this is
 
-This package contains the current source, documentation, assets, screenshots, tests and runnable demos from local commit 8299b8aecf7908293a683517abbec28a208f7491. The latest implementation is a5cf8314bdc301c94cbd36854829530c40d68c4f, independently accepted by A6; the later commit records delivery evidence.
+This handoff branch contains the current source, documentation, assets, screenshots, tests and runnable demos from source snapshot commit 8299b8aecf7908293a683517abbec28a208f7491. The latest implementation is a5cf8314bdc301c94cbd36854829530c40d68c4f, independently accepted by A6; the later commit records delivery evidence.
 
 Public GitHub main remains 637ceb3518705cdb29c373481908e333809e2d72. The published branch preview/free-midnight-a5cf831 adds ONLY prototype/web-mvp1/free-midnight-preview.html to that older public main. Its other source files and design documents are older. Do not mistake that branch's index.html for the current editable implementation. Use this snapshot's index.html and builder.
 
@@ -12,7 +12,7 @@ Public preview commit: b7b0367fe6f52eb9755d0616fe1e5f25af6c660a.
 Preview: https://raw.githack.com/Starai2025/ChildFree-/b7b0367fe6f52eb9755d0616fe1e5f25af6c660a/prototype/web-mvp1/free-midnight-preview.html
 The public GitHub bytes were verified against the reviewed artifact; this cloud environment blocks CDN access. Actual app flows were tested locally.
 
-The compact handoff omits only the reproducible `prototype/web-mvp1/design-preview.html` static gallery. Its source test script and all screenshots remain included; `node tests/claude-prototype-ui.mjs` regenerates it. No editable source or decision document is omitted. A complete archival ZIP is available separately.
+This GitHub branch includes all tracked repository files. The separately downloadable compact ZIP omits only the reproducible `prototype/web-mvp1/design-preview.html` static gallery. Its source test script and all screenshots remain included; `node tests/claude-prototype-ui.mjs` regenerates it. No editable source or decision document is omitted. A complete archival ZIP is available separately.
 
 ## Current founder decisions — these supersede older branding proposals
 
@@ -32,7 +32,7 @@ The compact handoff omits only the reproducible `prototype/web-mvp1/design-previ
 
 Only Welcome, Discover and Match have the new screen styling. Other screens get name-only branding where appropriate and otherwise retain their previous design. Founder screenshot approval is STILL PENDING before extending the new design to onboarding, profile, messaging, dates and other screens.
 
-The founder previously required seeing the full demo before source publication. The later publishing authorization covers ONLY standalone HTML on an isolated preview branch. Do not merge/push implementation to main or publish additional source branches until the founder expressly authorizes that. Preparing this local handoff package is not approval to publish source or production.
+The founder has now explicitly authorized publishing the complete handoff to `handoff/free-midnight-claude`. This supersedes the earlier preview-HTML-only publication restriction for this specific handoff branch. It does NOT authorize merging/pushing implementation to main, a production release, additional source branches or further screen redesign. GitHub main remains unchanged; screenshot approval of the three updated screens is still pending. Confirm any additional implementation/publication scope with the founder.
 
 The user is requesting a design continuation of the imported Claude web prototype, not a rebuild of Expo. Preserve all working eligibility, pledge, onboarding, ten-question draft/edit/skip/resume, discovery filters/ranking, mutual matching, messaging, safety controls and demo isolation. No live provider, database, production release or native runtime is proved by this demo. Keep real member/provider paths fail-closed and synthetic state separate.
 
@@ -52,7 +52,7 @@ Do not change SQL, providers, eligibility, fixture state formats, native modules
 
 ## Running and verifying
 
-From the extracted repository root, install the committed dependencies with npm ci when needed. The existing environment used Node 24/npm 11 and Deno for Edge typechecking. Run:
+From the cloned or extracted repository root, install the committed dependencies with npm ci when needed. The existing environment used Node 24/npm 11 and Deno for Edge typechecking. Run:
 
     node scripts/build-claude-demo.mjs
     node tests/native-midnight-ui.mjs
@@ -68,4 +68,4 @@ Open prototype/web-mvp1/demo-standalone.html in a desktop browser for the comple
 
 ## First next step
 
-Review the supplied three-screen screenshots and existing source. Confirm the founder's approval status before extending visual changes or publishing source. Continue the existing application using the locked current decisions; do not restart/rebuild it. Deliver concrete screenshots and tests for the next approved slice, with an independent review of a fixed candidate per AGENTS.md.
+Review the supplied three-screen screenshots and existing source. Confirm the founder's approval status before extending visual changes or publishing beyond this authorized handoff branch. Continue the existing application using the locked current decisions; do not restart/rebuild it. Deliver concrete screenshots and tests for the next approved slice, with an independent review of a fixed candidate per AGENTS.md.
