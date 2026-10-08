@@ -2,6 +2,17 @@
 
 You are continuing the existing Starai2025/ChildFree- app. Read this first, then AGENTS.md, docs/Native_Dating_MVP_Build_Spec.md, docs/MVP1_Agent_Execution_Plan.md, BUILD_STATUS.md and docs/FREE_MIDNIGHT_REFINEMENT.md.
 
+## Latest update — October 8, 2026: Midnight Luxe v2 across the whole browser app
+
+The founder approved the v2 polish of Welcome, Discover and Match, then asked for every remaining screen to be finished in the same style. All screens of `prototype/web-mvp1` now use v2: onboarding, filters, passions, the basics, Matches, Dates, Events, Profile, chat, safety sheets, the date planner and Review. The legacy orange/white/Inter look no longer renders.
+
+Founder rules learned along the way:
+- One logo per screen (header lockup only).
+- Restrained layouts: no decorative extras.
+- Photography or dark emerald/gold surfaces with Lora headlines, not flat ivory pages.
+
+Design decisions and evidence are in docs/FREE_MIDNIGHT_REFINEMENT.md, with screenshots in docs/evidence/{native-midnight,midnight-tabs,midnight-tour,claude-redesign}. The design, full-browser and prototype tests pass; on Windows they were run with local Chrome in place of the Linux-only bundled Chromium. Expo, SQL and provider code are unchanged, and main is untouched.
+
 ## Which version this is
 
 This handoff branch contains the current source, documentation, assets, screenshots, tests and runnable demos from source snapshot commit 8299b8aecf7908293a683517abbec28a208f7491. The latest implementation is a5cf8314bdc301c94cbd36854829530c40d68c4f, independently accepted by A6; the later commit records delivery evidence.
