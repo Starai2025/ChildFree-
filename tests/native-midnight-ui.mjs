@@ -31,6 +31,8 @@ try {
  assert.equal(await background('.card-actions .pass'),'rgb(17, 17, 17)');
  assert.equal(await background('.native-profile-badges .native-badge:not(.soft)'),'rgb(15, 92, 77)');
  assert.equal(await color('header.top .native-heart'),'rgb(200, 154, 43)');
+ const titleStyle=await page.locator('.discover-heading h1').evaluate(el=>({size:parseFloat(getComputedStyle(el).fontSize),weight:parseInt(getComputedStyle(el).fontWeight,10)}));
+ assert.ok(titleStyle.size>=19&&titleStyle.weight>=700,'Terracotta heading must meet large-text contrast sizing');
  await capture('discover');
  await page.locator('.card-actions .like').click();await page.locator('.native-match').waitFor();await capture('match');
  assert.equal(await background('.native-match .native-pill'),'rgb(197, 100, 69)');

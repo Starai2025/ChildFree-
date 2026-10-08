@@ -24,7 +24,7 @@ No replacement hues were introduced. Overlays, borders and shadows use transpare
 
 Reusable `nativeLogo()`, `nativePrimary()` and `nativeBadge()` helpers generate the same serif wordmark with gold heart, terracotta pill with SVG arrow, and soft rounded factual badges. The existing reusable profile card keeps its photos, photo navigation, prompt likes and compatibility details; Discover displays identity below its edge-to-edge photograph. `.native-circle`, shared corner/spacing/shadow tokens and the original reaction handlers keep matching controls consistent. Demo-specific viewport inset is a token, not a business rule.
 
-Primary pill labels use 20px bold ivory type for large-text contrast with the locked terracotta. The smaller Like label uses obsidian; emerald badges use ivory. Keyboard focus uses gold. Reduced-motion preferences and existing screen-reader labels remain supported. Short match dialogs scroll safely without clipping their heading.
+Primary pill labels use 20px bold ivory type for large-text contrast with the locked terracotta. Discover's terracotta heading uses 19px bold type for the same contrast threshold. The smaller Like label uses obsidian; emerald badges use ivory. Keyboard focus uses gold. Reduced-motion preferences and existing screen-reader labels remain supported. Short match dialogs scroll safely without clipping their heading.
 
 ## Original assets
 
