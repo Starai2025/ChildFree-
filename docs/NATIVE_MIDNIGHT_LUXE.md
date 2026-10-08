@@ -50,4 +50,12 @@ The design check verifies actual computed brand colors, the bundled serif, layou
 
 Initial `npm run check` encountered Expo telemetry attempting to write outside the workspace; the documented `EXPO_NO_TELEMETRY=1` invocation passes. Actual native runtime and hosted providers are outside this browser presentation slice and are not validated by these screenshots.
 
-Next: independent review of the fixed local candidate, then founder approval of these three screens before extending Midnight Luxe to onboarding, profile, messages, dates or other screens.
+Independent A6 review accepted `25fa742d38d686876cd02d853204173c099db91b`. Its nonblocking contrast note was repaired in `1290954a58e113c9251f9654f57804ecf650e443`, which A6 also accepted. The updated design check and source walkthrough pass. Founder approval of the three screenshots remains pending before extending Midnight Luxe to onboarding, profile, messages, dates or other screens.
+
+## Authorized preview delivery
+
+Only the standalone HTML was published to `preview/native-midnight-1290954`, commit `ad2e4f6f1326c1779667743cd571fabd074256d3`, at `prototype/web-mvp1/native-midnight-preview.html`. Its parent is public main `637ceb3518705cdb29c373481908e333809e2d72`; the preview diff is exactly one added HTML file. GitHub main was verified unchanged after the push. No source implementation, docs, assets or earlier unpublished commits were pushed to main.
+
+[Interactive review preview](https://raw.githack.com/Starai2025/ChildFree-/ad2e4f6f1326c1779667743cd571fabd074256d3/prototype/web-mvp1/native-midnight-preview.html). Public GitHub raw bytes were verified against the reviewed standalone artifact; CDN access is blocked by this environment's proxy, so a CDN browser launch is not claimed. Local browser testing and actual screenshots are recorded above.
+
+`/workspace/exports/Native-Midnight-Luxe-demo.html` and `Native-Midnight-Luxe-demo.zip` contain the same reviewed HTML. The ZIP includes a desktop walkthrough and font license. SHA-256: `19ff5248bba8d744ee378e80387ebc6d4ba6bfa52d30bbdf5b0d36d5d88dd7cf`, 11,201,085 bytes. The exported JSON delivery manifest records the source and preview commits and pending visual approval.
