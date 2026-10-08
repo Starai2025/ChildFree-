@@ -392,7 +392,7 @@ body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding
 .topt label,.dblock,.ditem{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:12px}.dblock.gold{border-color:#F9C8AE;background:#FFF8F3}.dblock .lbl,.dblock a{color:var(--berry)}.dblock p{color:var(--text)}.dblock .sub,.ditem .s{color:var(--muted)}.dblock .big{font-size:18px;font-weight:600}.dpin{background:#FFF4EC;color:#704F3D;border-color:#FFD7BF;font-size:11px}.dpin b,.dpin button{color:var(--berry)}.topt input:focus-visible+span{outline:3px solid #2474D6}.topt label:has(input:focus-visible){outline-color:#2474D6}
 @media(max-width:360px){main{padding-left:16px;padding-right:16px}.chat-head{margin-left:-16px;margin-right:-16px}.card-photo{aspect-ratio:3/4}.wordmark{font-size:18px}.photo-identity h2{font-size:24px}.card-actions button{font-size:12px}nav.tabs button{font-size:8px}.newm{gap:12px}}
 @media(prefers-reduced-motion:reduce){button,.btn{transition:none}}
-/* FREE MIDNIGHT · Midnight Luxe v2. Applies to Welcome, Discover and Match only.
+/* FREE MIDNIGHT · Midnight Luxe v2. Applies to every screen (body[data-midnight]).
    Five locked hues; every other colour is one of them at reduced opacity.
    Type scale 12/14/16/18/22/28/32+ (12px only for short uppercase labels). Spacing 4/8/12/16/20/24/32.
    Lockup: "row" in page headers, "stack" on full-screen moments. Emblem never sits on top of a face. */
@@ -641,9 +641,9 @@ body[data-route=me] .card>.card-photo{aspect-ratio:4/5;height:auto;max-height:52
 body[data-midnight] main .native-invite{margin-top:20px;border-color:var(--native-gold);color:var(--native-obsidian);background:#C89A2B14}
 body[data-midnight] .sep{height:1px;background:var(--native-hair);margin:28px 0}
 /* Hero pages (Matches, Profile): dark emerald hero like Match, ivory sheet rising over it. */
-body:is([data-route=connections],[data-route=me]) header.top{background:var(--native-obsidian);color:var(--native-ivory);border-bottom:1px solid #F6F0E814}
-body:is([data-route=connections],[data-route=me]) .wordmark{color:var(--native-ivory)}
-body:is([data-route=connections],[data-route=me]) #hdr button{color:var(--native-ivory);border-color:var(--native-on-dark-hair)}
+body:is([data-route=connections],[data-route=me],[data-route=dates],[data-route=events]) header.top{background:var(--native-obsidian);color:var(--native-ivory);border-bottom:1px solid #F6F0E814}
+body:is([data-route=connections],[data-route=me],[data-route=dates],[data-route=events]) .wordmark{color:var(--native-ivory)}
+body:is([data-route=connections],[data-route=me],[data-route=dates],[data-route=events]) #hdr button{color:var(--native-ivory);border-color:var(--native-on-dark-hair)}
 .native-hero{position:relative;isolation:isolate;overflow:hidden;margin:0 -20px;padding:28px 24px 64px;color:var(--native-ivory);background:radial-gradient(120% 90% at 88% 0%,var(--native-emerald) 0%,#0F5C4D00 66%),var(--native-obsidian)}
 .native-hero::after{content:"";position:absolute;z-index:-1;left:-30%;bottom:-60%;width:90%;height:110%;background:radial-gradient(closest-side,#C89A2B24,#C89A2B00);pointer-events:none}
 .native-hero .native-eyebrow{color:var(--native-gold);margin:0 0 8px}
@@ -692,6 +692,143 @@ body[data-midnight] .native-convo.unread .s{color:var(--native-obsidian);font-we
 
 .native-danger{margin:40px 0 16px;padding-top:24px;border-top:1px solid var(--native-hair)}
 @media(max-width:360px){body[data-midnight] .native-hero h1{font-size:34px}.native-hero{padding-left:20px;padding-right:20px}}
+/* Shared components on every screen (forms, sheets, chat, planner, review). One logo per screen, restrained surfaces. */
+html{background:var(--native-obsidian)}
+body[data-midnight]{--bad:var(--native-sienna);--ok:var(--native-emerald);--marigold:var(--native-gold);--surface:var(--native-ivory);--ink:var(--native-obsidian);--berry-ink:var(--native-ivory);font-size:16px;line-height:1.5;letter-spacing:0}
+body[data-midnight] header.top{min-height:64px;padding:12px 20px}
+body[data-midnight] .wordmark small{display:none}
+
+/* Buttons */
+body[data-midnight] :is(main,.sheet,.savebar) button:not([class]),body[data-midnight] .sheet .btn-block:not(.btn-primary):not(.btn-danger),body[data-midnight] :is(.btn-quiet,.btn-ghost):not(.item):not(.native-row){min-height:48px;padding:10px 20px;border-radius:var(--native-pill-radius);border:1px solid #11111133;background:transparent;color:var(--native-obsidian);font-family:var(--native-sans);font-size:15px;font-weight:600;box-shadow:none}
+body[data-midnight] :is(main,.sheet,.savebar) button:not([class]):hover,body[data-midnight] :is(.btn-quiet,.btn-ghost):not(.item):not(.native-row):hover{background:var(--native-wash)}
+body[data-midnight] :is(.btn-primary,.btn-go,.btn-gold):not(.native-pill):not(.like):not(.native-tile){min-height:52px;padding:12px 24px;border-radius:var(--native-pill-radius);border:0;background:var(--native-terracotta);color:var(--native-ivory);font-family:var(--native-sans);font-size:16px;font-weight:700;box-shadow:0 8px 24px #8A332433}
+body[data-midnight] :is(.btn-primary,.btn-go,.btn-gold):not(.native-pill):not(.like):hover{background:var(--native-terracotta);color:var(--native-ivory)}
+body[data-midnight] :is(.btn-danger,.btn-red){min-height:48px;border-radius:var(--native-pill-radius);border:1px solid #8A332466;background:transparent;color:var(--native-terracotta);font-weight:700}
+body[data-midnight] .btn-link{min-height:44px;padding:8px 0;border:0;background:none;color:var(--native-emerald);font-size:16px;font-weight:700}
+body[data-midnight] .btn-link:hover{background:none;text-decoration:underline;text-underline-offset:4px}
+body[data-midnight] .btn-mute{border:0;background:none;color:var(--native-ink-2);font-weight:600}
+body[data-midnight] button:disabled{opacity:.4}
+
+/* Forms */
+body[data-midnight] label{font-size:15px;font-weight:600;line-height:1.4;color:var(--native-obsidian);margin:20px 0 8px}
+body[data-midnight] legend{font-weight:600}
+body[data-midnight] .hint{display:block;margin-top:2px;font-size:13px;font-weight:500;color:var(--native-ink-2)}
+body[data-midnight] :is(input[type=text],input[type=date],input[type=number],input[type=time],input[type=datetime-local],select,textarea){min-height:52px;padding:12px 16px;border:1px solid #11111133;border-radius:14px;background:#FFFFFF00;color:var(--native-obsidian);font-family:var(--native-sans);font-size:16px}
+body[data-midnight] :is(input,select,textarea):focus{background:transparent;border-color:var(--native-emerald);outline:3px solid #0F5C4D33;outline-offset:0}
+body[data-midnight] textarea{min-height:96px;line-height:1.5}
+body[data-midnight] .panel{margin:16px 0;padding:20px;border:1px solid var(--native-hair);border-radius:20px;background:var(--native-ivory);box-shadow:var(--native-shadow)}
+body[data-midnight] .q{padding:18px 0;border-top:1px solid var(--native-hair)}
+body[data-midnight] .q-text{font-size:16px;font-weight:600;line-height:1.45;margin-bottom:12px;color:var(--native-obsidian)}
+body[data-midnight] .seg{gap:10px}
+body[data-midnight] .seg label{margin:0;padding:12px;border:1px solid #11111133;border-radius:14px;background:transparent;font-size:15px;font-weight:600;color:var(--native-obsidian)}
+body[data-midnight] :is(.seg,.pick) label:has(input:checked){background:var(--native-emerald);border-color:var(--native-emerald);color:var(--native-ivory)}
+body[data-midnight] .pick{gap:8px}
+body[data-midnight] .pick label{min-height:44px;padding:10px 16px;border:1px solid #11111133;border-radius:var(--native-pill-radius);background:transparent;font-size:15px;font-weight:600}
+body[data-midnight] :is(.seg,.pick,.topt) label:has(input:focus-visible){outline:3px solid var(--native-gold);outline-offset:2px}
+body[data-midnight] .checks label{font-size:16px;font-weight:500;margin:10px 0}
+body[data-midnight] :is(.checks,.strict) input{accent-color:var(--native-emerald)}
+body[data-midnight] .strict{font-size:14px;color:var(--native-ink-2)}
+body[data-midnight] .counter{font-size:13px;color:var(--native-ink-2)}
+body[data-midnight] .counter.bad{color:var(--native-terracotta)}
+body[data-midnight] .errors{border:1px solid #8A332466;border-radius:14px;background:#8A33240D;color:var(--native-terracotta);font-size:15px}
+body[data-midnight] .pledge{font-family:var(--native-serif);font-size:20px;line-height:1.6;font-weight:500;color:var(--native-obsidian)}
+body[data-midnight] .photos{gap:10px}
+body[data-midnight] .ph{border-radius:16px;border:1px dashed #11111140;background:var(--native-wash)}
+body[data-midnight] .ph button.add{background:transparent;color:var(--native-emerald);font-size:14px;font-weight:700}
+body[data-midnight] .ph .x{padding:4px 10px;border:0;border-radius:var(--native-pill-radius);background:var(--native-ivory);color:var(--native-obsidian);font-size:12px;font-weight:700}
+body[data-midnight] .fgroup{border-top:1px solid var(--native-hair)}
+body[data-midnight] .fgroup h3,body[data-midnight] .pgroup h3{font-size:16px;font-weight:700;color:var(--native-obsidian);letter-spacing:0;text-transform:none}
+body[data-midnight] :is(.fcount,.pcount){top:64px;padding:12px 0;border-bottom:1px solid var(--native-hair);background:var(--native-ivory);font-size:14px;font-weight:700}
+body[data-midnight] .pcount b{font-size:14px}
+body[data-midnight] .savebar{border-top:1px solid var(--native-hair);background:#F6F0E8F2;backdrop-filter:blur(12px)}
+body[data-midnight] .compat-section progress{accent-color:var(--native-emerald)}
+body[data-midnight] .compat-progress{font-size:13px;color:var(--native-ink-2)}
+body[data-midnight] .compat-section label{font-size:17px}
+body[data-midnight] .compat-answers dt{font-size:13px;color:var(--native-ink-2)}
+
+/* Notices, sheets, toasts */
+body[data-midnight] .status{padding:20px;border:1px solid #0F5C4D33;border-radius:20px;background:#0F5C4D0F;color:var(--native-obsidian)}
+body[data-midnight] .status.bad{border-color:#8A332433;background:#8A33240A}
+body[data-midnight] main>.status{margin:24px 0;padding:28px 24px;border-top:3px solid var(--native-gold)}
+body[data-midnight] .status h2{font-family:var(--native-serif);font-size:26px;line-height:1.2;font-weight:700;margin:0 0 10px}
+body[data-midnight] .status p{font-size:16px;color:var(--native-ink-2)}
+body[data-midnight] .announce{border:0;border-radius:16px;background:var(--native-emerald);color:var(--native-ivory);font-size:15px}
+body[data-midnight] .announce b{color:var(--native-gold);font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:1}
+body[data-midnight] .announce button{color:var(--native-ivory);background:transparent}
+.scrim{background:#111111A6;backdrop-filter:blur(4px)}
+body[data-midnight] .sheet{background:var(--native-ivory);color:var(--native-obsidian);border-radius:28px 28px 0 0;padding:28px 24px calc(24px + env(safe-area-inset-bottom,0px))}
+body[data-midnight] .sheet h2{font-family:var(--native-sans);font-size:22px;font-weight:700;margin:0 0 8px}
+body[data-midnight] .sheet .row{gap:10px}
+.toast{background:var(--native-obsidian);color:var(--native-ivory);border-radius:14px;font-size:14px;font-weight:600;box-shadow:0 8px 24px #11111140}
+body[data-midnight] .tabs-inline{padding:0;gap:8px;border-radius:0;background:transparent}
+body[data-midnight] .tabs-inline button{min-height:40px;padding:8px 16px;border:1px solid #11111126;border-radius:var(--native-pill-radius);background:transparent;color:var(--native-ink-2);font-size:14px;font-weight:600}
+body[data-midnight] .tabs-inline button[aria-pressed=true]{background:var(--native-emerald);border-color:var(--native-emerald);color:var(--native-ivory);box-shadow:none}
+body[data-midnight] .stat{border:1px solid var(--native-hair);border-radius:16px;background:var(--native-ivory)}
+body[data-midnight] .stat b{font-size:28px;font-weight:700;color:var(--native-obsidian)}
+body[data-midnight] .stat span{font-size:13px;color:var(--native-ink-2)}
+body[data-midnight] .gaps th,body[data-midnight] .gaps td{border-color:var(--native-hair)}
+body[data-midnight] .gaps td.short{background:#C89A2B33}
+
+/* Chat */
+body[data-route=chat] main{background:var(--native-ivory)}
+body[data-midnight] .chat-head{min-height:72px;background:var(--native-obsidian);color:var(--native-ivory);border:0}
+body[data-midnight] .chat-head .avatar{width:44px;height:44px;border:0;box-shadow:0 0 0 2px var(--native-obsidian),0 0 0 3.5px var(--native-gold)}
+body[data-midnight] .chat-head .grow>div:first-child{font-family:var(--native-sans)!important;font-size:17px!important;font-weight:700}
+body[data-midnight] .chat-head .tiny{font-size:13px;color:var(--native-on-dark-2);opacity:1}
+body[data-midnight] .chat-head :is(button,.btn-quiet,.btn-link){min-height:44px!important;padding:8px!important;border:0!important;background:transparent!important;color:var(--native-ivory)!important}
+body[data-midnight] .msgs{gap:6px;padding:20px 0 160px}
+body[data-midnight] .b{max-width:80%;padding:12px 16px;border-radius:20px;font-size:16px;line-height:1.45}
+body[data-midnight] .b.me{background:var(--native-terracotta);border:0;color:var(--native-ivory);border-bottom-right-radius:6px}
+body[data-midnight] .b.them{background:#11111010;border:0;color:var(--native-obsidian);border-bottom-left-radius:6px}
+body[data-midnight] .b.img{background:transparent;padding:0}
+body[data-midnight] :is(.when,.seen){font-size:12px;color:var(--native-ink-2)}
+body[data-midnight] .typing{font-size:13px;color:var(--native-ink-2)}
+body[data-midnight] .ctx{border-radius:16px;background:#C89A2B1A;color:var(--native-ink-2);font-size:14px}
+body[data-midnight] .ctx q{font-family:var(--native-serif);font-size:17px;color:var(--native-obsidian)}
+body[data-midnight] .composer{border-top:1px solid var(--native-hair);background:var(--native-ivory)}
+body[data-midnight] .composer textarea{min-height:48px;height:48px;padding:12px 18px;border:1px solid #11111126;border-radius:24px;background:transparent;font-size:16px}
+body[data-midnight] .composer .ph-btn{width:48px;height:48px;min-height:48px;border:1px solid #11111126;background:transparent;color:var(--native-emerald)}
+body[data-midnight] .composer .btn-primary{display:flex;align-items:center;justify-content:center;width:48px!important;height:48px;min-height:48px!important;padding:0!important;border-radius:50%!important;background:var(--native-terracotta);color:var(--native-ivory);box-shadow:none}
+body[data-midnight] .dpin{border:0;border-radius:14px;background:var(--native-emerald);color:var(--native-ivory);font-size:14px}
+body[data-midnight] :is(.dpin b,.dpin button){color:var(--native-gold)}
+body[data-midnight] .dblock{padding:18px;border:1px solid var(--native-hair);border-radius:20px;background:var(--native-ivory);color:var(--native-obsidian);box-shadow:var(--native-shadow)}
+body[data-midnight] .dblock.gold{border-color:#C89A2B99;background:#C89A2B0F}
+body[data-midnight] .dblock .lbl{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--native-emerald)}
+body[data-midnight] .dblock p{color:var(--native-obsidian)}
+body[data-midnight] .dblock .sub{color:var(--native-ink-2);font-size:14px}
+body[data-midnight] .dblock .big{font-family:var(--native-serif);font-size:22px;font-weight:700}
+body[data-midnight] .dblock a{color:var(--native-emerald)}
+
+/* Date planner: a full-screen moment, dark like Match */
+body[data-midnight] .planner{background:radial-gradient(130% 50% at 50% 0%,var(--native-emerald) 0%,#0F5C4D00 70%),var(--native-obsidian);color:var(--native-ivory);color-scheme:dark}
+body[data-midnight] .planner .phead button{color:var(--native-ivory);font-weight:600}
+body[data-midnight] .planner .phead b{font-size:16px;color:var(--native-ivory)}
+body[data-midnight] .planner h1{font-family:var(--native-serif);font-size:34px;line-height:1.1;font-weight:700;color:var(--native-ivory)}
+body[data-midnight] .planner h2{font-family:var(--native-sans);font-size:20px;font-weight:700;color:var(--native-ivory)}
+body[data-midnight] .planner :is(p,label){color:var(--native-ivory)}
+body[data-midnight] .planner .pm{color:var(--native-on-dark-2)}
+body[data-midnight] .planner :is(select,input[type=text],input[type=time],input[type=datetime-local]){border-color:var(--native-on-dark-hair);background:#F6F0E80D;color:var(--native-ivory)}
+body[data-midnight] .planner .errors{border-color:#C89A2B80;background:#C89A2B14;color:var(--native-ivory)}
+body[data-midnight] :is(.pchips,.days) button{border:1px solid var(--native-on-dark-hair);border-radius:16px;background:transparent;color:var(--native-ivory)}
+body[data-midnight] :is(.pchips,.days) button[aria-pressed=true]{background:var(--native-emerald);border-color:var(--native-gold);color:var(--native-ivory)}
+body[data-midnight] .opt{border-radius:16px;background:#F6F0E80F;color:var(--native-ivory)}
+body[data-midnight] .opt input[type=time]{background:transparent}
+body[data-midnight] :is(.opt button,.opt.add){color:var(--native-on-dark-2)}
+body[data-midnight] .opt.add{border:1px dashed var(--native-on-dark-hair);background:transparent}
+body[data-midnight] .planner :is(.btn-ghost,button:not([class])){border-color:var(--native-on-dark-hair);color:var(--native-ivory);background:transparent}
+body[data-midnight] .planner .btn-red{border-color:#C89A2B80;color:var(--native-ivory)}
+body[data-midnight] .planner .btn-mute{color:var(--native-on-dark-2)}
+body[data-midnight] .pbar{border-top:1px solid var(--native-on-dark-hair);background:var(--native-obsidian)}
+body[data-midnight] .card.vcard{border:1px solid var(--native-on-dark-hair);border-radius:24px;background:#F6F0E80A;color:var(--native-ivory)}
+body[data-midnight] .vcard .vphoto{background:var(--native-emerald);color:var(--native-gold)}
+body[data-midnight] .vcard h3{font-family:var(--native-serif);font-size:24px;font-weight:700;color:var(--native-ivory)}
+body[data-midnight] :is(.vmeta,.vprog){font-size:14px;color:var(--native-on-dark-2)}
+body[data-midnight] .vtags span{border-color:var(--native-on-dark-hair);background:transparent;font-size:13px}
+body[data-midnight] .vcard a{color:var(--native-gold)}
+body[data-midnight] .vact .vpass{border:1px solid var(--native-on-dark-hair);background:transparent;color:var(--native-ivory);border-radius:var(--native-pill-radius)}
+body[data-midnight] .vact .vlike{border:0;background:var(--native-terracotta);color:var(--native-ivory);border-radius:var(--native-pill-radius)}
+body[data-midnight] .topt label{border:1px solid var(--native-on-dark-hair);border-radius:16px;background:#F6F0E80A;color:var(--native-ivory)}
+body[data-midnight] .topt label:has(input:checked){background:var(--native-emerald);border-color:var(--native-gold);color:var(--native-ivory)}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   body[data-route=discover] .discover-heading{margin-top:12px}
@@ -1146,8 +1283,6 @@ function go(route, extra){
   if (route === "eligibility") S.elig = null;
   render(true);
 }
-// Routes drawn with the Midnight Luxe v2 system. Others keep the legacy look until the founder approves them.
-const MIDNIGHT = ["welcome","discover","view","connections","dates","events","me"];
 const LIVE = ["discover","connections","me","admin","welcome","ineligible","view","events","dates"];
 
 function render(force){
@@ -1155,7 +1290,7 @@ function render(force){
   if (!Object.values(S.loaded).every(Boolean)) return;
   const r = currentRoute();
   document.body.dataset.route = r;
-  document.body.toggleAttribute("data-midnight", MIDNIGHT.includes(r));
+  document.body.toggleAttribute("data-midnight", true); // every screen uses Midnight Luxe v2
   if (r === "chat"){ if (force || S._last !== "chat") renderChat(); else updateChat(); }
   else if (force || S._last !== r || LIVE.includes(r)) {
     const main = $("#main"), y = window.scrollY;
@@ -1203,9 +1338,8 @@ function nativeLogo(arrangement="row"){
 function nativeEmpty(title,text){ return `<div class="native-empty" role="note"><b>${esc(title)}</b><p>${esc(text)}</p></div>`; }
 function nativeBadge(label,soft=false){ return `<span class="native-badge${soft?" soft":""}">${esc(label)}</span>`; }
 function nativePrimary(label,attrs){ return `<button class="btn-primary native-pill" ${attrs}>${esc(label)}<svg class="native-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>`; }
-const originalWordmark = $(".wordmark").innerHTML;
 function renderHeader(r){
-  $(".wordmark").innerHTML = MIDNIGHT.includes(r) ? nativeLogo() : originalWordmark;
+  $(".wordmark").innerHTML = nativeLogo();
   $("#hdr").innerHTML = owner && r !== "admin" ? `<button class="btn-quiet" style="min-height:40px;padding:8px 14px" data-act="go" data-r="admin">Review</button>` : "";
 }
 function renderNav(r){
@@ -1623,8 +1757,7 @@ function upcomingEvents(){
   const cutoff = now() - 3*3600000;
   return Object.entries(S.events).map(([id,e]) => ({...e, id})).filter(e => new Date(e.when).getTime() >= cutoff).sort((a,b) => new Date(a.when) - new Date(b.when));
 }
-VIEWS.events = () => `${announceBanner()}<h1>Events</h1>
-    <p class="muted">Meet other members in person at founding-cohort events around Atlanta.</p>${eventsList()}`;
+VIEWS.events = () => `<section class="native-hero"><h1>Events</h1><p class="native-hero-sub">Meet other members in person at founding-cohort events around Atlanta.</p></section><div class="native-sheet">${announceBanner()}${eventsList()}</div>`;
 function eventsList(){
   const list = upcomingEvents(), canRsvp = isApprovedCurrent(uid);
   return `${list.length ? list.map(e => {
@@ -1661,15 +1794,14 @@ VIEWS.dates = () => {
     }[st.stage];
     return `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">${txt}</div><div class="st ${mine ? "mine" : "wait"}">${mine ? "Your turn" : "Proposing"}</div></div></button>`;
   };
-  return `${announceBanner()}<h1>Dates</h1>
-    <h2 style="margin-top:6px">Upcoming dates</h2>
+  return `<section class="native-hero"><h1>Dates</h1><p class="native-hero-sub">Plans with your matches, and meetups around Atlanta.</p></section><div class="native-sheet">${announceBanner()}
+    <div class="native-section-head"><h3>Upcoming dates</h3></div>
     ${upcoming.length ? upcoming.map(x => `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">Date with ${esc(S.profiles[x.id].name)}</div><div class="s">${esc(x.st.venue ? x.st.venue.name : "Your spot")} · ${esc(fmtAt(x.st.time))}</div><div class="st locked">Locked</div></div></button>`).join("")
       : nativeEmpty("No dates yet","After you've chatted with a match, tap Plan a date in your conversation.")}
     ${past ? `<p class="tiny muted">${past} past ${past===1?"date":"dates"}</p>` : ""}
-    ${pending.length ? `<h2>Pending proposals</h2>${pending.map(line).join("")}` : ""}
-    <h2>Community events</h2>
-    <p class="muted small">Founding-cohort meetups around Atlanta.</p>
-    ${eventsList()}`;
+    ${pending.length ? `<div class="native-section-head"><h3>Pending proposals</h3></div>${pending.map(line).join("")}` : ""}
+    <div class="native-section-head"><h3>Community events</h3><p>Founding-cohort meetups around Atlanta.</p></div>
+    ${eventsList()}</div>`;
 };
 VIEWS.view = () => {
   const id = S.viewId;

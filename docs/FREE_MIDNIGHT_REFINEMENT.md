@@ -99,3 +99,16 @@ What changed:
 - The dark "Room for more" and "No matches yet" feature cards are removed. A quiet note or a plain empty state replaces them.
 - "Invite a friend" is now a row in Profile details.
 - Row icons are plain emerald line icons without tinted boxes.
+
+## v2 everywhere (October 8, 2026)
+
+At the founder's request ("finish the rest"), every screen now uses Midnight Luxe v2. `body[data-midnight]` is always set, and the legacy orange/white/Inter look no longer renders.
+
+Shared components restyled once and used everywhere:
+- **Controls:** pill buttons (sienna primary, outlined secondary, sienna-outline danger, emerald text links). Form fields are 52px with 16px text and an emerald focus ring. Yes/No toggles and interest pills turn emerald when selected.
+- **Overlays and notices:** ivory pop-up sheets, an obsidian toast, emerald announcements, and a gold-topped review notice with a Lora headline.
+- **Chat:** an obsidian header with a gold-ringed avatar, sienna bubbles for you and soft neutral bubbles for them, and a rounded composer.
+- **Date planner:** a full-screen dark emerald/obsidian moment like Match, with emerald-and-gold selected chips.
+- **Dates and Events:** the same dark hero and ivory sheet as Matches and Profile.
+
+One logo per screen still holds: the header lockup only. Screenshots of every screen are in `docs/evidence/midnight-tour/`, `claude-redesign/` and `compatibility/`. The design, full-browser and prototype tests all pass.
