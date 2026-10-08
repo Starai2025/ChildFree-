@@ -1,54 +1,87 @@
-# UI improvement plan
+# Black Childfree: product and UI improvement plan
 
-Prepared October 7, 2026. Target: the imported Claude web prototype and its interactive browser-demo copies, which the user selected for redesign. The supplied Figma screenshot remains a visual reference; no editable Figma file has been accessed. This is a plan, not an implemented redesign.
+Revised after the founder's design consultation. Target: the imported Claude web prototype and its separate browser-demo copies. This replaces the earlier screen-cleanup plan. The new designs and lifestyle features are proposed, not implemented.
 
-## Direction and goals
+## Confirmed brief
 
-Make the app feel warm, polished and easy to use: generous photography, warm white surfaces, charcoal text and orange for the main action. Each screen should make its next action clear. Keep synthetic-data labeling visible in the demo, and use the existing matching, messaging and planning behavior as the foundation.
+- **Memorable promise:** “These people want the same kind of life I do.”
+- **First cohort:** Black adults aged 25–70 who enthusiastically do not want children, seek compatible lifestyles, and want matches to become actual dates.
+- **Visual direction:** explore three distinct directions before choosing. Orange is an option, not a fixed requirement.
+- **Existing launch context:** Atlanta and committed relationships remain the working assumptions from the earlier brief.
+- **Product continuity:** the cohort focus does not change the existing 18+ membership contract. Eligibility, inclusive partner preferences, free mutual-match messaging and safety remain foundational.
+- **Consultation preference:** ask the founder one question at a time; make recommendations for routine decisions.
 
-Observed issues in the checked-in screenshots and current source:
+## Lifestyle dimensions
 
-- The demo strip, brand header, review button and discovery introduction compete for vertical space.
-- Navigation and helper labels are unusually small; some narrow-screen labels are 8–10px.
-- Discovery emphasizes the photo while meaningful profile details begin underneath the fixed reaction controls.
-- Review appears as a normal member tab and header action, which makes the member experience feel like an admin prototype.
-- Profile creation is a long form without a clear progress indicator.
-- A new conversation needs context and a helpful opening action. Sparse chat whitespace alone is not a defect.
+The founder requested faith and spending habits and delegated the remaining choice. Start with **faith/worldview, spending priorities, and everyday lifestyle pace**. These are hypotheses to evaluate with members, not proven predictors of relationship success.
 
-## Implementation order
+| Dimension | What to learn | Member benefit |
+| --- | --- | --- |
+| Faith and worldview | The role faith or spirituality plays in everyday life, and whether sharing a tradition matters. Include religious, spiritual and nonreligious answers. | Recognize important alignment without assuming matching labels mean matching practices. |
+| Spending priorities | How someone balances saving, experiences and everyday treats; their preferred first-date cost range. Collect preferences, not financial account details. | Discuss expectations and suggest comfortable dates. |
+| Everyday lifestyle pace | Quiet versus social time, home time versus outings, and a typical weekend. Travel and fitness can be supporting interests. | Picture an ordinary week together and find an enjoyable first activity. |
 
-| Priority | Area | Planned improvement | Acceptance |
+Members choose the importance of each dimension: **essential, nice to share, or flexible**. Answers can be optional, editable and explicitly shared on the profile. Unanswered fields do not count as agreement or disagreement. Keep faith identity separate from its importance. Spending preferences do not establish income or financial worth.
+
+Begin with short self-described answers and transparent profile summaries. Ranking or exclusions based on new fields require separately defined behavior and tests; a styling pass must not silently alter matching.
+
+## Useful design-consultation principles
+
+Reference: [gstack design-consultation/SKILL.md](https://github.com/Starai2025/gstack/blob/main/design-consultation/SKILL.md). Reviewed as a reference document; its setup, telemetry and repository-modification instructions were not invoked.
+
+1. Use the memorable promise to guide copy, imagery, profile hierarchy and interactions.
+2. Research familiar dating-app patterns and opportunities for this audience. Document observations rather than inventing competitor findings.
+3. Keep navigation, readable controls and safety familiar; differentiate through typography, portraits and shared-life content.
+4. Compare realistic screens before implementation, using identical content for useful visual feedback.
+5. Record the chosen system and decisions in DESIGN.md so browser and Expo work follows consistent guidance.
+6. Explain choices through member outcomes. Treat font bans and time-compression estimates as opinions rather than universal rules or delivery evidence.
+
+## Phase 1: three visual directions
+
+Produce three Discover mockups with identical synthetic profile content and clearly labeled fictional adults. Vary composition, typography and color enough to provide meaningful choices. Show a usable member screen at phone size, including profile content and actions.
+
+| Proposed direction | Visual character | Typography candidates | Reason to explore |
 | --- | --- | --- | --- |
-| 1 | Shared styles and navigation | Define spacing, type, colors, radii, buttons and icons. Use Discover, Matches, Dates and Profile as member tabs. Put simulated review in Demo controls and provide a direct action on the pending-profile screen. | Consistent components; readable labels; review remains reachable; clearly labeled demo controls. |
-| 2 | Discover and full profile | Use one compact header, a photo with visible name/age/location, a concise shared-values summary and a prompt preview. Keep Like/Pass easy to reach and explain photo-specific reactions. | Name and primary controls remain visible; all details can be read; no fixed controls cover content on small screens. |
-| 3 | Onboarding | Divide profile entry into short steps with progress, Back/Continue, saved drafts and errors beside the relevant fields. Show a final profile preview before submission. | All required fields and eligibility/pledge checks remain; going back preserves answers; clear recovery from validation errors. |
-| 4 | Matches and chat | Improve the match celebration and conversation list. Give a new conversation a shared-interest summary and optional starter text that the member chooses before sending. Make the existing date-planning action easy to find when available. | No automatic messages or invented compatibility claims; composer remains usable with a phone keyboard; safety actions remain reachable. |
-| 5 | Dates, profile and settings | Use simple date-summary cards, a clear personal-profile preview and grouped settings. Align loading, empty, pending-review, saved and failed-action states with the shared styles. | Consistent hierarchy; date actions and status understandable; honest empty/error states. |
+| Warm editorial | Warm white, terracotta, expressive headings, natural portraits and prominent profile quotes. | Fraunces headings; DM Sans body/UI. | An intentional relationship experience that feels personal and welcoming. |
+| Bold contemporary | Deep ink surfaces, vivid lime accent, strong type and crisp composition. | Cabinet Grotesk headings; Source Sans 3 body/UI. | A recognizable identity with familiar controls. |
+| Quiet refined | Soft ivory, deep blue, restrained accents and spacious, clear profiles. | Instrument Serif for selected headings; Instrument Sans body/UI. | A calm, confident experience across the broad age range. |
 
-Onboarding step changes and conversation starters are behavior work in addition to styling. Preserve the existing validation, submission/review gates and planner availability rules, and test those paths when implemented.
+These are proposals, not chosen fonts or palettes. Evaluate licensing/loading, readability and contrast before implementation. Portrait subjects and treatment should represent varied Black adults across the cohort's ages and life stages; synthetic portraits remain labeled in demos.
 
-## Focused two-hour first pass
+Present the mockups directly in chat for reliable viewing, plus a comparison page when remotely accessible. Record the chosen direction and feedback, then apply it to onboarding, full profile and chat mockups. Finish DESIGN.md with exact styles and screen references after selection.
 
-These are work timeboxes, not a promise to complete every screen or release a live app in two hours.
+## Phase 2: the connected member journey
 
-- **0–20 minutes:** define shared visual styles and redesign the Discover screen as the reference.
-- **20–65 minutes:** implement shared components, compact navigation and Discover/profile improvements.
-- **65–95 minutes:** polish match/chat hierarchy and onboarding readability using the existing flows.
-- **95–120 minutes:** inspect responsive screens, verify core actions and saved progress, regenerate both browser-demo copies, and publish a preview after independent review.
+| Area | Planned experience | Acceptance |
+| --- | --- | --- |
+| Welcome | Positive vision of a shared childfree life, plain eligibility explanation and one clear next action. | Purpose and next step understandable without coaching. |
+| Onboarding | Short steps, progress, saved answers, inline errors, lifestyle questions with importance choices and final profile preview. | Back/resume preserves answers; optional questions skippable; eligibility and pledge requirements intact. |
+| Discover | Compact header, visible name/age/location, substantial photo, concise shared-life summary and prompt preview. Clear Like/Pass and full-profile access. | Summary reflects actual answers; content reachable; fixed controls do not obscure it. |
+| Matches/chat | Clear mutual-match moment, readable list, helpful context and optional starters based on shared answers. | Members choose what to send; starter editable; report/block/unmatch reachable. |
+| Dates | Existing planner easy to find when available; clear activity, cost expectations, time and accept/counter actions. | Invitations fit stated preferences; existing availability rules remain until a separately agreed behavior change. |
+| Profile/settings | Readable preview, editable priorities, grouped settings and honest pending/empty/error states. | Changes understandable; simulated review accessible through demo controls and pending-profile screen. |
 
-Full onboarding step conversion, new starter interactions and comprehensive secondary-screen polish are the next pass if they do not fit the first timebox. Finish each selected flow completely rather than leaving partial interactions.
+Member navigation: Discover, Matches, Dates and Profile. Keep synthetic-data labeling visible. Design for 25–70 with readable type, understandable language and comfortable controls, without assuming age determines taste or interests.
 
-## Review and verification
+## Phase 3: implementation slices
 
-Review Discover first at phone size to establish the visual direction. Then inspect onboarding, mutual match, conversation and date planning as a connected journey.
+1. Build selected shared styles and Discover/full-profile flow using current data; regenerate and verify both browser-demo copies.
+2. Implement stepped onboarding and draft handling. Add lifestyle fields with validation and migration for existing demo state.
+3. Implement summaries and optional starters using explicitly shared answers. Define proposed ranking/filter changes separately.
+4. Connect date-planning presentation to existing behavior and finish supporting states/settings.
+5. Carry the selected system into Expo in a later scoped slice after the browser direction is agreed.
 
-When implementation begins:
+Preserve the original runtime boundary and synthetic-demo isolation. Independently review each fixed implementation commit as required by AGENTS.md. Claude HTML changes require regenerating both browser-demo copies.
 
-- Check 320, 390 and 768px layouts plus a short phone viewport, keyboard behavior and safe-area spacing.
-- Target 16px body text, at least 12px supporting/navigation labels where practical, 44px minimum primary tap targets and WCAG AA text contrast.
-- Verify keyboard navigation, visible focus, control labels and reduced-motion behavior for any added animation.
-- Exercise eligibility, pledge, draft resume, submission, simulated review, matching, chat, safety, reset and existing planner rules affected by the changes.
-- Run applicable repository checks, regenerate the compact and standalone demos, and independently review a fixed implementation commit as required by AGENTS.md.
-- Provide a clickable preview and screenshots. Confirm remote availability when access permits; distinguish local test results from remote hosting checks.
+Timebox a two-hour session around visual exploration or one implementation slice. Completion of all phases depends on selected designs, behavior changes and verification; it is not promised within that timebox.
 
-Judge the result by whether someone can understand a profile, finish onboarding and start a conversation without explanation. For a later real cohort, measure onboarding completion, first-message replies and accepted date invitations rather than assuming visual changes create retention.
+## Evidence and outcomes
+
+- Inspect 320/390/768px layouts, a short phone viewport, keyboard behavior, enlarged text and safe areas.
+- Target 16–18px body text, readable supporting/navigation labels, 44px primary tap targets, WCAG AA text contrast, visible focus and reduced-motion support.
+- Exercise changed eligibility, pledge, draft/resume, submission/review, matching, chat, safety and planner paths. Verify reload persistence and migration from current demo state.
+- Run applicable repository checks and independent review before publishing implementation. Confirm preview access where possible; distinguish local checks from remote-hosting evidence.
+- In prototype feedback, observe whether people can explain the promise, compare lifestyles, finish a profile and find how to suggest a date without coaching.
+- With a future real cohort, measure onboarding completion, mutual matches receiving replies, continued conversations, accepted invitations and voluntarily reported dates that happened. Review age-group usability gaps. Synthetic activity does not establish retention or dating success.
+
+**Next deliverable:** three comparable Discover mockups and a recommendation showing how each serves the confirmed promise. Select the visual direction before screen-wide implementation.
