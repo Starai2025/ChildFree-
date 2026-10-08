@@ -42,3 +42,13 @@ EXPO_NO_TELEMETRY=1 DENO_DIR=/workspace/.deno-cache npm run check
 The design check passes at 320×667, 390×844, 768×844 and 1280×900; it checks computed colors/contrast, loaded bundled fonts, bold heading weight, the new brand/copy, visible profile identity, reachable CTAs, eligibility and mutual-match chat navigation. It records zero external requests. Full browser regression passes onboarding with all ten optional questions, editing, persistence, failed-storage retry, legacy profiles, matching, messages and reset. The source walkthrough also covers filters, safety, date planning, profile and Review. All 36 repository tests, typecheck/lint, Edge typecheck and admin build pass.
 
 Independent review and isolated artifact-only preview delivery follow the same contract as the previous checkpoint. Main source must not be pushed until the founder reviews the full demo, and remaining screens must not be redesigned before screenshot approval. The earlier Native preview URL remains an immutable historical version.
+
+## Reviewed delivery
+
+A6 independently accepted source commit `a5cf8314bdc301c94cbd36854829530c40d68c4f` against `fbc5842`, with no material findings. Its design and full-browser checks passed with evidence/generated hashes unchanged.
+
+Only `prototype/web-mvp1/free-midnight-preview.html` was added on `preview/free-midnight-a5cf831`, commit `b7b0367fe6f52eb9755d0616fe1e5f25af6c660a`. The parent is public main `637ceb3518705cdb29c373481908e333809e2d72`; the branch diff is exactly that one HTML file. Main was verified unchanged after the push. No unpublished source commits were pushed to main.
+
+[Interactive review demo](https://raw.githack.com/Starai2025/ChildFree-/b7b0367fe6f52eb9755d0616fe1e5f25af6c660a/prototype/web-mvp1/free-midnight-preview.html). Public GitHub raw returns the exact reviewed bytes; this environment blocks CDN access, so CDN browser rendering is unverified here. The actual app was tested locally, including the standalone/offline copy.
+
+`/workspace/exports/Free-Midnight-demo.html` and `Free-Midnight-demo.zip` contain the reviewed HTML; the ZIP includes a walkthrough and both font licenses. Size12,115,580 bytes; SHA-256 `e38c2602d84f537afd95227bf990e4cbbde354f7c60aa7346197210343d611df`. The `free-midnight-review.json` manifest records source/preview commits, public-byte verification and pending visual approval.
