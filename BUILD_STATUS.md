@@ -20,6 +20,8 @@ A browser demo, local SQL tests and JavaScript exports do not complete those gat
 
 ## Local evidence
 
+Latest browser refinement: founder renamed the app FREE MIDNIGHT and supplied its crescent-heart emblem and welcome copy. The three review screens now use bolder bundled DM Sans/Lora, larger labels and deep pigment burnt sienna `#8A3324`. Existing functional and isolation checks pass. Other screen redesign and source publication to main still await founder approval; see docs/FREE_MIDNIGHT_REFINEMENT.md.
+
 Newest browser presentation checkpoint: Native Dating / Midnight Luxe, using the founder's supplied board and five locked colors. Welcome, Discover and the Match dialog now share scoped tokens, a serif wordmark with gold heart, original synthetic hero photography, terracotta pill actions and ivory/emerald surfaces. Other app screens await screenshot approval. Existing eligibility, optional compatibility questions, filtering/matching, messaging and local demo isolation are preserved. This browser change does not modify Expo or provider logic. See docs/NATIVE_MIDNIGHT_LUXE.md for screenshots, validation and the approval gate; public main remains unchanged.
 
 Local review candidate: the user requested the ten-question compatibility section in the browser app, then required seeing the full demo before a GitHub push. The Claude source and generated demo copies now include optional one-at-a-time questions, draft persistence/retry, profile editing and exact shared-answer summaries. Previously saved profiles remain usable without invented answers. The shipped browser workflow and 36 repository tests pass. Expo/SQL/provider code and original ranking/filter rules are unchanged. This candidate has not been pushed; see docs/COMPATIBILITY_QUESTIONS.md.

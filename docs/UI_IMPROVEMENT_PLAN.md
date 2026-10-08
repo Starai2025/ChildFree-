@@ -1,5 +1,7 @@
 # Black Childfree: product and UI improvement plan
 
+Latest founder direction: **FREE MIDNIGHT**, larger/bolder readable typography, supplied crescent-heart mark, and deep pigment burnt sienna `#8A3324` replacing the previous terracotta accent. The welcome headline is “The Only Thing We're Raising / Is the Bar.” with “Black Singles. No Children. Not Ever.” See [latest three-screen review slice](FREE_MIDNIGHT_REFINEMENT.md). This supersedes earlier Native naming/font/color details below; approval is still required before extending the redesigned screens or pushing implementation to main.
+
 Revised after the founder's design consultation. Target: the imported Claude web prototype and its separate browser-demo copies. The founder has now locked **Native Dating / Midnight Luxe**, using the supplied image and five exact brand colors; this supersedes the earlier three-direction exploration. Welcome, Discover and Match are the first local screenshot checkpoint; see [design system, scope and evidence](NATIVE_MIDNIGHT_LUXE.md). The ten-question compatibility collection and profile comparison remain implemented; see [implementation and evidence](COMPATIBILITY_QUESTIONS.md). Public main must remain unchanged until full demo review; the separately authorized artifact-only preview is the delivery exception.
 
 ## Confirmed brief

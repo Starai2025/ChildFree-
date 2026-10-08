@@ -49,8 +49,8 @@ try {
   assert.ok(await page.evaluate(()=>localStorage.getItem('blackchildfree.claude-browser-demo.v1').length<100000),'Preset portraits must not fill browser storage.');
   assert.ok(stored.some(([,value])=>value.img==='@demo-portrait:amara'));
   await page.screenshot({path:'docs/evidence/claude-browser-demo/chat.png'});
-  await demo('menu').click();await demo('fresh').click();await page.getByRole('button',{name:"Join Native",exact:true}).waitFor();
-  await page.getByRole('button',{name:"Join Native",exact:true}).click();
+  await demo('menu').click();await demo('fresh').click();await page.getByRole('button',{name:"Join Free Midnight",exact:true}).waitFor();
+  await page.getByRole('button',{name:"Join Free Midnight",exact:true}).click();
   await page.locator('#dob').fill('1994-01-01');
   for (let i=0;i<6;i++) {
     const radio=page.locator(`[name="q${i}"][value="yes"]`);

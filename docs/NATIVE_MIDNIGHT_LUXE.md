@@ -1,5 +1,7 @@
 # Native Dating · Midnight Luxe · first visual checkpoint
 
+Historical Native checkpoint. The founder's subsequent [FREE MIDNIGHT refinement](FREE_MIDNIGHT_REFINEMENT.md) supersedes the name, fonts and primary accent while preserving the staged approval gate and existing flows. Current local screenshots/demo copies show that newer draft; this document records the initial implementation and immutable Native preview delivery.
+
 The founder's attached Midnight Luxe board is now the authoritative design reference. It supersedes the orange Figma direction and the three-direction exploration in the previous plan. This is a browser-prototype presentation change, not an Expo rebuild or production release.
 
 ## Scope and approval gate
