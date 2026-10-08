@@ -1,5 +1,7 @@
 # Interactive browser delivery
 
+This document records the initial browser-delivery checkpoint. The subsequent local [compatibility-question candidate](COMPATIBILITY_QUESTIONS.md) changes the Claude source and generated copies and awaits user demo review before a GitHub push. Existing public delivery links continue to serve the earlier version.
+
 The user could not see the redesigned app through a repository/file link. The Claude source still required Claude's runtime, and the earlier design preview only switched static screenshots. This change makes the same redesigned interface usable as an isolated browser demo, with clearly labeled synthetic data and no sign-in.
 
 ## Open the app

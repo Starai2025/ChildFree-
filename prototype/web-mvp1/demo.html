@@ -380,6 +380,7 @@ body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding
 .composer{left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid #EDF0F4;padding:9px 14px calc(14px + env(safe-area-inset-bottom,0px));z-index:12}.composer textarea{background:#F1F3F7;border:0;height:44px;min-height:44px;padding:12px 14px;border-radius:24px;font-size:12px;resize:none}.composer .ph-btn,.composer .btn-primary{flex:none;width:44px;height:44px;min-height:44px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center}.composer .ph-btn{background:#F4F6F9;border:0;color:#9198A5}.composer .btn-primary{background:var(--berry);color:#fff;border:0;box-shadow:none}
 .match{background:linear-gradient(150deg,#CB4708,#AE3504);padding:28px;overflow-y:auto}.match h1{font-size:38px;font-weight:800}.match .pair{margin-bottom:30px}.match .av{width:116px;height:116px;border:5px solid #fff;box-shadow:0 10px 35px #8A280F33;background:#FD9972}.match .note{font-size:16px}.match .shared span{font-size:11px}.match .actions{width:100%;max-width:320px}.match .actions button{width:100%;border-radius:12px;font-size:13px}.match .btn-primary{color:#C74100;background:#fff}.match .actions button:last-child{border-color:#ffffff50;background:transparent}
 .welcome{padding:14px 0}.welcome-art{height:176px;background:#FFF3EB;border-radius:22px;display:flex;align-items:center;justify-content:center;margin-bottom:30px;position:relative;overflow:hidden}.welcome-art::before,.welcome-art::after{content:"";position:absolute;border:1px solid #F9D3BF;border-radius:50%;width:230px;height:230px;left:-125px;top:-80px}.welcome-art::after{left:auto;right:-130px;top:60px}.welcome-art svg{width:80px;height:80px;color:#F5651C;stroke-width:1.2}.welcome h1{font-size:34px;letter-spacing:-1.3px;max-width:310px}.welcome>p{font-size:13px;line-height:1.85;color:var(--muted)}.welcome .welcome-note{font-size:10px;line-height:1.8;color:#71747D;padding:14px 0}.welcome-facts{display:flex;gap:7px;margin:20px 0}.welcome-facts span{flex:1;text-align:center;background:#F7F8FA;border-radius:8px;padding:10px 5px;font-size:10px;color:#747B88}.welcome .btn-primary{margin-top:10px!important}
+.compat-section,#compat-editor,.compat-summary{scroll-margin-top:130px}.compat-section .small,.compat-summary .small{font-size:13px}.compat-progress{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.compat-section progress{display:block;width:100%;height:6px;margin:14px 0;accent-color:var(--berry)}.compat-section label{font-size:16px;line-height:1.5}.compat-section select{font-size:16px;width:100%;min-height:48px}.compat-buttons{margin-top:16px;gap:8px;flex-wrap:wrap}.compat-buttons button{min-height:44px}.compat-save{min-height:20px;margin-bottom:0}.compat-summary{padding:18px 0;border-bottom:1px solid var(--line);margin-bottom:8px}.compat-summary h3{font-size:17px;margin:0 0 10px}.compat-summary summary{cursor:pointer;padding:12px 0;font-size:14px}.compat-summary .chip{font-size:12px}.compat-answers{margin:12px 0}.compat-answers>div{padding:11px 0;border-bottom:1px solid var(--line)}.compat-answers dt{font-size:12px;color:var(--muted);line-height:1.5}.compat-answers dd{font-size:15px;font-weight:500;margin:5px 0 0;line-height:1.5}
 /* The date planner uses the same white/orange system as the rest of the app. */
 .planner{background:#fff;color:var(--text);max-width:480px;left:50%;right:auto;transform:translateX(-50%);width:100%;padding-top:calc(20px + env(safe-area-inset-top,0px))}.planner .phead button{color:var(--berry)}.planner h1{color:var(--text);font-size:28px}.planner h2,.planner p,.planner label{color:var(--text)}.planner .pm{color:var(--muted)}.planner select,.planner input[type=text],.planner input[type=time],.planner input[type=datetime-local]{background:#F3F5F9;color:var(--text);border:1px solid var(--line)}
 .pchips button,.days button{background:#F7F8FA;color:var(--text);border-color:var(--line);font-size:12px}.pchips button[aria-pressed=true],.days button[aria-pressed=true],.topt label:has(input:checked){background:#FFF0E8;border-color:#F8B998;color:#B43D06}.days button b{font-size:20px}.opt{background:#F3F5F9;color:var(--text)}.opt input[type=time]{background:#fff}.opt button,.opt.add{color:var(--muted)}.opt.add{border-color:#D7DCE5}
@@ -411,15 +412,18 @@ body[data-route=chat] header.top{display:none}body[data-route=chat] main{padding
   const clone = value => JSON.parse(JSON.stringify(value));
   const listeners = new Map();
   const stamp = Date.now();
-  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:[{id:'ordinary_sunday',a:'Coffee, the farmers market, and a long walk with nowhere to rush.'},{id:'partnership',a:'Choosing each other. Being kind, being honest, and making room to grow.'}],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
+  const compatibility = {version:1,answers:{faithPractice:'personal',faithPartner:'respect',faithImportance:'prefer',spendingPriority:'balanced',dateBudget:'casual',spendingImportance:'prefer',socialPace:'balanced',weekend:'mix',lifestyleImportance:'prefer',dateAvailability:'weekends'}};
+  const profile = (name, gender) => ({name,gender,city:'Atlanta',zip:'30308',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:[{id:'ordinary_sunday',a:'Coffee, the farmers market, and a long walk with nowhere to rush.'},{id:'partnership',a:'Choosing each other. Being kind, being honest, and making room to grow.'}],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
   function fixtures(fresh = false) {
     const seeded = new Map();
     seeded.set('profiles/malik', profile('Malik','Man'));
     seeded.set('profiles/zuri', profile('Zuri','Woman'));
+    seeded.get('profiles/malik').compatibility = clone(compatibility);
     seeded.set('approvals/malik', {status:'approved',revision:1,note:'Synthetic demo approval'});
     seeded.set('reactions/malik', {r:{amara:{k:'like',at:stamp-60000}}});
     if (!fresh) {
       seeded.set('profiles/amara', profile('Amara','Woman'));
+      seeded.get('profiles/amara').compatibility = clone(compatibility);
       seeded.set('approvals/amara', {status:'approved',revision:1,note:'Synthetic demo approval'});
       seeded.set('data/users/amara/private', {elig:{dob:'1994-01-01',result:'eligible',answers:Array(6).fill('yes'),v:1},pledge:{v:1,at:stamp},matchSeen:{},lastRead:{}});
     }
@@ -566,6 +570,34 @@ function cleanDetails(d){
   if (ints.length) out.interests = ints;
   return out;
 }
+// ---------- Compatibility domain (versioned, optional self-reported answers) ----------
+const COMPATIBILITY_QUESTIONS = [
+  {id:"faithPractice",group:"Faith and worldview",q:"What role does faith or spirituality play in your life?",options:[["daily","Part of my everyday life"],["personal","Personal, without a regular routine"],["occasional","Part of my life occasionally"],["secular","Not part of my life"]],shared:"Same role for faith or spirituality"},
+  {id:"faithPartner",group:"Faith and worldview",q:"What approach to beliefs would you like in a partner?",options:[["shared","A shared faith or worldview"],["respect","Different beliefs with mutual respect"],["explore","Open to exploring beliefs together"]],shared:"Same preference about a partner's beliefs"},
+  {id:"faithImportance",group:"Faith and worldview",q:"How important is a similar approach to faith or spirituality?",options:[["essential","Essential to me"],["prefer","Nice to share"],["flexible","I'm flexible"]]},
+  {id:"spendingPriority",group:"Spending priorities",q:"Which spending approach feels most like you?",options:[["saving","Prioritize saving and planned purchases"],["balanced","Balance saving and enjoying experiences"],["experiences","Prioritize experiences within my means"]],shared:"Same spending priorities"},
+  {id:"dateBudget",group:"Spending priorities",q:"What would feel comfortable spending on a first date?",options:[["free","A free or very low-cost activity"],["casual","A casual café or affordable outing"],["occasion","A special meal or experience"]],shared:"Same first-date budget preference"},
+  {id:"spendingImportance",group:"Spending priorities",q:"How important is a similar approach to spending?",options:[["essential","Essential to me"],["prefer","Nice to share"],["flexible","I'm flexible"]]},
+  {id:"socialPace",group:"Everyday lifestyle",q:"What social pace feels best to you?",options:[["quiet","Mostly quiet time and a small circle"],["balanced","A mix of quiet time and social plans"],["social","Frequent outings and social plans"]],shared:"Same social pace"},
+  {id:"weekend",group:"Everyday lifestyle",q:"What does a good weekend usually look like?",options:[["home","Relaxing or enjoying projects at home"],["outdoors","Getting outside and staying active"],["culture","Food, music, culture or exploring"],["mix","A mix of home time and outings"]],shared:"Same kind of weekend"},
+  {id:"lifestyleImportance",group:"Everyday lifestyle",q:"How important is a similar everyday lifestyle?",options:[["essential","Essential to me"],["prefer","Nice to share"],["flexible","I'm flexible"]]},
+  {id:"dateAvailability",group:"Making a date happen",q:"When are you usually available for a first date?",options:[["weekdays","Weekday afternoons or evenings"],["weekends","Mostly weekends"],["flexible","My schedule is flexible"],["coordinate","My schedule varies; let's coordinate"]],shared:"Same general date availability"}
+];
+function cleanCompatibility(value){
+  const answers = {};
+  if (value && value.version === 1 && value.answers && typeof value.answers === "object" && !Array.isArray(value.answers)){
+    for (const question of COMPATIBILITY_QUESTIONS){
+      const answer = value.answers[question.id];
+      if (question.options.some(([id]) => id === answer)) answers[question.id] = answer;
+    }
+  }
+  return {version:1, answers};
+}
+function sharedCompatibility(first, second){
+  const a = cleanCompatibility(first).answers, b = cleanCompatibility(second).answers;
+  return COMPATIBILITY_QUESTIONS.filter(q => q.shared && a[q.id] && a[q.id] === b[q.id]).map(q => q.shared);
+}
+// ---------- End compatibility domain ----------
 const REPORT_CATS = [
   ["eligibility","Lying about eligibility"],
   ["scam","Impersonation, scam or asking for money"],
@@ -584,7 +616,7 @@ const S = {
   myMsgs:{}, theirMsgs:{}, msgSubs:{}, mySeen:{}, theirSeen:{}, msgImg:{},
   photoCache:{}, photoLoading:{},
   route:null, chatWith:null, cardPhoto:0,
-  draft:null, draftPhotos:null, elig:null, pledgeChecked:false,
+  draft:null, draftPhotos:null, elig:null, pledgeChecked:false, compatStep:0, compatSaving:0, compatSaveState:"",
   adminTab:"queue", readonly:false
 };
 
@@ -863,7 +895,7 @@ function go(route, extra){
   if (route !== "chat" || (extra && extra.chatWith !== S.chatWith)) leaveChatRoom();
   S.route = route;
   if (extra && extra.chatWith) S.chatWith = extra.chatWith;
-  if (route === "editor") { S.draft = null; S.draftPhotos = null; }
+  if (route === "editor") { S.draft = null; S.draftPhotos = null; S.compatStep = 0; S.compatSaving++; S.compatSaveState = ""; S.focusCompat = !!(extra && extra.focusCompat); }
   if (route === "passions") S.pdraft = null;
   if (route !== "passions") S.passionsOnboard = false;
   if (extra && extra.viewId){ S.viewId = extra.viewId; S.cardPhoto = 0; }
@@ -991,8 +1023,8 @@ function draftDefaults(){
   if (p) return { name:p.name, gender:p.gender, partnerGenders:(p.partnerGenders||[]).slice(), bio:p.bio||"",
     p1:p.prompts[0].id, a1:p.prompts[0].a, p2:p.prompts[1].id, a2:p.prompts[1].a,
     p3:(p.prompts[2]||{}).id||"", a3:(p.prompts[2]||{}).a||"", p4:(p.prompts[3]||{}).id||"", a4:(p.prompts[3]||{}).a||"", goal:p.goal, marriage:p.marriage||"",
-    zip:p.zip, city:p.city, ageMin:p.ageMin, ageMax:p.ageMax, details:clone(p.details||{}) };
-  return { name:"", gender:"", partnerGenders:[], bio:"", p1:"", a1:"", p2:"", a2:"", p3:"", a3:"", p4:"", a4:"", goal:"", marriage:"", zip:"", city:"", ageMin:18, ageMax:99, details:{} };
+    zip:p.zip, city:p.city, ageMin:p.ageMin, ageMax:p.ageMax, details:clone(p.details||{}), compatibility:cleanCompatibility(p.compatibility) };
+  return { name:"", gender:"", partnerGenders:[], bio:"", p1:"", a1:"", p2:"", a2:"", p3:"", a3:"", p4:"", a4:"", goal:"", marriage:"", zip:"", city:"", ageMin:18, ageMax:99, details:{}, compatibility:cleanCompatibility(null) };
 }
 VIEWS.editor = () => {
   if (!S.draft) S.draft = draftDefaults();
@@ -1012,6 +1044,12 @@ VIEWS.editor = () => {
   <select id="f-gender" data-f="gender">${opt(GENDERS, D.gender, "Choose one")}</select>
   <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin:16px 0 6px">I'd like to meet</legend>
   <div class="checks">${GENDERS.map(g => `<label><input type="checkbox" data-f="partnerGenders" value="${g}" ${D.partnerGenders.includes(g)?"checked":""}> ${({"Woman":"Women","Man":"Men","Non-binary":"Non-binary people"})[g]}</label>`).join("")}</div></fieldset>
+
+  <section aria-labelledby="compat-title" class="compat-section">
+    <h2 id="compat-title">The life you'd share</h2>
+    <p class="small muted">10 short questions about faith, spending, everyday life and making a date happen. Answers you choose to share appear on your profile. You can skip any question and edit later.</p>
+    <div id="compat-editor"></div>
+  </section>
 
   <h2>Your prompts</h2>
   <p class="small muted">Answer at least two different prompts, and up to four, in 20–200 characters each. Members can like a prompt and comment on it.</p>
@@ -1055,8 +1093,45 @@ VIEWS.editor = () => {
   <button class="btn-primary btn-block" style="margin-top:22px" data-act="submit-profile">${editing ? "Save and send for review" : "Submit for review"}</button>`;
 };
 function afterEditor(){
+  S.draft.compatibility = cleanCompatibility(S.draft.compatibility);
+  renderCompatibilityEditor();
   updateCounters();
   if (!S.draftPhotos) loadDraftPhotos(); else renderPhotoGrid();
+  if (S.focusCompat){ S.focusCompat = false; $("#compat-editor").scrollIntoView({block:"start"}); $("#compat-answer").focus({preventScroll:true}); }
+}
+function renderCompatibilityEditor(focus = false){
+  const root = $("#compat-editor"); if (!root || !S.draft) return;
+  const answers = cleanCompatibility(S.draft.compatibility).answers;
+  const count = Object.keys(answers).length, question = COMPATIBILITY_QUESTIONS[S.compatStep];
+  const status = `<p class="compat-save small" role="status" id="compat-save">${esc(S.compatSaveState)}${S.compatSaveState === "Answers not saved. Please retry." ? ' <button class="btn-link" data-act="compat-retry">Retry save</button>' : ""}</p>`;
+  if (!question){
+    root.innerHTML = `<div class="panel"><h3>Your shared-life answers</h3><p>${count} of 10 answered. Skipped questions stay unanswered.</p>${compatibilityAnswers(S.draft.compatibility)}<button class="btn-block" data-act="compat-step" data-index="0">Edit answers</button>${status}</div>`;
+  } else {
+    root.innerHTML = `<div class="panel"><div class="compat-progress" aria-live="polite"><span>Question ${S.compatStep + 1} of 10 · ${esc(question.group)}</span><span>${count} answered</span></div><progress value="${count}" max="10" aria-label="Compatibility questions answered">${count}/10</progress><label for="compat-answer">${esc(question.q)}</label><select id="compat-answer" data-compat="${question.id}"><option value="">Prefer not to answer</option>${question.options.map(([id,label])=>`<option value="${id}" ${answers[question.id]===id ? "selected" : ""}>${esc(label)}</option>`).join("")}</select>${question.id.endsWith("Importance") ? '<p class="small muted">This priority is shared on your profile for conversation. Your Discovery filters control who appears.</p>' : ""}<div class="row compat-buttons"><button data-act="compat-step" data-index="${S.compatStep-1}" ${S.compatStep===0 ? "disabled" : ""}>Back</button><button class="btn-primary" data-act="compat-step" data-index="${S.compatStep+1}">${S.compatStep===9 ? "Review answers" : "Next"}</button><button class="btn-link" data-act="compat-skip">Skip</button></div>${status}</div>`;
+  }
+  if (focus) ($( "#compat-answer") || root.querySelector('button')).focus({preventScroll:true});
+}
+function compatibilityAnswers(value){
+  const answers = cleanCompatibility(value).answers;
+  return `<dl class="compat-answers">${COMPATIBILITY_QUESTIONS.filter(q=>answers[q.id]).map(q=>`<div><dt>${esc(q.q)}</dt><dd>${esc(q.options.find(([id])=>id===answers[q.id])[1])}</dd></div>`).join("")}</dl>`;
+}
+function compatibilitySummary(id){
+  const profile = S.profiles[id], count = Object.keys(cleanCompatibility(profile.compatibility).answers).length;
+  const shared = id === uid ? [] : sharedCompatibility((myProfile()||{}).compatibility, profile.compatibility);
+  return `<section class="compat-summary" aria-label="Shared-life answers"><h3>The life ${id===uid ? "you'd" : "they'd"} share</h3>${shared.length ? `<div class="chips">${shared.map(text=>`<span class="chip">${esc(text)}</span>`).join("")}</div>` : ""}${count ? `<details><summary>${count} of 10 shared-life answers</summary>${compatibilityAnswers(profile.compatibility)}</details>` : '<p class="small muted">No shared-life answers yet.</p>'}</section>`;
+}
+async function persistCompatibilityDraft(){
+  clearTimeout(draftTimer);
+  const revision = ++S.compatSaving;
+  S.compatSaveState = "Saving answers…";
+  const body = clone({...S.priv, draft:clone(S.draft)});
+  S.priv.draft = clone(S.draft);
+  const write = (chains.priv || Promise.resolve()).then(()=>db.doc(privPath()).set(body));
+  chains.priv = write.catch(()=>{});
+  if ($("#compat-save")) $("#compat-save").textContent = S.compatSaveState;
+  try { await write; if (revision === S.compatSaving) S.compatSaveState = "Answers saved on this profile draft."; }
+  catch { if (revision === S.compatSaving) S.compatSaveState = "Answers not saved. Please retry."; }
+  if (revision === S.compatSaving && $("#compat-save")) $("#compat-save").innerHTML = esc(S.compatSaveState) + (S.compatSaveState === "Answers not saved. Please retry." ? ' <button class="btn-link" data-act="compat-retry">Retry save</button>' : "");
 }
 function updateCounters(){
   const D = S.draft; if (!D) return;
@@ -1113,6 +1188,7 @@ function card(id, likeable){
       ${likeable ? likeBanner(id) : ""}
       ${basicsRow(p)}
       ${interestsRow(id)}
+      ${compatibilitySummary(id)}
       <div class="chips">${reasons(id).map(r=>`<span class="chip">${esc(r)}</span>`).join("")}</div>
       ${p.prompts.map(pr => `<div class="prompt">${likeable?`<button class="likeon" data-act="like-on" data-id="${esc(id)}" data-on="prompt:${esc(pr.id)}" aria-label="Like this prompt and add a comment">${icon("heart")}</button>`:""}<div class="pq">${esc(PROMPT[pr.id]||"")}</div><div class="pa">${esc(pr.a)}</div></div>`).join("")}
       ${p.bio?`<div class="bio">${esc(p.bio)}</div>`:""}
@@ -1474,6 +1550,7 @@ VIEWS.me = () => {
     <p><b>Status:</b> ${esc(status)}</p>
     ${card(uid).replace('class="card"','class="card" style="margin-top:0"')}
     <button class="btn-block" data-act="go" data-r="editor">Edit profile</button>
+    <button class="btn-block btn-quiet" style="margin-top:10px" data-act="edit-compatibility">Edit compatibility answers</button>
     <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="passions">${(((p.details||{}).interests)||[]).length ? "Edit passions" : "Add your passions"}</button>
     <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="details">Edit the basics (no review needed)</button>
     <button class="btn-block btn-quiet" style="margin-top:10px" data-act="go" data-r="filters">Discovery filters</button>
@@ -1646,6 +1723,15 @@ async function deleteAll(){
   render(true);
 }
 const A = {
+  "edit-compatibility": () => go("editor", {focusCompat:true}),
+  "compat-step": d => { S.compatStep = Math.max(0,Math.min(COMPATIBILITY_QUESTIONS.length,+d.index || 0)); renderCompatibilityEditor(true); },
+  "compat-skip": () => {
+    const question = COMPATIBILITY_QUESTIONS[S.compatStep];
+    if (!question || !S.draft) return;
+    delete S.draft.compatibility.answers[question.id];
+    S.compatStep++; renderCompatibilityEditor(true); persistCompatibilityDraft();
+  },
+  "compat-retry": () => { if (S.draft) persistCompatibilityDraft(); },
   go: d => go(d.r),
   close: closeSheet,
   "close-scrim": (d, el, e) => { if (e.target === el) closeSheet(); },
@@ -1700,6 +1786,7 @@ const A = {
     const photos = S.draftPhotos || [];
     if (photos.length < 2) errs.push("Add at least 2 photos.");
     if (errs.length){ $("#ed-err").innerHTML = `<div class="errors" role="alert"><b>Fix these to continue:</b><ul>${errs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`; return; }
+    clearTimeout(draftTimer);
     el.disabled = true; el.textContent = "Submitting…";
     try {
       const prev = myProfile(), rev = (prev ? prev.revision : 0) + 1;
@@ -1711,7 +1798,7 @@ const A = {
         name:trim(D.name), gender:D.gender, partnerGenders:D.partnerGenders.slice(), bio:trim(D.bio),
         prompts:chosen.map(n => ({id:D["p"+n], v:1, a:trim(D["a"+n])})),
         goal:D.goal, marriage:D.marriage, city:trim(D.city), zip:trim(D.zip), metro:"atlanta",
-        ageMin:amin, ageMax:amax, age:ageFrom(S.priv.elig.dob), photoCount:photos.length, details:cleanDetails(D.details||{}),
+        ageMin:amin, ageMax:amax, age:ageFrom(S.priv.elig.dob), photoCount:photos.length, details:cleanDetails(D.details||{}), compatibility:cleanCompatibility(D.compatibility),
         revision:rev, submittedAt:now(), lastActive:now(), paused:prev ? !!prev.paused : false, ineligible:false,
         pledgeV:PLEDGE_V, eligV:ELIG_V,
         inviteCode: prev && prev.inviteCode ? prev.inviteCode : newInviteCode(),
@@ -2143,6 +2230,10 @@ document.addEventListener("input", e => {
 });
 document.addEventListener("change", e => {
   const t = e.target;
+  if (t.dataset.compat && S.draft){
+    S.draft.compatibility = cleanCompatibility({...S.draft.compatibility, answers:{...S.draft.compatibility.answers,[t.dataset.compat]:t.value}});
+    renderCompatibilityEditor(true); persistCompatibilityDraft();
+  }
   if (t.dataset.f === "partnerGenders" && S.draft){
     const s = new Set(S.draft.partnerGenders); t.checked ? s.add(t.value) : s.delete(t.value);
     S.draft.partnerGenders = GENDERS.filter(g => s.has(g)); draftChanged();

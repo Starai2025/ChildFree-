@@ -1,5 +1,9 @@
 # Web prototype (MVP1 founding beta)
 
+## Local questionnaire review candidate
+
+The local source and generated demo copies now include ten optional compatibility questions, draft save/retry, editable answers and factual shared-answer summaries. See [questions and evidence](../../docs/COMPATIBILITY_QUESTIONS.md). This addition has not been pushed: the user requires trying the full interactive candidate first. The public links below still refer to the prior GitHub version until a later authorized push.
+
 ## Clickable browser demo
 
 Open [the interactive browser demo](https://raw.githack.com/Starai2025/ChildFree-/main/prototype/web-mvp1/demo.html). It runs the redesigned interface with synthetic profiles, local matching, messages, onboarding and simulated review. Like Malik to create a mutual match, then enter the conversation. Use **Demo controls → Simulate a reply**, **Start a new demo profile**, or **Reset demo**. No Claude account is needed.

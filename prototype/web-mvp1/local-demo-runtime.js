@@ -8,15 +8,18 @@
   const clone = value => JSON.parse(JSON.stringify(value));
   const listeners = new Map();
   const stamp = Date.now();
-  const profile = (name, gender) => ({name,gender,city:'Atlanta',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:[{id:'ordinary_sunday',a:'Coffee, the farmers market, and a long walk with nowhere to rush.'},{id:'partnership',a:'Choosing each other. Being kind, being honest, and making room to grow.'}],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
+  const compatibility = {version:1,answers:{faithPractice:'personal',faithPartner:'respect',faithImportance:'prefer',spendingPriority:'balanced',dateBudget:'casual',spendingImportance:'prefer',socialPace:'balanced',weekend:'mix',lifestyleImportance:'prefer',dateAvailability:'weekends'}};
+  const profile = (name, gender) => ({name,gender,city:'Atlanta',zip:'30308',age:32,partnerGenders:['Man','Woman'],ageMin:25,ageMax:45,revision:1,photoCount:2,goal:'A committed relationship',marriage:"I'm open to marriage",bio:'Good conversation, weekend adventures, and a life built with intention.',prompts:[{id:'ordinary_sunday',a:'Coffee, the farmers market, and a long walk with nowhere to rush.'},{id:'partnership',a:'Choosing each other. Being kind, being honest, and making room to grow.'}],details:{height:70,faith:'Spiritual, not religious',interests:['Coffee','Live music','Art and museums']},lastActive:stamp});
   function fixtures(fresh = false) {
     const seeded = new Map();
     seeded.set('profiles/malik', profile('Malik','Man'));
     seeded.set('profiles/zuri', profile('Zuri','Woman'));
+    seeded.get('profiles/malik').compatibility = clone(compatibility);
     seeded.set('approvals/malik', {status:'approved',revision:1,note:'Synthetic demo approval'});
     seeded.set('reactions/malik', {r:{amara:{k:'like',at:stamp-60000}}});
     if (!fresh) {
       seeded.set('profiles/amara', profile('Amara','Woman'));
+      seeded.get('profiles/amara').compatibility = clone(compatibility);
       seeded.set('approvals/amara', {status:'approved',revision:1,note:'Synthetic demo approval'});
       seeded.set('data/users/amara/private', {elig:{dob:'1994-01-01',result:'eligible',answers:Array(6).fill('yes'),v:1},pledge:{v:1,at:stamp},matchSeen:{},lastRead:{}});
     }

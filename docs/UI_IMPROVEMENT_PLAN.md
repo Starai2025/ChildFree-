@@ -1,6 +1,6 @@
 # Black Childfree: product and UI improvement plan
 
-Revised after the founder's design consultation. Target: the imported Claude web prototype and its separate browser-demo copies. This replaces the earlier screen-cleanup plan. The new designs and lifestyle features are proposed, not implemented.
+Revised after the founder's design consultation. Target: the imported Claude web prototype and its separate browser-demo copies. This replaces the earlier screen-cleanup plan. The three visual directions remain proposed. The ten-question compatibility collection and profile comparison now exist as a local review candidate; see [implementation and evidence](COMPATIBILITY_QUESTIONS.md). The user requires trying the full demo before any push.
 
 ## Confirmed brief
 
