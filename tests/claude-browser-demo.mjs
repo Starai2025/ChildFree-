@@ -9,7 +9,7 @@ const server=createServer(async(request,response)=> {
   const pathname=decodeURIComponent(new URL(request.url,'http://localhost').pathname);
   const file=path.resolve(root,'.'+pathname);
   if (!file.startsWith(root+path.sep)) {response.writeHead(403).end();return;}
-  try {const content=await readFile(file);response.writeHead(200,{'Content-Type':file.endsWith('.png')?'image/png':'text/html'}).end(content);}
+  try {const content=await readFile(file);response.writeHead(200,{'Content-Type':file.endsWith('.png')?'image/png':file.endsWith('.jpg')?'image/jpeg':'text/html'}).end(content);}
   catch {response.writeHead(404).end();}
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -25,7 +25,7 @@ try {
   const actor=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('blackchildfree.claude-browser-demo.v1')).entries);
   const act=name=>page.locator(`[data-act="${name}"]`);
   const demo=name=>page.locator(`[data-demo="${name}"]`);
-  await page.goto(url);await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  await page.goto(url);await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   for (const width of [320,390,768]) {
     await page.setViewportSize({width,height:844});
     const identity=await page.locator('.photo-identity').boundingBox(),buttons=await page.locator('.card-actions').boundingBox();
@@ -43,7 +43,7 @@ try {
   await demo('menu').click();await demo('reply').click();
   await page.getByText(/^Simulated reply:/).waitFor();
   await page.reload();await page.locator('#tabs').getByRole('button',{name:'Matches',exact:true}).click();
-  await act('open-chat').click();await page.getByText('Hello from the actual clickable synthetic demo.',{exact:true}).waitFor();
+  await page.locator('[data-act="open-chat"][data-id="malik"]').click();await page.getByText('Hello from the actual clickable synthetic demo.',{exact:true}).waitFor();
   await page.getByText(/^Simulated reply:/).waitFor();
   const stored=await actor();assert.equal(stored.find(([key])=>key==='msgs/amara/c/amara__malik')[1].list.length,1);
   assert.ok(await page.evaluate(()=>localStorage.getItem('blackchildfree.claude-browser-demo.v1').length<100000),'Preset portraits must not fill browser storage.');
@@ -102,8 +102,8 @@ try {
   await page.locator('#hdr').getByRole('button',{name:'Review',exact:true}).click();
   await page.locator('[data-act="approve"][data-id="amara"]').click();
   await page.locator('#tabs').getByRole('button',{name:'Discover',exact:true}).click();
-  await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
-  await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
+  await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   const completed=await actor();assert.equal(completed.find(([key])=>key==='profiles/amara')[1].name,'Demo Taylor');
   assert.equal(Object.keys(completed.find(([key])=>key==='profiles/amara')[1].compatibility.answers).length,10);
   await page.locator('.compat-summary').getByText('Same first-date budget preference',{exact:true}).waitFor();
@@ -128,33 +128,33 @@ try {
   await page.locator('#hdr').getByRole('button',{name:'Review',exact:true}).click();
   await page.locator('[data-act="approve"][data-id="amara"]').click();
   await page.locator('#tabs').getByRole('button',{name:'Discover',exact:true}).click();
-  await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   assert.equal(Object.keys((await actor()).find(([key])=>key==='profiles/amara')[1].compatibility.answers).length,9);
   assert.equal(await page.locator('.compat-summary').getByText('Same role for faith or spirituality',{exact:true}).count(),0);
-  await demo('menu').click();await demo('reset').click();await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  await demo('menu').click();await demo('reset').click();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   // Existing saved profiles retain their identity and acquire no invented answers.
   await page.evaluate(()=>{const key='blackchildfree.claude-browser-demo.v1',state=JSON.parse(localStorage.getItem(key));for(const [path,value]of state.entries)if(path.startsWith('profiles/'))delete value.compatibility;localStorage.setItem(key,JSON.stringify(state));});
-  await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   await page.locator('.compat-summary').getByText('No shared-life answers yet.',{exact:true}).waitFor();
   await page.locator('#tabs').getByRole('button',{name:'Profile',exact:true}).click();
   await page.getByRole('button',{name:'Edit compatibility answers',exact:true}).click();
   assert.equal(await page.locator('#compat-answer').inputValue(),'');
-  assert.ok((await actor()).some(([key,value])=>key==='profiles/amara'&&value.name==='Amara'&&!value.compatibility));
-  await demo('menu').click();await demo('reset').click();await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  assert.ok((await actor()).some(([key,value])=>key==='profiles/amara'&&value.name==='Jessica'&&!value.compatibility));
+  await demo('menu').click();await demo('reset').click();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   // The downloadable version embeds all assets and supports the same app logic.
   await page.goto(url.replace('demo.html','demo-standalone.html'));
-  await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   await page.locator('.card-photo img').evaluate(image=>image.decode());
-  assert.ok((await page.locator('.card-photo img').getAttribute('src')).startsWith('data:image/png;base64,'));
+  assert.ok((await page.locator('.card-photo img').getAttribute('src')).match(/^data:image\/(png|jpeg);base64,/));
   // Opening the downloaded HTML directly must work without a web server.
   await page.goto(`file://${path.join(root,'demo-standalone.html')}`);
-  await page.locator('.photo-identity h2').filter({hasText:'Malik'}).waitFor();
+  await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   await page.locator('.card-photo img').evaluate(image=>image.decode());
   await page.locator('.card-actions .like').click();await act('match-chat').click();
   await page.getByRole('textbox',{name:'Message',exact:true}).fill('An offline synthetic hello.');
   await page.getByRole('button',{name:'Send message',exact:true}).click();
   await page.reload();await page.locator('#tabs').getByRole('button',{name:'Matches',exact:true}).click();
-  await act('open-chat').click();await page.getByText('An offline synthetic hello.',{exact:true}).waitFor();
+  await page.locator('[data-act="open-chat"][data-id="malik"]').click();await page.getByText('An offline synthetic hello.',{exact:true}).waitFor();
   assert.equal(errors.length,0,errors.join('\n'));assert.equal(external.length,0,external.join('\n'));
   console.log('PASS: full browser demo — matching/chat/offline persistence, ten-question draft/resume/submission/edit/skip, storage failure/retry, shared-answer reasons, legacy saved profiles, reset and responsive controls. No external provider requests.');
 } finally {await runtime?.close();await new Promise(resolve=>server.close(resolve));}

@@ -1,9 +1,12 @@
-import {readFile,writeFile} from 'node:fs/promises';
+import {readFile,writeFile,readdir} from 'node:fs/promises';
 
 const source=await readFile('prototype/web-mvp1/index.html','utf8');
 const runtime=await readFile('prototype/web-mvp1/local-demo-runtime.js','utf8');
-const imageNames={amara:'synthetic-amara.png',malik:'synthetic-malik.png',welcome:'synthetic-native-couple.png',mark:'free-midnight-emblem.png'};
-const embeddedImages=Object.fromEntries(await Promise.all(Object.entries(imageNames).map(async ([name,file])=>[name,`data:image/png;base64,${(await readFile(`prototype/web-mvp1/preview-assets/${file}`)).toString('base64')}`])));
+// Portraits: every preview-assets/synthetic-<id>.jpg|png (a second photo is synthetic-<id>-2). Missing people fall back to a default portrait.
+const portraitFiles=(await readdir('prototype/web-mvp1/preview-assets')).filter(file=>/^synthetic-(?!native-couple)[a-z0-9-]+.(jpe?g|png)$/.test(file)).sort();
+const imageNames={...Object.fromEntries(portraitFiles.map(file=>[file.replace(/^synthetic-|.(jpe?g|png)$/g,''),file])),welcome:'synthetic-native-couple.png',mark:'free-midnight-emblem.png'};
+const mime=file=>file.endsWith('.png')?'image/png':'image/jpeg';
+const embeddedImages=Object.fromEntries(await Promise.all(Object.entries(imageNames).map(async ([name,file])=>[name,`data:${mime(file)};base64,${(await readFile(`prototype/web-mvp1/preview-assets/${file}`)).toString('base64')}`])));
 const hostedImages=Object.fromEntries(Object.entries(imageNames).map(([name,file])=>[name,`preview-assets/${file}`]));
 const fonts=await Promise.all(['Lora','DMSans'].map(async name=>({path:`preview-assets/${name}.ttf`,data:`data:font/ttf;base64,${(await readFile(`prototype/web-mvp1/preview-assets/${name}.ttf`)).toString('base64')}`,license:await readFile(`prototype/web-mvp1/preview-assets/${name}-OFL.txt`,'utf8')})));
 const json=value=>JSON.stringify(value).replaceAll('<','\\u003c');

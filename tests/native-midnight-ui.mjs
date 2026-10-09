@@ -5,7 +5,7 @@ import {createServer} from 'node:http';
 import path from 'node:path';
 import {launchBrowser} from './browser-runtime.mjs';
 const root=path.resolve('prototype/web-mvp1');
-const server=createServer(async(req,res)=>{const file=path.resolve(root,'.'+new URL(req.url,'http://localhost').pathname);if(!file.startsWith(root+path.sep)){res.writeHead(403).end();return;}try{res.writeHead(200,{'Content-Type':file.endsWith('.png')?'image/png':file.endsWith('.ttf')?'font/ttf':'text/html'}).end(await readFile(file));}catch{res.writeHead(404).end();}});
+const server=createServer(async(req,res)=>{const file=path.resolve(root,'.'+new URL(req.url,'http://localhost').pathname);if(!file.startsWith(root+path.sep)){res.writeHead(403).end();return;}try{res.writeHead(200,{'Content-Type':file.endsWith('.png')?'image/png':file.endsWith('.jpg')?'image/jpeg':file.endsWith('.ttf')?'font/ttf':'text/html'}).end(await readFile(file));}catch{res.writeHead(404).end();}});
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const runtime=await launchBrowser();
 try {

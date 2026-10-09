@@ -9,7 +9,7 @@ const hero = `data:image/png;base64,${(await readFile('prototype/web-mvp1/previe
 let html = (await readFile('prototype/web-mvp1/index.html', 'utf8')).replace('preview-assets/synthetic-native-couple.png',hero);
 for(const name of ['Lora','DMSans']) html=html.replace(`preview-assets/${name}.ttf`,`data:font/ttf;base64,${(await readFile(`prototype/web-mvp1/preview-assets/${name}.ttf`)).toString('base64')}`);
 html=html.replace('preview-assets/free-midnight-emblem.png',`data:image/png;base64,${(await readFile('prototype/web-mvp1/preview-assets/free-midnight-emblem.png')).toString('base64')}`);
-const images = Object.fromEntries(await Promise.all(['amara', 'malik'].map(async name => [name, `data:image/png;base64,${(await readFile(`prototype/web-mvp1/preview-assets/synthetic-${name}.png`)).toString('base64')}`])));
+const images = Object.fromEntries(await Promise.all(['amara', 'malik'].map(async name => [name, `data:image/jpeg;base64,${(await readFile(`prototype/web-mvp1/preview-assets/synthetic-${name}.jpg`)).toString('base64')}`])));
 const server = createServer((request, response) => response.writeHead(200, {'Content-Type':'text/html'}).end(html));
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const url = `http://127.0.0.1:${server.address().port}`;
