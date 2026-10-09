@@ -862,6 +862,11 @@ body[data-midnight] .ob-bar .in{gap:10px}
 body[data-midnight] .ob-bar .btn-quiet{flex:1}
 body[data-midnight] .ob-bar .btn-primary{flex:2}
 body[data-midnight] .ob-bar [hidden]{display:none}
+body[data-midnight] .sheet h2{font-family:var(--native-serif);font-size:24px;line-height:1.2}
+body[data-midnight] .sheet :is(.btn-block,.btn-danger){font-size:15px;font-weight:600}
+body[data-midnight] #compat-editor .compat-buttons .btn-primary{border:1px solid var(--native-emerald);background:transparent;color:var(--native-emerald);box-shadow:none}
+body[data-midnight] #compat-editor .compat-buttons button:not([class]){border-color:transparent;color:var(--native-ink-2)}
+body[data-midnight] .planner .phead b{font-family:var(--native-serif);font-size:18px}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   .native-hero-compact .native-hero-sub{display:none}
@@ -2872,7 +2877,7 @@ function renderPropose(){
   const sel = new Set(P.opts.map(o => o.day));
   openPlanner(`${phead("Propose a date")}
     <p class="pm" style="margin-top:6px">Plan something with ${name}. They'll swipe on spots and pick one of your times.</p>
-    <h2><label for="pp-vibe" style="font-size:22px;font-weight:400;font-family:var(--native-serif);margin:0">What's the vibe?</label></h2>
+    <h2><label for="pp-vibe" style="margin:0;font:inherit;color:inherit">What's the vibe?</label></h2>
     <select id="pp-vibe" data-pv>${VIBES.map(v => `<option ${v===P.vibe?"selected":""}>${esc(v)}</option>`).join("")}</select>
     <h2>Budget</h2>
     <div class="pchips" role="group" aria-label="Budget">${[1,2,3,4].map(n => `<button data-act="pp-budget" data-b="${n}" aria-pressed="${P.budget===n}">${priceStr(n)}</button>`).join("")}</div>

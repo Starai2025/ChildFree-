@@ -97,8 +97,8 @@
       ['garden','Demo Garden Patio','Decatur','Outdoors & walks'],
       ['gallery','Demo Art House','West End','Art & museums']
     ];
-    for (const [id,name,area,vibe] of venues) seeded.set(`venues/${id}`,{name,area,address:`${area}, Atlanta`,vibes:[vibe,'Coffee & conversation'],tags:['Quiet enough to talk'],price:1,blurb:'A relaxed spot that is easy to talk in.',at:stamp});
-    const cache = Object.fromEntries(venues.map(([id,name,area,vibe]) => [id,{name,area,address:`${area}, Atlanta`,vibes:[vibe],tags:['Quiet enough to talk'],price:1,blurb:'A relaxed spot that is easy to talk in.'}]));
+    for (const [id,name,area,vibe] of venues) seeded.set(`venues/${id}`,{name,area,address:'Atlanta, GA',vibes:[vibe,'Coffee & conversation'],tags:['Quiet enough to talk'],price:1,blurb:'A relaxed spot that is easy to talk in.',at:stamp});
+    const cache = Object.fromEntries(venues.map(([id,name,area,vibe]) => [id,{name,area,address:'Atlanta, GA',vibes:[vibe],tags:['Quiet enough to talk'],price:1,blurb:'A relaxed spot that is easy to talk in.'}]));
     seeded.set('events/mixer', {title:'Founding cohort mixer', when:nextDay(5,'19:00'), place:'Demo Art House, West End', details:'Meet other founding members over music and small bites.', capacity:40, at:stamp});
     for (const id of ['jason','ashley','danielle','brittany']) seeded.set(`rsvps/${id}`, {going:{mixer:true}});
     if (!fresh) {

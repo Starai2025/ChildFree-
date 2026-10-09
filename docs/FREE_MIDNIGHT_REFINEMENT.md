@@ -156,3 +156,13 @@ Sign-up is now nine short screens: Eligibility → Pledge → About you → Phot
 - **Review and submit:** lists each section's status with a tap-to-edit row, then Submit for review. Validation errors appear there.
 - **Unchanged:** fields, draft saving, compatibility questions and submit validation all work as before.
 - **Editing:** editing an existing profile remains a single page.
+
+## Pristine pass, step 6: settings, sheets and planner consistency (October 8, 2026), awaiting founder sign-off
+
+- **Date planner:**
+  - The Demo pill hides while the planner is open (it was covering the title).
+  - The title is Lora, and every section question ("What's the vibe?", "Budget", "When are you free?") uses one heading style.
+  - Venue cards read "West End · Atlanta, GA" instead of repeating the area.
+- **Sheets** (conversation options, report, block, preview): Lora titles and uniform 15px buttons.
+- **The life you'd share (sign-up):** the question card's own Next is now a quiet emerald outline and Back is a text button, so the sticky Continue is the only primary action.
+- **Filters, Passions and The basics:** already consistent from earlier steps (Lora titles, pill fields, sticky save bar); no changes needed.
