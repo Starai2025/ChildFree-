@@ -2,6 +2,22 @@
 
 You are continuing the existing Starai2025/ChildFree- app. Read this first, then AGENTS.md, docs/Native_Dating_MVP_Build_Spec.md, docs/MVP1_Agent_Execution_Plan.md, BUILD_STATUS.md and docs/FREE_MIDNIGHT_REFINEMENT.md.
 
+## Latest update — October 9, 2026: demo cast, pristine pass and portraits
+
+- **Demo cast:** 14 fictional people, equal men and women, ages 27–59 (see docs/DEMO_CAST.md). Amara and Malik display as Jessica and Marcus; internal ids are unchanged. Jessica is open to men and women, so women appear in Discover. She starts with three matches, a locked date, a pending proposal and a community event.
+- **Pristine pass, steps 1–7** (each approved by the founder):
+  - A small Demo pill replaces the demo bar, and Review moves into it and into Profile → Settings.
+  - Members get four tabs, sharing a dark emerald hero with Lora titles.
+  - Discover has a solid band behind Pass/Like, and people no longer appear in both Discover and "Likes you".
+  - Chat shows the date once and uses time headers.
+  - Profile is a compact card with a preview sheet.
+  - Sign-up is step by step (9 screens with progress dots).
+  - Planner and sheets are consistent.
+  - Desktop gets text-only brand panels.
+- **Portraits:** 8 cast members have portraits — 3 AI-generated, 5 supplied by the founder. Confirm the licence of the supplied photos before wider sharing (docs/DEMO_CAST.md).
+
+Details: docs/FREE_MIDNIGHT_REFINEMENT.md. The design, full-browser and prototype tests pass; on Windows they were run with local Chrome.
+
 ## Latest update — October 8, 2026: Midnight Luxe v2 across the whole browser app
 
 The founder approved the v2 polish of Welcome, Discover and Match, then asked for every remaining screen to be finished in the same style. All screens of `prototype/web-mvp1` now use v2: onboarding, filters, passions, the basics, Matches, Dates, Events, Profile, chat, safety sheets, the date planner and Review. The legacy orange/white/Inter look no longer renders.
