@@ -346,8 +346,6 @@ label{font-size:13px;margin:17px 0 7px}.hint{font-size:11px;display:block;margin
 .prompt .pa{font-size:18px;line-height:1.5;font-weight:600;letter-spacing:-.4px}
 .likeon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;padding:0;background:#FFF0E8;border:0;color:var(--berry);margin:0 0 4px 10px}
 .bio{font-size:13px;color:#646A74;line-height:1.8}
-.discover-heading{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
-.discover-heading h1{font-size:24px;margin:0 0 4px}.discover-heading p{font-size:11px;color:var(--muted);margin:0}
 .section-kicker{text-transform:uppercase;letter-spacing:1.5px;font-weight:600;font-size:9px;color:var(--berry);margin-bottom:6px}
 .disc-top{margin:10px 0;gap:8px}.disc-top button{min-height:36px;font-size:11px;padding:7px 12px;border-radius:8px}.disc-top .small{font-size:11px}
 .toppick{background:#FFF3EB;color:#A13A0D;border-radius:9px;padding:10px 12px;font-size:12px;border:1px solid #FFE5D5;margin:10px 0}.toppick small{font-size:10px;color:#A56F57;font-weight:400;margin-top:2px}
@@ -470,16 +468,13 @@ body[data-midnight] #hdr button{background:transparent;color:var(--native-ink-2)
 /* Discover: page */
 body[data-midnight] main{padding:0 20px 120px}
 body:is([data-route=discover],[data-route=view]) main{padding-bottom:200px}
-body[data-route=discover] .discover-heading{margin:20px 0 0}
-body[data-route=discover] .discover-heading h1{font-family:var(--native-sans);font-size:28px;line-height:1.15;color:var(--native-obsidian);font-weight:700;letter-spacing:-.01em;margin:0}
-body[data-route=discover] .discover-heading p{font-size:14px;line-height:1.4;color:var(--native-ink-2);font-weight:500;margin:4px 0 0}
 body[data-route=discover] .disc-top{margin:12px 0 16px;min-height:40px}
 body[data-route=discover] .disc-top .small{color:var(--native-obsidian);font-size:14px;font-weight:600}
 body[data-route=discover] main .disc-top button{background:transparent;border:1px solid var(--native-hair);color:var(--native-obsidian);border-radius:var(--native-pill-radius);min-height:40px;padding:8px 18px;font-size:14px;font-weight:600}
 
 /* Discover: card */
 body:is([data-route=discover],[data-route=view],[data-route=me]) .card{background:var(--native-ivory);border:1px solid var(--native-hair);border-radius:var(--native-card-radius);box-shadow:var(--native-shadow);overflow:hidden;margin:0 0 16px}
-body:is([data-route=discover],[data-route=view]) .card>.card-photo{height:clamp(300px,calc(100svh - 380px - var(--native-demo-inset)),560px);aspect-ratio:auto;max-height:none;background:var(--native-emerald);border-radius:0}
+body:is([data-route=discover],[data-route=view]) .card>.card-photo{height:clamp(300px,calc(100svh - 400px - var(--native-demo-inset)),560px);aspect-ratio:auto;max-height:none;background:var(--native-emerald);border-radius:0}
 body:is([data-route=discover],[data-route=view],[data-route=me]) .card-photo>img{object-position:center 25%}
 body:is([data-route=discover],[data-route=view],[data-route=me]) .card-photo::after{content:"";display:block;position:absolute;inset:45% 0 0;background:linear-gradient(180deg,#11111100,#11111199 45%,#111111E6);pointer-events:none}
 body:is([data-route=discover],[data-route=view],[data-route=me]) .dots{top:12px;left:16px;right:16px}
@@ -537,7 +532,7 @@ body:is([data-route=discover],[data-route=view]) .card-actions .like svg{width:2
 body:is([data-route=discover],[data-route=view]) .under{margin:8px 0 4px}
 body:is([data-route=discover],[data-route=view]) .under button,body:is([data-route=discover],[data-route=view]) .swipe-hint{color:var(--native-ink-2);font-size:14px;font-weight:600}
 body:is([data-route=discover],[data-route=view]) .swipe-hint{font-weight:500;line-height:1.5}
-body:is([data-route=discover],[data-route=view]) main button:not(.pass):not(.like):not(.photo-like):not(.likeon):not(.nav){background:var(--native-ivory);color:var(--native-obsidian)}
+body:is([data-route=discover],[data-route=view]) main button:not(.pass):not(.like):not(.photo-like):not(.likeon):not(.nav):not(.btn-primary):not(.btn-link){background:var(--native-ivory);color:var(--native-obsidian)}
 body[data-midnight] .btn-primary:not(.like){background:var(--native-terracotta);color:var(--native-ivory);border-color:var(--native-terracotta)}
 body[data-midnight] .announce,body[data-midnight] .status{background:#0F5C4D12;border-color:#0F5C4D40;color:var(--native-obsidian);font-size:14px}
 body[data-midnight] .announce button{color:var(--native-emerald)}
@@ -576,7 +571,7 @@ body[data-midnight] nav.tabs .badge{background:var(--native-terracotta);border-c
 
 /* Tab pages (Matches, Dates, Profile): same system as Discover. */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
-body[data-midnight] main>h1,.native-page-head h1{font-family:var(--native-sans);font-size:28px;line-height:1.15;font-weight:700;letter-spacing:-.01em;color:var(--native-obsidian);margin:20px 0 4px}
+body[data-midnight] :is(main,.native-sheet)>h1,.native-page-head h1{font-family:var(--native-serif);font-size:32px;line-height:1.12;font-weight:700;letter-spacing:-.015em;color:var(--native-obsidian);margin:20px 0 4px}
 body[data-midnight] main>h2{font-family:var(--native-sans);font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-.01em;color:var(--native-obsidian);margin:32px 0 12px}
 body[data-midnight] main>h3{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--native-emerald);margin:28px 0 12px}
 :where(body[data-midnight]) main p{font-size:16px;line-height:1.5}
@@ -641,9 +636,9 @@ body[data-route=me] .card>.card-photo{aspect-ratio:4/5;height:auto;max-height:52
 body[data-midnight] main .native-invite{margin-top:20px;border-color:var(--native-gold);color:var(--native-obsidian);background:#C89A2B14}
 body[data-midnight] .sep{height:1px;background:var(--native-hair);margin:28px 0}
 /* Hero pages (Matches, Profile): dark emerald hero like Match, ivory sheet rising over it. */
-body:is([data-route=connections],[data-route=me],[data-route=dates],[data-route=events]) header.top{background:var(--native-obsidian);color:var(--native-ivory);border-bottom:1px solid #F6F0E814}
-body:is([data-route=connections],[data-route=me],[data-route=dates],[data-route=events]) .wordmark{color:var(--native-ivory)}
-body:is([data-route=connections],[data-route=me],[data-route=dates],[data-route=events]) #hdr button{color:var(--native-ivory);border-color:var(--native-on-dark-hair)}
+body:is([data-route=discover],[data-route=view],[data-route=connections],[data-route=me],[data-route=dates],[data-route=events],[data-route=admin]) header.top{background:var(--native-obsidian);color:var(--native-ivory);border-bottom:1px solid #F6F0E814}
+body:is([data-route=discover],[data-route=view],[data-route=connections],[data-route=me],[data-route=dates],[data-route=events],[data-route=admin]) .wordmark{color:var(--native-ivory)}
+body:is([data-route=discover],[data-route=view],[data-route=connections],[data-route=me],[data-route=dates],[data-route=events],[data-route=admin]) #hdr button{color:var(--native-ivory);border-color:var(--native-on-dark-hair)}
 .native-hero{position:relative;isolation:isolate;overflow:hidden;margin:0 -20px;padding:28px 24px 64px;color:var(--native-ivory);background:radial-gradient(120% 90% at 88% 0%,var(--native-emerald) 0%,#0F5C4D00 66%),var(--native-obsidian)}
 .native-hero::after{content:"";position:absolute;z-index:-1;left:-30%;bottom:-60%;width:90%;height:110%;background:radial-gradient(closest-side,#C89A2B24,#C89A2B00);pointer-events:none}
 .native-hero .native-eyebrow{color:var(--native-gold);margin:0 0 8px}
@@ -791,6 +786,7 @@ body[data-midnight] .composer .ph-btn{width:48px;height:48px;min-height:48px;bor
 body[data-midnight] .composer .btn-primary{display:flex;align-items:center;justify-content:center;width:48px!important;height:48px;min-height:48px!important;padding:0!important;border-radius:50%!important;background:var(--native-terracotta);color:var(--native-ivory);box-shadow:none}
 body[data-midnight] .dpin{border:0;border-radius:14px;background:var(--native-emerald);color:var(--native-ivory);font-size:14px}
 body[data-midnight] :is(.dpin b,.dpin button){color:var(--native-gold)}
+body[data-midnight] main .dpin button:not([class]){min-height:36px;padding:4px 8px;border:0;background:transparent;color:var(--native-gold);font-weight:700}
 body[data-midnight] .dblock{padding:18px;border:1px solid var(--native-hair);border-radius:20px;background:var(--native-ivory);color:var(--native-obsidian);box-shadow:var(--native-shadow)}
 body[data-midnight] .dblock.gold{border-color:#C89A2B99;background:#C89A2B0F}
 body[data-midnight] .dblock .lbl{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--native-emerald)}
@@ -829,12 +825,18 @@ body[data-midnight] .vact .vpass{border:1px solid var(--native-on-dark-hair);bac
 body[data-midnight] .vact .vlike{border:0;background:var(--native-terracotta);color:var(--native-ivory);border-radius:var(--native-pill-radius)}
 body[data-midnight] .topt label{border:1px solid var(--native-on-dark-hair);border-radius:16px;background:#F6F0E80A;color:var(--native-ivory)}
 body[data-midnight] .topt label:has(input:checked){background:var(--native-emerald);border-color:var(--native-gold);color:var(--native-ivory)}
+.native-hero-compact{padding:20px 24px 52px}
+body[data-midnight] .native-hero-compact h1{font-size:34px}
+body[data-route=view] main>.btn-link{color:var(--native-emerald)!important}
+.native-moment{display:flex;flex-direction:column;align-items:center;gap:4px;padding:28px 8px 8px;text-align:center}
+body[data-midnight] .native-moment h2{margin:0 0 8px;font-family:var(--native-serif);font-size:28px;line-height:1.2;font-weight:700;color:var(--native-obsidian)}
+body[data-midnight] .native-moment p{max-width:320px;color:var(--native-ink-2)}
+body[data-midnight] .native-moment .btn-primary{margin-top:12px}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
-  body[data-route=discover] .discover-heading{margin-top:12px}
-  body[data-route=discover] .discover-heading p{display:none}
+  .native-hero-compact .native-hero-sub{display:none}
   body[data-route=discover] .disc-top{margin:8px 0 12px}
-  body:is([data-route=discover],[data-route=view]) .card>.card-photo{height:clamp(260px,calc(100svh - 330px - var(--native-demo-inset)),560px)}
+  body:is([data-route=discover],[data-route=view]) .card>.card-photo{height:clamp(240px,calc(100svh - 370px - var(--native-demo-inset)),560px)}
   body:is([data-route=discover],[data-route=view],[data-route=me]) .card-photo>img{object-position:center 40%}
   body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity h2{font-size:28px}
   body:is([data-route=discover],[data-route=view],[data-route=me]) .photo-identity p{margin-bottom:8px}
@@ -1340,7 +1342,7 @@ function nativeBadge(label,soft=false){ return `<span class="native-badge${soft?
 function nativePrimary(label,attrs){ return `<button class="btn-primary native-pill" ${attrs}>${esc(label)}<svg class="native-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>`; }
 function renderHeader(r){
   $(".wordmark").innerHTML = nativeLogo();
-  $("#hdr").innerHTML = owner && r !== "admin" ? `<button class="btn-quiet" style="min-height:40px;padding:8px 14px" data-act="go" data-r="admin">Review</button>` : "";
+  $("#hdr").innerHTML = "";
 }
 function renderNav(r){
   const nav = $("#tabs");
@@ -1350,7 +1352,7 @@ function renderNav(r){
   nav.hidden = false;
   const anyUnread = matchIds().some(unread) || likesYou().some(id => likedMe(id).at > (S.priv.likesSeen||0));
   const tab = (key,label,extra="") => `<button data-act="go" data-r="${key}" ${r===key?'aria-current="page"':""} aria-label="${label}">${icon(key)}<span>${label}</span>${extra}</button>`;
-  nav.innerHTML = `<div class="in">${tab("discover","Discover")}${tab("connections","Matches", anyUnread?'<span class="badge" aria-label="unread messages"></span>':"")}${tab("dates","Dates", matchIds().some(planNeedsMe) ? '<span class="badge" aria-label="date plans need you"></span>' : "")}${tab("me","Profile")}${owner?tab("admin","Review"):""}</div>`;
+  nav.innerHTML = `<div class="in">${tab("discover","Discover")}${tab("connections","Matches", anyUnread?'<span class="badge" aria-label="unread messages"></span>':"")}${tab("dates","Dates", matchIds().some(planNeedsMe) ? '<span class="badge" aria-label="date plans need you"></span>' : "")}${tab("me","Profile")}</div>`;
 }
 
 // ---------- Views ----------
@@ -1663,28 +1665,30 @@ function statusBlock(){
   return "";
 }
 VIEWS.discover = () => {
-  const st = statusBlock(); if (st) return st;
+  const hero = `<section class="native-hero native-hero-compact discover-heading"><h1>Discover</h1><p class="native-hero-sub">Atlanta · Your daily introductions</p></section>`;
+  const st = statusBlock(); if (st) return `${hero}<div class="native-sheet">${st}</div>`;
   const D = deck();
   if (!D.length){
     const d = S.priv.disc || {}, used = d.day === dayKey() ? d.newCount||0 : 0;
     const sc = strictCount();
-    return `${discTop("")}<h1>${used >= DAILY_LIMIT ? "That's everyone for today." : "No one new right now."}</h1>
+    return `${hero}<div class="native-sheet">${announceBanner()}<div class="native-moment"><h2>${used >= DAILY_LIMIT ? "That's everyone for today." : "No one new right now."}</h2>
       <p>${used >= DAILY_LIMIT ? `You get up to ${DAILY_LIMIT} new people a day. Come back tomorrow for more.` : "There aren't more approved members who match your preferences yet. We're inviting new members to the founding cohort every week."}</p>
       ${used < DAILY_LIMIT && sc ? `<p>You have ${sc} ${sc===1?"dealbreaker":"dealbreakers"} on. Turning some into preferences will show more people, with your favorites still shown first.</p>` : ""}
-      <p class="muted small">We never widen your filters without asking.</p>
-      <div class="row"><button data-act="go" data-r="filters">Edit filters</button><button class="btn-quiet" data-act="go" data-r="connections">Matches</button></div>`;
+      <button class="btn-primary btn-block" data-act="go" data-r="connections">See your matches</button>
+      <button class="btn-link" data-act="go" data-r="filters">Edit filters</button>
+      <p class="native-footnote">We never widen your filters without asking.</p></div></div>`;
   }
   const id = D[0];
   const dd = S.priv.disc || {}, isTop = dd.day === dayKey() && dd.top === id;
   const why = isTop ? reasons(id).filter(r => r !== "In each other's age range").slice(0,2).join(" · ") : "";
-  return `<div class="discover-heading"><div><h1>Discover</h1><p>Atlanta, Georgia · Your daily introductions</p></div></div>${discTop(`${D.length} ${D.length===1?"person":"people"} waiting for you`)}
+  return `${hero}<div class="native-sheet">${discTop(`${D.length} ${D.length===1?"person":"people"} waiting for you`)}
     ${card(id, true, isTop ? (why || "Picked from your preferences and recent activity") : "")}
     <div class="card-actions" style="padding:0 0 6px;border:0">
       <button class="pass native-circle" data-act="react" data-k="pass" data-id="${esc(id)}">${icon("close")} Pass</button>
       <button class="like btn-primary native-circle" data-act="react" data-k="like" data-id="${esc(id)}">${icon("heart")} Like</button>
     </div>
     <div class="under"><button data-act="report" data-id="${esc(id)}">Report</button><button data-act="block" data-id="${esc(id)}">Block</button></div>
-    <p class="swipe-hint">Swipe right to like, left to pass. Arrow keys work too.</p>`;
+    <p class="swipe-hint">Swipe right to like, left to pass. Arrow keys work too.</p></div>`;
 };
 
 VIEWS.filters = () => {
@@ -1851,7 +1855,7 @@ function renderChat(){
     <div class="chat-head">
       <button class="btn-link" data-act="go" data-r="connections" aria-label="Back to matches">${icon("arrow")}</button>
       ${img(id,0,"avatar")}
-      <div class="grow"><div style="font-family:var(--serif);font-size:20px">${esc(p.name)}, ${p.age}</div><div class="tiny muted">${esc(p.city)}</div></div>
+      <div class="grow"><div style="font-family:var(--native-serif);font-size:20px">${esc(p.name)}, ${p.age}</div><div class="tiny muted">${esc(p.city)}</div></div>
       <button class="btn-quiet" style="min-height:40px;padding:8px 12px" data-act="chat-menu" data-id="${esc(id)}" aria-label="Conversation options">${icon("more")}</button>
     </div>
     <div id="dpin"></div>
@@ -1971,6 +1975,7 @@ VIEWS.me = () => {
       ${row("admin",'data-act="go" data-r="eligibility"',"Eligibility answers","Update your answers if something changed")}
       ${row("pledge",'data-act="show-pledge"',"Community Pledge",`Accepted ${S.priv.pledge?new Date(S.priv.pledge.at).toLocaleDateString():""}`)}
       ${row("help",'data-act="help"',"Help and support","Get help or appeal a decision")}
+      ${owner ? row("admin",'data-act="go" data-r="admin"',"Review queue","Approve profiles and manage the community") : ""}
     </ul>
     <div class="native-section-head"><h3>Blocked members</h3></div>
     ${blocked.length ? `<ul class="list native-group">${blocked.map(id => `<li class="item" style="cursor:default"><div class="grow"><div class="t">${esc((S.profiles[id]||{}).name || "Former member")}</div></div><button class="btn-quiet" style="min-height:38px;padding:6px 12px" data-act="unblock" data-id="${esc(id)}">Unblock</button></li>`).join("")}</ul><p class="native-footnote">Unblocking doesn't restore a match.</p>` : `<p class="native-footnote">You haven't blocked anyone.</p>`}
@@ -2081,7 +2086,7 @@ const openInvites = () => allInvites().filter(x => !(S.priv.handledInvites||{})[
 function reviewItem(id){
   const p = S.profiles[id], list = photosOf(id); if (!list) loadPhotos(id);
   return `<div class="panel">
-    <div style="font-family:var(--serif);font-size:24px">${esc(p.name)}, ${p.age}</div>
+    <div style="font-family:var(--native-serif);font-size:24px">${esc(p.name)}, ${p.age}</div>
     <p class="small muted" style="margin:2px 0 8px">${esc(p.gender)} · wants to meet ${esc((p.partnerGenders||[]).join(", "))} · ages ${p.ageMin}–${p.ageMax} · ${esc(p.city)} ${esc(p.zip)} · revision ${p.revision}</p>
     <div class="review-photos">${Array.from({length:p.photoCount||0},(_,i)=>img(id,i)).join("")}</div>
     ${p.prompts.map(pr => `<p><span class="small muted">${esc(PROMPT[pr.id])}</span><br>${esc(pr.a)}</p>`).join("")}
@@ -2244,7 +2249,7 @@ const A = {
       preview = src ? `<img src="${src}" alt="${esc(p.name)}'s photo" style="width:120px;border-radius:12px;display:block;margin:0 auto 6px">` : "";
     } else {
       const t = describeOn(id, on); if (!t) return;
-      preview = `<div class="panel" style="margin-top:0"><div class="small muted" style="font-weight:600">${esc(t.q)}</div><div style="font-family:var(--serif);font-size:20px;margin-top:4px">${esc(t.a)}</div></div>`;
+      preview = `<div class="panel" style="margin-top:0"><div class="small muted" style="font-weight:600">${esc(t.q)}</div><div style="font-family:var(--native-serif);font-size:20px;margin-top:4px">${esc(t.a)}</div></div>`;
     }
     sheet(`<h2 style="margin-top:0">Like ${esc(p.name)}'s ${on.startsWith("photo")?"photo":"prompt"}</h2>${preview}
       <label for="like-note">Add a comment <span class="hint">Optional, up to 150 characters</span></label>
@@ -2787,7 +2792,7 @@ function renderPropose(){
   const sel = new Set(P.opts.map(o => o.day));
   openPlanner(`${phead("Propose a date")}
     <p class="pm" style="margin-top:6px">Plan something with ${name}. They'll swipe on spots and pick one of your times.</p>
-    <h2><label for="pp-vibe" style="font-size:22px;font-weight:400;font-family:var(--serif);margin:0">What's the vibe?</label></h2>
+    <h2><label for="pp-vibe" style="font-size:22px;font-weight:400;font-family:var(--native-serif);margin:0">What's the vibe?</label></h2>
     <select id="pp-vibe" data-pv>${VIBES.map(v => `<option ${v===P.vibe?"selected":""}>${esc(v)}</option>`).join("")}</select>
     <h2>Budget</h2>
     <div class="pchips" role="group" aria-label="Budget">${[1,2,3,4].map(n => `<button data-act="pp-budget" data-b="${n}" aria-pressed="${P.budget===n}">${priceStr(n)}</button>`).join("")}</div>
@@ -2901,10 +2906,10 @@ function planBlock(other){
       <button class="btn-mute" data-act="plan-change" data-id="${id}">Need to reschedule or cancel?</button></div>`;
     case "drafting": return `<div class="dblock"><div class="lbl">Date plan in progress</div><p class="sub">You started planning with ${name}. Finish picking spots to send it.</p><div class="row" style="display:flex;gap:8px"><button class="btn-gold" style="flex:1" data-act="plan-continue" data-id="${id}">Continue</button><button class="btn-mute" data-act="plan-change" data-id="${id}">Discard</button></div></div>`;
     case "sent": return st.iAmInit
-      ? `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">You proposed ${esc(st.init.vibe)} · ${priceStr(st.init.budget)}. ${name} is picking a venue and time.</p><button class="btn-mute" style="color:#E31C25" data-act="plan-change" data-id="${id}">Cancel proposal</button></div>`
+      ? `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">You proposed ${esc(st.init.vibe)} · ${priceStr(st.init.budget)}. ${name} is picking a venue and time.</p><button class="btn-mute" style="color:var(--native-terracotta)" data-act="plan-change" data-id="${id}">Cancel proposal</button></div>`
       : `<div class="dblock gold"><div class="lbl">${name} wants to plan a date</div><p>${esc(st.init.vibe)} · ${priceStr(st.init.budget)}</p><p class="sub">${(st.init.times||[]).map(fmtAt).map(esc).join("<br>")}</p><div class="row" style="display:flex;gap:8px;align-items:center"><button class="btn-gold" style="flex:1" data-act="plan-swipe" data-id="${id}">Pick a venue</button><button class="btn-mute" data-act="plan-decline" data-id="${id}">Not this time</button></div></div>`;
     case "noMatch": return st.iAmInit
-      ? `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">${name} is choosing a spot for ${esc(st.init.vibe)}.</p><button class="btn-mute" style="color:#E31C25" data-act="plan-change" data-id="${id}">Cancel proposal</button></div>`
+      ? `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">${name} is choosing a spot for ${esc(st.init.vibe)}.</p><button class="btn-mute" style="color:var(--native-terracotta)" data-act="plan-change" data-id="${id}">Cancel proposal</button></div>`
       : `<div class="dblock gold"><div class="lbl">${st.noVenues ? `${name} wants to plan a date` : "No venue match yet"}</div>${st.noVenues ? `<p>${esc(st.init.vibe)} · ${priceStr(st.init.budget)}</p><p class="sub">${(st.init.times||[]).map(fmtAt).map(esc).join("<br>")}</p><p class="sub">Pick a spot you'd like to go.</p>` : `<p class="sub">Ask for new suggestions or pick a spot yourself.</p>`}<div class="row" style="display:flex;gap:8px;align-items:center"><button class="btn-gold" style="flex:1" data-act="plan-fallback" data-id="${id}">Choose a spot</button><button class="btn-mute" data-act="plan-decline" data-id="${id}">Not this time</button></div></div>`;
     case "newRound": return st.iAmInit
       ? `<div class="dblock gold"><div class="lbl">${name} passed on those spots</div><p class="sub">Pick 3 new venues to send.</p><button class="btn-gold btn-block" data-act="plan-newpick" data-id="${id}">Pick 3 new venues</button></div>`
@@ -2915,7 +2920,7 @@ function planBlock(other){
     case "counter": return st.iAmInit
       ? `<div class="dblock gold"><div class="lbl">${name} suggested a new time</div><p class="big">${esc(fmtAt(st.time))}</p><p class="sub">at ${esc(v ? v.name : "your spot")}</p><div class="row" style="display:flex;gap:8px"><button class="btn-go" style="flex:1" data-act="plan-accept" data-id="${id}">Accept time</button><button class="btn-red" data-act="plan-change" data-id="${id}">Cancel</button></div></div>`
       : `<div class="dblock"><div class="lbl">Waiting on ${name}</div><p class="sub">You suggested ${esc(fmtAt(st.time))}. ${name} needs to confirm.</p></div>`;
-    case "canceled": return `<div class="dblock"><div class="lbl" style="color:#8E8E93">Date plan canceled</div><p class="sub">${st.byMe ? "You" : name} canceled the plan.${st.reason ? ` “${esc(st.reason)}.”` : ""}</p><button class="btn-mute" style="color:#FFB800" data-act="plan-start" data-id="${id}">Plan another date</button></div>`;
+    case "canceled": return `<div class="dblock"><div class="lbl" style="color:var(--native-ink-2)">Date plan canceled</div><p class="sub">${st.byMe ? "You" : name} canceled the plan.${st.reason ? ` “${esc(st.reason)}.”` : ""}</p><button class="btn-mute" style="color:#FFB800" data-act="plan-start" data-id="${id}">Plan another date</button></div>`;
   }
   return "";
 }

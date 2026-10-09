@@ -112,3 +112,16 @@ Shared components restyled once and used everywhere:
 - **Dates and Events:** the same dark hero and ivory sheet as Matches and Profile.
 
 One logo per screen still holds: the header lockup only. Screenshots of every screen are in `docs/evidence/midnight-tour/`, `claude-redesign/` and `compatibility/`. The design, full-browser and prototype tests all pass.
+
+## Pristine pass, step 1: foundations (October 8, 2026), awaiting founder sign-off
+
+Following the UI/UX audit, with founder decisions on the demo controls, the shared dark header and step-by-step onboarding:
+
+- **Demo controls:** a small gold-dot "Demo" pill (top right) replaces the black demo bar. Its menu holds Simulate a reply, Review queue (team view), Start a new demo profile and Reset. Reset and new profile ask for confirmation inside the menu, not with a browser pop-up.
+- **Content wording:** "synthetic member", "fictional venue" and "Simulated reply:" are gone from screens. The only disclaimer is on Welcome and in the menu.
+- **Tabs:** members see four tabs (Discover, Matches, Dates, Profile). The team reaches Review from Profile → Settings → Review queue.
+- **Headers and titles:** all four tabs share the dark header and emerald hero. Discover uses a compact hero, and every page title is Lora.
+- **Discover end of day:** "That's everyone for today" is now a designed moment with one primary action (See your matches) and an Edit filters link.
+- **Leftover styles:** off-palette inline colours in date-plan and admin templates are replaced by palette tokens.
+
+Still to come, two screens at a time: Discover + Matches, Chat + Dates, Profile + Review, onboarding steps, settings screens, and the desktop frame. The remaining AI portraits wait for the free Hugging Face allowance.

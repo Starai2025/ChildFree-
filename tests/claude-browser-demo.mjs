@@ -41,15 +41,15 @@ try {
   await page.getByRole('button',{name:'Send message',exact:true}).click();
   await page.getByText('Hello from the actual clickable synthetic demo.',{exact:true}).waitFor();
   await demo('menu').click();await demo('reply').click();
-  await page.getByText(/^Simulated reply:/).waitFor();
+  await page.getByText('That sounds like my kind of Sunday. Coffee this weekend?',{exact:true}).waitFor();
   await page.reload();await page.locator('#tabs').getByRole('button',{name:'Matches',exact:true}).click();
   await page.locator('[data-act="open-chat"][data-id="malik"]').click();await page.getByText('Hello from the actual clickable synthetic demo.',{exact:true}).waitFor();
-  await page.getByText(/^Simulated reply:/).waitFor();
+  await page.getByText('That sounds like my kind of Sunday. Coffee this weekend?',{exact:true}).waitFor();
   const stored=await actor();assert.equal(stored.find(([key])=>key==='msgs/amara/c/amara__malik')[1].list.length,1);
   assert.ok(await page.evaluate(()=>localStorage.getItem('blackchildfree.claude-browser-demo.v1').length<100000),'Preset portraits must not fill browser storage.');
   assert.ok(stored.some(([,value])=>value.img==='@demo-portrait:amara'));
   await page.screenshot({path:'docs/evidence/claude-browser-demo/chat.png'});
-  await demo('menu').click();await demo('fresh').click();await page.getByRole('button',{name:"Join Free Midnight",exact:true}).waitFor();
+  await demo('menu').click();await demo('fresh').click();await demo('confirm').click();await page.getByRole('button',{name:"Join Free Midnight",exact:true}).waitFor();
   await page.getByRole('button',{name:"Join Free Midnight",exact:true}).click();
   await page.locator('#dob').fill('1994-01-01');
   for (let i=0;i<6;i++) {
@@ -99,7 +99,7 @@ try {
   await page.locator('#f-city').fill('Atlanta');await page.locator('#f-zip').fill('30308');
   await act('submit-profile').click();await act('skip-passions').click();
   await page.getByRole('heading',{name:'Your profile is in review.',exact:true}).waitFor();
-  await page.locator('#hdr').getByRole('button',{name:'Review',exact:true}).click();
+  await demo('menu').click();await demo('review').click();
   await page.locator('[data-act="approve"][data-id="amara"]').click();
   await page.locator('#tabs').getByRole('button',{name:'Discover',exact:true}).click();
   await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
@@ -125,13 +125,13 @@ try {
   await page.locator('#compat-editor').getByRole('button',{name:'Skip',exact:true}).click();
   await page.getByText('Answers saved on this profile draft.',{exact:true}).waitFor();
   await act('submit-profile').click();
-  await page.locator('#hdr').getByRole('button',{name:'Review',exact:true}).click();
+  await demo('menu').click();await demo('review').click();
   await page.locator('[data-act="approve"][data-id="amara"]').click();
   await page.locator('#tabs').getByRole('button',{name:'Discover',exact:true}).click();
   await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   assert.equal(Object.keys((await actor()).find(([key])=>key==='profiles/amara')[1].compatibility.answers).length,9);
   assert.equal(await page.locator('.compat-summary').getByText('Same role for faith or spirituality',{exact:true}).count(),0);
-  await demo('menu').click();await demo('reset').click();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
+  await demo('menu').click();await demo('reset').click();await demo('confirm').click();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   // Existing saved profiles retain their identity and acquire no invented answers.
   await page.evaluate(()=>{const key='blackchildfree.claude-browser-demo.v1',state=JSON.parse(localStorage.getItem(key));for(const [path,value]of state.entries)if(path.startsWith('profiles/'))delete value.compatibility;localStorage.setItem(key,JSON.stringify(state));});
   await page.reload();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
@@ -140,7 +140,7 @@ try {
   await page.getByRole('button',{name:'Edit compatibility answers',exact:true}).click();
   assert.equal(await page.locator('#compat-answer').inputValue(),'');
   assert.ok((await actor()).some(([key,value])=>key==='profiles/amara'&&value.name==='Jessica'&&!value.compatibility));
-  await demo('menu').click();await demo('reset').click();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
+  await demo('menu').click();await demo('reset').click();await demo('confirm').click();await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();
   // The downloadable version embeds all assets and supports the same app logic.
   await page.goto(url.replace('demo.html','demo-standalone.html'));
   await page.locator('.photo-identity h2').filter({hasText:'Marcus'}).waitFor();

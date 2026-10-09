@@ -111,7 +111,7 @@ try {
   await page.getByRole('button',{name:'Back to matches',exact:true}).click();
   await page.getByRole('heading',{name:'Conversations',exact:true}).waitFor();await capture('matches','Matches');
   await page.getByRole('button',{name:'Profile',exact:true}).click();await page.getByRole('heading',{name:'Your profile',exact:true}).waitFor();await capture('profile','Profile');
-  await page.getByRole('button',{name:'Review',exact:true}).last().click();await page.getByRole('heading',{name:'Review',exact:true}).waitFor();await capture('review','Review');
+  await page.locator('[data-act="go"][data-r="admin"]').click();await page.getByRole('heading',{name:'Review',exact:true}).waitFor();await capture('review','Review');
   for (const width of [320,390,768]) {
     await page.setViewportSize({width,height:844});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`Overflow at ${width}px`);

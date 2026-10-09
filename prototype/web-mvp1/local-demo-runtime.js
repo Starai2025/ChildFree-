@@ -97,9 +97,9 @@
       ['garden','Demo Garden Patio','Decatur','Outdoors & walks'],
       ['gallery','Demo Art House','West End','Art & museums']
     ];
-    for (const [id,name,area,vibe] of venues) seeded.set(`venues/${id}`,{name,area,address:'Fictional preview venue — no real address',vibes:[vibe,'Coffee & conversation'],tags:['Quiet enough to talk'],price:1,blurb:'A fictional venue for trying the date planner.',at:stamp});
-    const cache = Object.fromEntries(venues.map(([id,name,area,vibe]) => [id,{name,area,address:'Fictional preview venue — no real address',vibes:[vibe],tags:['Quiet enough to talk'],price:1,blurb:'A fictional venue for trying the date planner.'}]));
-    seeded.set('events/mixer', {title:'Founding cohort mixer', when:nextDay(5,'19:00'), place:'Demo Art House, West End (fictional venue)', details:'Meet other founding members over music and small bites. Synthetic demo event.', capacity:40, at:stamp});
+    for (const [id,name,area,vibe] of venues) seeded.set(`venues/${id}`,{name,area,address:`${area}, Atlanta`,vibes:[vibe,'Coffee & conversation'],tags:['Quiet enough to talk'],price:1,blurb:'A relaxed spot that is easy to talk in.',at:stamp});
+    const cache = Object.fromEntries(venues.map(([id,name,area,vibe]) => [id,{name,area,address:`${area}, Atlanta`,vibes:[vibe],tags:['Quiet enough to talk'],price:1,blurb:'A relaxed spot that is easy to talk in.'}]));
+    seeded.set('events/mixer', {title:'Founding cohort mixer', when:nextDay(5,'19:00'), place:'Demo Art House, West End', details:'Meet other founding members over music and small bites.', capacity:40, at:stamp});
     for (const id of ['jason','ashley','danielle','brittany']) seeded.set(`rsvps/${id}`, {going:{mixer:true}});
     if (!fresh) {
       seeded.set('data/users/amara/private', {elig:{dob:'1994-01-01',result:'eligible',answers:Array(6).fill('yes'),v:1},pledge:{v:1,at:stamp},matchSeen:{jason:stamp,kevin:stamp,ashley:stamp},lastRead:{[pair('ashley')]:stamp}});
@@ -132,7 +132,7 @@
   }
   let docs;
   try {const saved=localStorage.getItem(KEY);docs=saved&&JSON.parse(saved).cast===CAST_VERSION?decode(saved):fixtures();}
-  catch {docs=fixtures();document.querySelector('#demo-status').textContent='DEMO · Saved data unavailable; fresh fixtures loaded';}
+  catch {docs=fixtures();document.querySelector('#demo-status').textContent='Saved demo data could not be read, so the demo started fresh.';}
   const snapshot = path => ({exists:docs.has(path),data:()=>clone(docs.get(path))});
   const collection = path => ({docs:[...docs].filter(([key])=>key.startsWith(path+'/')&&!key.slice(path.length+1).includes('/')).map(([key,value])=>({id:key.slice(path.length+1),data:()=>clone(value)}))});
   function notify(path) {
@@ -161,22 +161,29 @@
     const button=event.target.closest('[data-demo]');if (!button) return;
     const panel=document.querySelector('#demo-panel');
     try {
-      if (button.dataset.demo==='menu') {panel.hidden=!panel.hidden;return;}
-      if (button.dataset.demo==='close') {panel.hidden=true;return;}
+      const actions=panel.querySelector('.demo-actions'),confirmBox=panel.querySelector('.demo-confirm');
+      const showActions=()=>{actions.hidden=false;confirmBox.hidden=true;delete confirmBox.dataset.pending;};
+      if (button.dataset.demo==='menu') {panel.hidden=!panel.hidden;showActions();return;}
+      if (button.dataset.demo==='close' || button.dataset.demo==='review') {panel.hidden=true;return;}
+      // Reset and new-profile ask inside the menu instead of a browser pop-up.
       if (button.dataset.demo==='reset' || button.dataset.demo==='fresh') {
-        const fresh=button.dataset.demo==='fresh';
-        if (!confirm(fresh?'Start a new synthetic profile? This resets your local demo progress.':'Reset all synthetic demo progress on this device?')) return;
-        localStorage.setItem(KEY,encode(fixtures(fresh)));location.reload();return;
+        confirmBox.dataset.pending=button.dataset.demo;
+        confirmBox.querySelector('.demo-confirm-text').textContent=button.dataset.demo==='fresh'?'Start a new demo profile? This clears your demo progress on this device.':'Reset the demo? This clears your demo progress on this device.';
+        actions.hidden=true;confirmBox.hidden=false;return;
+      }
+      if (button.dataset.demo==='cancel') {showActions();return;}
+      if (button.dataset.demo==='confirm') {
+        localStorage.setItem(KEY,encode(fixtures(confirmBox.dataset.pending==='fresh')));location.reload();return;
       }
       if (button.dataset.demo==='reply') {
         const target=document.querySelector('[data-act="chat-menu"]')?.dataset.id;
-        if (!target) {document.querySelector('#demo-status').textContent='DEMO · Open a conversation to simulate a reply';return;}
+        if (!target) {document.querySelector('#demo-status').textContent='Open a conversation first, then simulate a reply.';return;}
         const pair=['amara',target].sort().join('__');
         const path=`msgs/${target}/c/${pair}`;
         const previous=docs.get(path)||{to:'amara',list:[]};
-        await db.doc(path).set({...previous,list:[...previous.list,{id:`demo-reply-${Date.now()}`,t:`Simulated reply: ${(people[target]||{}).reply||'Great to hear from you. Tell me more!'}`,at:Date.now()}]});
+        await db.doc(path).set({...previous,list:[...previous.list,{id:`demo-reply-${Date.now()}`,t:(people[target]||{}).reply||'Great to hear from you. Tell me more!',at:Date.now()}]});
         panel.hidden=true;
       }
-    } catch (error) {document.querySelector('#demo-status').textContent=`DEMO · ${error.message}`;}
+    } catch (error) {document.querySelector('#demo-status').textContent=error.message;}
   });
 })();

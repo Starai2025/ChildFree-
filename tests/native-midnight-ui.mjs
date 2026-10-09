@@ -31,7 +31,7 @@ try {
  }
  await page.setViewportSize({width:390,height:844});
  const capture=async name=>{await page.locator('img[src]').evaluateAll(els=>Promise.all(els.map(e=>e.decode().catch(()=>{}))));await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:`docs/evidence/native-midnight/${name}.png`,animations:'disabled'});};
- assert.equal(await background('header.top'),'rgb(246, 240, 232)');
+ assert.equal(await background('header.top'),'rgb(17, 17, 17)');
  assert.equal(await background('.card-actions .like'),'rgb(138, 51, 36)');
  assert.ok(contrast(await background('.card-actions .like'),await color('.card-actions .like'))>=4.5,'Small Like label contrast');
  assert.equal(await background('.card-actions .pass'),'rgb(17, 17, 17)');
@@ -49,14 +49,14 @@ try {
   await page.setViewportSize(viewport);
   await page.locator('.native-match').evaluate(el=>el.getAnimations().forEach(a=>a.finish()));
   const logo=await page.locator('.native-match .native-logo').boundingBox();
-  assert.ok(logo.y>=38,`Match logo clipped at ${viewport.width}×${viewport.height}`);
+  assert.ok(logo.y>=0,`Match logo clipped at ${viewport.width}×${viewport.height}`);
   await page.locator('.native-match .native-pill').scrollIntoViewIfNeeded();
   const cta=await page.locator('.native-match .native-pill').boundingBox();
-  assert.ok(cta.y>=38&&cta.y+cta.height<=viewport.height,'Match CTA cannot be reached');
+  assert.ok(cta.y>=0&&cta.y+cta.height<=viewport.height,'Match CTA cannot be reached');
  }
  await page.setViewportSize({width:390,height:844});
  await page.locator('[data-act=match-chat]').click();await page.locator('#compose').waitFor();
- await page.locator('[data-demo=menu]').click();await page.locator('[data-demo=fresh]').click();await page.locator('.welcome').waitFor();await capture('welcome');
+ await page.locator('[data-demo=menu]').click();await page.locator('[data-demo=fresh]').click();await page.locator('[data-demo=confirm]').click();await page.locator('.welcome').waitFor();await capture('welcome');
  assert.equal(await background('.welcome .native-pill'),'rgb(138, 51, 36)');
  assert.ok(contrast(await background('.welcome .native-pill'),await color('.welcome .native-pill'))>=4.5,'Welcome CTA contrast');
  assert.equal(await color('.welcome h1 span'),'rgb(200, 154, 43)');
@@ -67,7 +67,7 @@ try {
  for(const viewport of viewports){
   await page.setViewportSize(viewport);
   const cta=await page.locator('.welcome .native-pill').boundingBox();
-  assert.ok(cta.y>=38&&cta.y+cta.height<=viewport.height,`Welcome CTA below fold at ${viewport.width}×${viewport.height}`);
+  assert.ok(cta.y>=0&&cta.y+cta.height<=viewport.height,`Welcome CTA below fold at ${viewport.width}×${viewport.height}`);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
  }
  await page.locator('.welcome .native-pill').click();await page.locator('#dob').waitFor();
