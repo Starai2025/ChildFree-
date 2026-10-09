@@ -125,3 +125,9 @@ Following the UI/UX audit, with founder decisions on the demo controls, the shar
 - **Leftover styles:** off-palette inline colours in date-plan and admin templates are replaced by palette tokens.
 
 Still to come, two screens at a time: Discover + Matches, Chat + Dates, Profile + Review, onboarding steps, settings screens, and the desktop frame. The remaining AI portraits wait for the free Hugging Face allowance.
+
+## Pristine pass, step 2: Discover + Matches (October 8, 2026), awaiting founder sign-off
+
+- **Discover:** Pass and Like sit on a short fade into a solid ivory band, so the card's text never ghosts underneath them.
+- **No duplicates:** someone already waiting in today's Discover (e.g. Marcus, who likes you) appears there with their "likes you" note. They are no longer repeated under Matches → Likes you.
+- **Matches tiles:** "Likes you" and "New matches" use the same horizontal photo strip and tile size. The tag is sienna for "Liked you" and gold for "New". Tile shadows are no longer clipped into a box.

@@ -536,7 +536,7 @@ body[data-midnight] .announce button{color:var(--native-emerald)}
 
 /* Discover: tab bar */
 body[data-midnight] nav.tabs{background:var(--native-ivory);border-top:1px solid var(--native-hair);box-shadow:none}
-body:is([data-route=discover],[data-route=view]) nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:132px;background:linear-gradient(180deg,#F6F0E800,#F6F0E8F2 62%,var(--native-ivory));pointer-events:none}
+body:is([data-route=discover],[data-route=view]) nav.tabs::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:112px;background:linear-gradient(180deg,#F6F0E800,var(--native-ivory) 28px);pointer-events:none}
 body[data-midnight] nav.tabs button{color:var(--native-ink-2);font-size:12px;font-weight:600;gap:6px}
 body[data-midnight] nav.tabs button svg{width:24px;height:24px}
 body[data-midnight] nav.tabs button[aria-current=page]{color:var(--native-emerald);font-weight:700}
@@ -661,13 +661,13 @@ body[data-midnight] .native-footnote{margin:12px 0 0;font-size:14px;line-height:
 
 /* Photo tiles */
 .native-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.native-strip{display:flex;gap:12px;overflow-x:auto;margin:0 -20px;padding:0 20px 8px;scroll-snap-type:x mandatory;scrollbar-width:none}
-.native-strip .native-tile{flex:none;width:132px;scroll-snap-align:start}
-body[data-midnight] .native-tile{position:relative;display:block;aspect-ratio:3/4;min-height:0;padding:0;border:0;border-radius:20px;overflow:hidden;background:var(--native-emerald);box-shadow:var(--native-shadow);text-align:left;color:var(--native-ivory)}
+.native-strip{display:flex;gap:12px;overflow-x:auto;margin:-12px -20px -20px;padding:12px 20px 28px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.native-strip .native-tile{flex:none;width:148px;scroll-snap-align:start}
+body[data-midnight] .native-tile{position:relative;display:block;aspect-ratio:3/4;min-height:0;padding:0;border:0;border-radius:20px;overflow:hidden;background:var(--native-emerald);box-shadow:0 1px 2px #1111110F,0 8px 20px #1111111F;text-align:left;color:var(--native-ivory)}
 .native-tile>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%}
 .native-tile::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,#11111100 45%,#111111D9);box-shadow:inset 0 0 0 1px #C89A2B59}
 .native-tile-chip{position:absolute;z-index:1;top:10px;left:10px;padding:4px 10px;border-radius:var(--native-pill-radius);background:var(--native-terracotta);color:var(--native-ivory);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-.native-strip .native-tile-chip{background:var(--native-gold);color:var(--native-obsidian)}
+.native-tile-chip.new{background:var(--native-gold);color:var(--native-obsidian)}
 .native-tile-name{position:absolute;z-index:1;left:14px;right:14px;bottom:12px;font-size:18px;font-weight:700;line-height:1.2}
 .native-tile-note{position:absolute;z-index:1;left:14px;right:14px;bottom:36px;font-size:12px;font-weight:600;color:var(--native-on-dark-2)}
 .native-tile:has(.native-tile-note) .native-tile-name{bottom:12px}
@@ -2202,11 +2202,11 @@ VIEWS.connections = () => {
   const withMsgs = ids.filter(id => convo(id).length).sort((a,b) => { const la = convo(a).slice(-1)[0].at, lb = convo(b).slice(-1)[0].at; return lb - la; });
   const fresh = ids.filter(id => !convo(id).length);
   const pending = Object.entries(myR()).filter(([id,r]) => r.k === "like" && !ids.includes(id) && S.profiles[id] && now() - r.at < 30*86400000).length;
-  const ly = likesYou();
+  const inDiscover = new Set(deck()), ly = likesYou().filter(id => !inDiscover.has(id));
 
   const hero = `<section class="native-hero"><h1>Matches</h1><p class="native-hero-sub">People who said yes to the same kind of life.</p></section>`;
-  const tile = (id, attrs, chip, extra="") => `<button class="native-tile" ${attrs}>${img(id,0)}<span class="native-tile-chip">${chip}</span><span class="native-tile-name">${esc(S.profiles[id].name)}, ${S.profiles[id].age}</span>${extra}</button>`;
-  const lySection = ly.length ? `<div class="native-section-head"><h3>Likes you</h3><p>Like them back to match.</p></div><div class="native-tiles">${ly.map(id => tile(id,`data-act="view-like" data-id="${esc(id)}"`,"Liked you",likedMe(id).note?'<span class="native-tile-note">Left a comment</span>':"")).join("")}</div>` : "";
+  const tile = (id, attrs, chip, extra="") => `<button class="native-tile" ${attrs}>${img(id,0)}<span class="native-tile-chip${chip === "New" ? " new" : ""}">${chip}</span><span class="native-tile-name">${esc(S.profiles[id].name)}, ${S.profiles[id].age}</span>${extra}</button>`;
+  const lySection = ly.length ? `<div class="native-section-head"><h3>Likes you</h3><p>Like them back to match.</p></div><div class="native-strip">${ly.map(id => tile(id,`data-act="view-like" data-id="${esc(id)}"`,"Liked you",likedMe(id).note?'<span class="native-tile-note">Left a comment</span>':"")).join("")}</div>` : "";
   const waiting = pending ? `<p class="native-footnote">You have ${pending} ${pending===1?"like":"likes"} waiting for a response.</p>` : "";
   if (!ids.length) return `${hero}<div class="native-sheet">${lySection}${ly.length ? `<p class="native-footnote">When someone you like likes you back, they'll show up here.</p>` : nativeEmpty("No matches yet","When someone you like likes you back, they'll show up here.")}${waiting}</div>`;
   return `${hero}<div class="native-sheet">${announceBanner()}${lySection}
