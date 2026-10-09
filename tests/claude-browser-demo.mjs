@@ -57,12 +57,15 @@ try {
     await page.locator('.seg label').filter({has:radio}).click();assert.ok(await radio.isChecked());
   }
   await act('submit-elig').click();await page.locator('#pledge-check').check();await act('accept-pledge').click();
+  // Sign-up is stepped; the progress dots jump between steps.
+  await page.locator('.ob-dots [data-n="1"]').click();
   await page.locator('#photos img').first().waitFor();
   assert.equal(await page.locator('#photos img').count(),2);
   await page.screenshot({path:'docs/evidence/claude-browser-demo/onboarding.png'});
   const compatibilityValues=['personal','respect','prefer','balanced','casual','prefer','balanced','mix','prefer','weekends'];
   const compatibilityKeys=['faithPractice','faithPartner','faithImportance','spendingPriority','dateBudget','spendingImportance','socialPace','weekend','lifestyleImportance','dateAvailability'];
   const draftAnswers=async()=> (await actor()).find(([key])=>key==='data/users/amara/private')[1].draft.compatibility.answers;
+  await page.locator('.ob-dots [data-n="3"]').click();
   await page.locator('#compat-answer').selectOption(compatibilityValues[0]);
   await page.getByText('Answers saved on this profile draft.',{exact:true}).waitFor();
   await page.reload();await page.locator('#compat-answer').waitFor();
@@ -91,12 +94,16 @@ try {
   assert.equal((await draftAnswers()).faithPractice,'secular');
   await page.locator('#compat-answer').selectOption('personal');
   await page.getByText('Answers saved on this profile draft.',{exact:true}).waitFor();
+  await page.locator('.ob-dots [data-n="0"]').click();
   await page.locator('#f-name').fill('Demo Taylor');await page.locator('#f-gender').selectOption('Woman');
   await page.locator('[data-f="partnerGenders"][value="Man"]').check();
+  await page.locator('.ob-dots [data-n="2"]').click();
   await page.locator('#f-p1').selectOption('ordinary_sunday');await page.locator('#f-a1').fill('Coffee, a farmers market, and an unhurried walk together.');
   await page.locator('#f-p2').selectOption('partnership');await page.locator('#f-a2').fill('Being honest and thoughtful, and choosing each other every day.');
+  await page.locator('.ob-dots [data-n="4"]').click();
   await page.locator('#f-goal').selectOption('A committed relationship');
   await page.locator('#f-city').fill('Atlanta');await page.locator('#f-zip').fill('30308');
+  await page.locator('.ob-dots [data-n="6"]').click();
   await act('submit-profile').click();await act('skip-passions').click();
   await page.getByRole('heading',{name:'Your profile is in review.',exact:true}).waitFor();
   await demo('menu').click();await demo('review').click();

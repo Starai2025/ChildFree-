@@ -146,3 +146,13 @@ Still to come, two screens at a time: Discover + Matches, Chat + Dates, Profile 
 - **Profile card:** a compact card (photo, then name, location and badges on ivory) overlaps the hero. Below it are a full-width "Edit profile" button and a "Preview my profile" link.
 - **Preview sheet:** the link opens the full public card ("How members see you") in a sheet, so settings are reached without scrolling past every prompt and answer.
 - **In review:** Discover's "Your profile is in review" is now a calm, centred moment (gold rule, Lora headline, one line) with "Preview my profile".
+
+## Pristine pass, step 5: step-by-step sign-up (October 8, 2026), awaiting founder sign-off
+
+Sign-up is now nine short screens: Eligibility → Pledge → About you → Photos → Prompts → The life you'd share → What you're looking for → The basics → Review and submit.
+
+- **Progress:** each screen shows "STEP n OF 9" with progress dots (done = emerald, current = gold). The profile dots are tappable to jump between steps.
+- **Navigation:** a sticky Back / Continue bar sits at the bottom. The current step is saved (`priv.obStep`), so a reload returns to the same screen.
+- **Review and submit:** lists each section's status with a tap-to-edit row, then Submit for review. Validation errors appear there.
+- **Unchanged:** fields, draft saving, compatibility questions and submit validation all work as before.
+- **Editing:** editing an existing profile remains a single page.

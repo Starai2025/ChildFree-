@@ -846,6 +846,19 @@ body[data-midnight] .sheet .card{margin:0}
 body[data-midnight] .native-sheet>.status{display:flex;flex-direction:column;align-items:center;gap:6px;margin:8px 0;padding:32px 20px;border:0;border-top:0;background:transparent;text-align:center}
 body[data-midnight] .native-sheet>.status::before{content:"";width:40px;height:2px;margin-bottom:14px;border-radius:2px;background:var(--native-gold)}
 body[data-midnight] .native-sheet>.status p{max-width:320px}
+.ob-progress{display:flex;flex-direction:column;gap:10px;margin:20px 0 4px}
+.ob-count{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--native-emerald)}
+.ob-dots{display:flex;gap:6px}
+body[data-midnight] .ob-dot{position:relative;flex:1;display:block;height:16px;min-height:16px;padding:0;border:0;border-radius:0;background:transparent}
+.ob-dot::before{content:"";position:absolute;left:0;right:0;top:6px;height:4px;border-radius:2px;background:#11111126}
+.ob-dot.done::before{background:var(--native-emerald)}
+.ob-dot.on::before{background:var(--native-gold)}
+body[data-midnight] .ob-step>h1.ob-title{margin:12px 0 8px;font-family:var(--native-serif);font-size:30px;line-height:1.15;font-weight:700;letter-spacing:-.015em}
+body[data-route=editor] main{padding-bottom:132px}
+body[data-midnight] .ob-bar .in{gap:10px}
+body[data-midnight] .ob-bar .btn-quiet{flex:1}
+body[data-midnight] .ob-bar .btn-primary{flex:2}
+body[data-midnight] .ob-bar [hidden]{display:none}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   .native-hero-compact .native-hero-sub{display:none}
@@ -1774,7 +1787,7 @@ VIEWS.eligibility = () => {
   }
   const E = S.elig;
   return `
-  ${myProfile() ? `<button class="btn-link" data-act="go" data-r="me">Back to profile</button>` : ""}
+  ${myProfile() ? `<button class="btn-link" data-act="go" data-r="me">Back to profile</button>` : obProgress(0)}
   <h1>Is this community for you?</h1>
   <p class="muted">Answer honestly. We don't check these against documents, and you can change them later.</p>
   <div class="panel">
@@ -1808,6 +1821,7 @@ VIEWS.ineligible = () => {
 };
 
 VIEWS.pledge = () => `
+  ${myProfile() ? "" : obProgress(1)}
   <h1>Our community, our commitment.</h1>
   <div class="panel"><p class="pledge" style="margin:0">${esc(PLEDGE_TEXT)}</p></div>
   <p class="small muted">The pledge doesn't replace moderation. Breaking it can get you removed, and you can always report or block someone.</p>
@@ -1829,39 +1843,34 @@ VIEWS.editor = () => {
   const opt = (list, val, ph) => (ph?`<option value="">${ph}</option>`:"") + list.map(o => { const [v,l] = Array.isArray(o)?o:[o,o]; return `<option value="${esc(v)}" ${v===val?"selected":""}>${esc(l||ph)}</option>`; }).join("");
   const promptOpts = (n) => { const val = D["p"+n], others = [1,2,3,4].filter(x => x !== n).map(x => D["p"+x]);
     return `<option value="">${n > 2 ? "No prompt" : "Choose a prompt"}</option>` + CATALOG.map(([id,t]) => `<option value="${id}" ${id===val?"selected":""} ${others.includes(id)?"disabled":""}>${esc(t)}</option>`).join(""); };
-  return `
-  ${editing ? `<button class="btn-link" data-act="go" data-r="me">Cancel</button>` : ""}
-  <h1>${editing ? "Edit your profile" : "Build your profile"}</h1>
-  <p class="muted">${editing ? "Saving changes sends your profile back for review. You'll be hidden from Discover until it's approved." : "In this demo, approve your profile from the Demo menu."} Your progress saves automatically.</p>
-
-  <h2>About you</h2>
+  const H = editing ? "h2" : "h1";
+  const cur = editing ? -1 : Math.min(S.priv.obStep || 0, OB_STEPS.length - 1);
+  const step = (i, body) => `<section class="ob-step" data-step="${i}" ${!editing && i !== cur ? "hidden" : ""}>${editing && i === OB_STEPS.length - 1 ? "" : `<${H} class="ob-title">${OB_STEPS[i]}</${H}>`}${body}</section>`;
+  const sections = [
+    step(0, `${editing ? "" : `<p class="muted">In this demo, approve your profile from the Demo menu. Your progress saves automatically.</p>`}
   <label for="f-name">First name or nickname</label>
   <input type="text" id="f-name" data-f="name" maxlength="40" value="${esc(D.name)}" autocomplete="given-name">
   <label for="f-gender">I'm a</label>
   <select id="f-gender" data-f="gender">${opt(GENDERS, D.gender, "Choose one")}</select>
   <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin:16px 0 6px">I'd like to meet</legend>
-  <div class="checks">${GENDERS.map(g => `<label><input type="checkbox" data-f="partnerGenders" value="${g}" ${D.partnerGenders.includes(g)?"checked":""}> ${({"Woman":"Women","Man":"Men","Non-binary":"Non-binary people"})[g]}</label>`).join("")}</div></fieldset>
-
-  <section aria-labelledby="compat-title" class="compat-section">
-    <h2 id="compat-title">The life you'd share</h2>
-    <p class="small muted">10 short questions about faith, spending, everyday life and making a date happen. Answers you choose to share appear on your profile. You can skip any question and edit later.</p>
-    <div id="compat-editor"></div>
-  </section>
-
-  <h2>Your prompts</h2>
-  <p class="small muted">Answer at least two different prompts, and up to four, in 20–200 characters each. Members can like a prompt and comment on it.</p>
+  <div class="checks">${GENDERS.map(g => `<label><input type="checkbox" data-f="partnerGenders" value="${g}" ${D.partnerGenders.includes(g)?"checked":""}> ${({"Woman":"Women","Man":"Men","Non-binary":"Non-binary people"})[g]}</label>`).join("")}</div></fieldset>`),
+    step(1, `<p class="small muted">Add 2 to 6 clear photos of you. Location data is removed from each photo.</p>
+  <div class="photos" id="photos"><p class="muted small">Loading photos…</p></div>
+  <input type="file" id="file" accept="image/*" hidden>`),
+    step(2, `<p class="small muted">Answer at least two different prompts, and up to four, in 20–200 characters each. Members can like a prompt and comment on it.</p>
   ${[1,2,3,4].map(n => `
     <label for="f-p${n}">Prompt ${n}${n > 2 ? ' <span class="hint">Optional</span>' : ""}</label>
     <select id="f-p${n}" data-f="p${n}">${promptOpts(n)}</select>
     <textarea id="f-a${n}" data-f="a${n}" maxlength="200" aria-label="Answer to prompt ${n}" placeholder="Your answer">${esc(D["a"+n])}</textarea>
     <div class="counter" id="c-a${n}"></div>`).join("")}
-
   <label for="f-bio">Bio <span class="hint">Optional, up to 500 characters</span></label>
   <textarea id="f-bio" data-f="bio" maxlength="500">${esc(D.bio)}</textarea>
-  <div class="counter" id="c-bio"></div>
-
-  <h2>What you're looking for</h2>
-  <label for="f-goal">Relationship goal</label>
+  <div class="counter" id="c-bio"></div>`),
+    step(3, `<section aria-label="The life you'd share" class="compat-section" id="compat-title">
+    <p class="small muted">10 short questions about faith, spending, everyday life and making a date happen. Answers you choose to share appear on your profile. You can skip any question and edit later.</p>
+    <div id="compat-editor"></div>
+  </section>`),
+    step(4, `<label for="f-goal">Relationship goal</label>
   <select id="f-goal" data-f="goal">${opt(GOALS, D.goal, "Choose one")}</select>
   <label for="f-mar">Marriage <span class="hint">Optional</span></label>
   <select id="f-mar" data-f="marriage">${MARRIAGE.map(m => `<option value="${esc(m)}" ${m===D.marriage?"selected":""}>${m?esc(m):"Prefer not to say"}</option>`).join("")}</select>
@@ -1869,31 +1878,72 @@ VIEWS.editor = () => {
     <div><label for="f-amin">Ages from</label><input type="number" id="f-amin" data-f="ageMin" min="18" max="99" value="${esc(D.ageMin)}"></div>
     <div><label for="f-amax">to</label><input type="number" id="f-amax" data-f="ageMax" min="18" max="99" value="${esc(D.ageMax)}"></div>
   </div>
-
-  <h2>Where you are</h2>
-  <p class="small muted">The founding beta is Atlanta-area only. Members see your neighborhood or city, never your ZIP.</p>
+  <p class="small muted" style="margin-top:20px">The founding beta is Atlanta-area only. Members see your neighborhood or city, never your ZIP.</p>
   <div class="row">
     <div><label for="f-city">Neighborhood or city</label><input type="text" id="f-city" data-f="city" maxlength="40" value="${esc(D.city)}" placeholder="Decatur"></div>
     <div style="flex:.7"><label for="f-zip">ZIP code</label><input type="text" id="f-zip" data-f="zip" inputmode="numeric" maxlength="5" value="${esc(D.zip)}"></div>
-  </div>
-
-  <h2>The basics</h2>
-  <p class="small muted">Optional. Members can filter by these, and you can change them later without another review.</p>
-  ${detailsFields(D)}
-
-  <h2>Photos</h2>
-  <p class="small muted">Add 2 to 6 clear photos of you. Location data is removed from each photo.</p>
-  <div class="photos" id="photos"><p class="muted small">Loading photos…</p></div>
-  <input type="file" id="file" accept="image/*" hidden>
-
+  </div>`),
+    step(5, `<p class="small muted">Optional. Members can filter by these, and you can change them later without another review.</p>
+  ${detailsFields(D)}`),
+    step(6, `${editing ? "" : `<p class="muted">Check everything, then send your profile for review. Tap any line to change it.</p><div id="ob-summary"></div>`}
   <div id="ed-err"></div>
-  <button class="btn-primary btn-block" style="margin-top:22px" data-act="submit-profile">${editing ? "Save and send for review" : "Submit for review"}</button>`;
+  <button class="btn-primary btn-block" style="margin-top:22px" data-act="submit-profile">${editing ? "Save and send for review" : "Submit for review"}</button>`)
+  ];
+  if (editing) return `
+  <button class="btn-link" data-act="go" data-r="me">Cancel</button>
+  <h1>Edit your profile</h1>
+  <p class="muted">Saving changes sends your profile back for review. You'll be hidden from Discover until it's approved. Your progress saves automatically.</p>
+  ${sections.join("")}`;
+  return `<div id="ob-progress">${obProgress(cur + 2)}</div>
+  ${sections.join("")}
+  <div class="savebar ob-bar"><div class="in"><button class="btn-quiet" data-act="ob-back" ${cur === 0 ? "hidden" : ""}>Back</button><button class="btn-primary" data-act="ob-next" ${cur === OB_STEPS.length - 1 ? "hidden" : ""}>Continue</button></div></div>`;
 };
+// Sign-up is a short sequence: eligibility and pledge, then one profile topic per screen.
+const OB_STEPS = ["About you","Photos","Prompts","The life you'd share","What you're looking for","The basics","Review and submit"];
+const OB_TOTAL = OB_STEPS.length + 2;
+function obProgress(index){
+  const dots = Array.from({length:OB_TOTAL}, (_, i) => {
+    const e = i - 2, cls = i < index ? "done" : i === index ? "on" : "";
+    return e >= 0 && index >= 2
+      ? `<button class="ob-dot ${cls}" data-act="ob-step" data-n="${e}" aria-label="Step ${i + 1}: ${esc(OB_STEPS[e])}" ${i === index ? 'aria-current="step"' : ""}></button>`
+      : `<span class="ob-dot ${cls}" aria-hidden="true"></span>`;
+  }).join("");
+  return `<div class="ob-progress"><span class="ob-count">Step ${index + 1} of ${OB_TOTAL}</span><div class="ob-dots">${dots}</div></div>`;
+}
+function setObStep(n){
+  n = Math.max(0, Math.min(OB_STEPS.length - 1, n));
+  S.obStep = n; savePriv({obStep:n});
+  document.querySelectorAll(".ob-step").forEach(el => { el.hidden = +el.dataset.step !== n; });
+  const prog = $("#ob-progress"); if (prog) prog.innerHTML = obProgress(n + 2);
+  const back = $('[data-act="ob-back"]'), next = $('[data-act="ob-next"]');
+  if (back) back.hidden = n === 0;
+  if (next) next.hidden = n === OB_STEPS.length - 1;
+  if (n === OB_STEPS.length - 1) renderObSummary();
+  window.scrollTo(0, 0);
+}
+function renderObSummary(){
+  const el = $("#ob-summary"); if (!el) return;
+  const D = S.draft, d = D.details || {};
+  const photos = (S.draftPhotos || []).length;
+  const prompts = [1,2,3,4].filter(n => D["p"+n] && trim(D["a"+n])).length;
+  const answered = Object.keys(cleanCompatibility(D.compatibility).answers).length;
+  const basics = Object.keys(d).filter(k => k !== "interests" && d[k]).length;
+  const rows = [
+    [0, "About you", [trim(D.name), D.gender].filter(Boolean).join(" · ") || "Not started"],
+    [1, "Photos", `${photos} of 6 added`],
+    [2, "Prompts", `${prompts} answered`],
+    [3, "The life you'd share", `${answered} of 10 answered`],
+    [4, "What you're looking for", [D.goal, trim(D.city)].filter(Boolean).join(" · ") || "Not started"],
+    [5, "The basics", basics ? `${basics} shared` : "Optional"]
+  ];
+  el.innerHTML = `<ul class="list native-group native-rows">${rows.map(([n, t, s]) => `<li><button class="item native-row" data-act="ob-step" data-n="${n}"><div class="grow"><div class="t">${esc(t)}</div><div class="s">${esc(s)}</div></div></button></li>`).join("")}</ul>`;
+}
 function afterEditor(){
   S.draft.compatibility = cleanCompatibility(S.draft.compatibility);
   renderCompatibilityEditor();
   updateCounters();
   if (!S.draftPhotos) loadDraftPhotos(); else renderPhotoGrid();
+  renderObSummary();
   if (S.focusCompat){ S.focusCompat = false; $("#compat-editor").scrollIntoView({block:"start"}); $("#compat-answer").focus({preventScroll:true}); }
 }
 function renderCompatibilityEditor(focus = false){
@@ -2555,6 +2605,9 @@ const A = {
   "compat-retry": () => { if (S.draft) persistCompatibilityDraft(); },
   go: d => go(d.r),
   close: closeSheet,
+  "ob-step": d => setObStep(+d.n),
+  "ob-back": () => setObStep((S.priv.obStep || 0) - 1),
+  "ob-next": () => setObStep((S.priv.obStep || 0) + 1),
   "preview-profile": () => sheet(`<div class="native-preview-head"><h2>How members see you</h2><button class="btn-link" data-act="close">Done</button></div>${card(uid)}`),
   "close-scrim": (d, el, e) => { if (e.target === el) closeSheet(); },
   "confirm-yes": () => { const f = S._confirm; S._confirm = null; closeSheet(); if (f) f(); },
