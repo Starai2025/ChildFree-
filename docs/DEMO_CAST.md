@@ -25,7 +25,7 @@ The cast also includes:
 
 Discover shows up to 5 new people a day, so Brandon, Rachel and Chris come after today's five.
 
-**Saved state:** saved demo state records `cast: 2`. A browser holding an older cast loads the new one automatically.
+**Saved state:** saved demo state records `cast: 3`. A browser holding an older cast loads the new one automatically.
 
 ## Adding portraits
 
@@ -36,3 +36,12 @@ Put each portrait in `prototype/web-mvp1/preview-assets/` as `synthetic-<id>.jpg
 The builder picks portraits up automatically. People without one show a default portrait until theirs is added.
 
 Use 4:5 portraits about 1080 px wide; JPEG keeps the offline demo small. All portraits must be fictional (AI-generated). Never use real people's photos.
+
+## Portrait sources (October 9, 2026)
+
+| Ids | Source |
+|---|---|
+| amara (Jessica), malik (Marcus) | Original fictional demo portraits |
+| michael, brandon, anthony | AI-generated with FLUX.1 Krea (Hugging Face Space `mcp-tools/FLUX.1-Krea-dev`); fictional people |
+| brittany, ashley, kevin, danielle, jason | Supplied by the founder. They appear to be photographs of real people. **Confirm the licence allows dating-profile use before any public sharing, or replace them with AI portraits.** |
+| chris, lauren, nicole, rachel | No portrait yet; they show a default portrait |

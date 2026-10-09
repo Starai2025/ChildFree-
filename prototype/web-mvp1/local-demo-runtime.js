@@ -9,7 +9,7 @@
   const listeners = new Map();
   const stamp = Date.now();
   // Fictional cast. "amara" (shown as Jessica) is the demo user; "malik" is shown as Marcus. Internal ids stay stable for saved state.
-  const CAST_VERSION = 2;
+  const CAST_VERSION = 3;
   const day = 86400000, hour = 3600000;
   const answers = (faithPractice,faithPartner,faithImportance,spendingPriority,dateBudget,spendingImportance,socialPace,weekend,lifestyleImportance,dateAvailability) =>
     ({version:1,answers:{faithPractice,faithPartner,faithImportance,spendingPriority,dateBudget,spendingImportance,socialPace,weekend,lifestyleImportance,dateAvailability}});
