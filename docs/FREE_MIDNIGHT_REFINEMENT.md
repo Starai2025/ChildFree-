@@ -131,3 +131,12 @@ Still to come, two screens at a time: Discover + Matches, Chat + Dates, Profile 
 - **Discover:** Pass and Like sit on a short fade into a solid ivory band, so the card's text never ghosts underneath them.
 - **No duplicates:** someone already waiting in today's Discover (e.g. Marcus, who likes you) appears there with their "likes you" note. They are no longer repeated under Matches → Likes you.
 - **Matches tiles:** "Likes you" and "New matches" use the same horizontal photo strip and tile size. The tag is sienna for "Liked you" and gold for "New". Tile shadows are no longer clipped into a box.
+
+## Pristine pass, step 3: Chat + Dates (October 8, 2026), awaiting founder sign-off
+
+- **Chat:**
+  - A locked date shows once, in the emerald pinned bar; its Details button opens or closes the full card.
+  - A small "TODAY · 12:12 PM" header starts the conversation and follows any pause of an hour or more, instead of a time under every bubble.
+- **Dates:**
+  - Every date and time uses one format, "Sat, Oct 10 · 11:00 AM", with venue and time on separate lines.
+  - The event "I'm going" action is a quiet emerald outline, so it no longer competes with the date rows.

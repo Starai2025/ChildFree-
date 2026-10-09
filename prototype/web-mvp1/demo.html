@@ -829,6 +829,9 @@ body[data-route=view] main>.btn-link{color:var(--native-emerald)!important}
 body[data-midnight] .native-moment h2{margin:0 0 8px;font-family:var(--native-serif);font-size:28px;line-height:1.2;font-weight:700;color:var(--native-obsidian)}
 body[data-midnight] .native-moment p{max-width:320px;color:var(--native-ink-2)}
 body[data-midnight] .native-moment .btn-primary{margin-top:12px}
+.chat-stamp{align-self:center;margin:14px 0 6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--native-ink-2)}
+body[data-midnight] main .native-rsvp{min-height:44px;padding:8px 20px;border:1px solid var(--native-emerald);border-radius:var(--native-pill-radius);background:transparent;color:var(--native-emerald);font-size:15px;font-weight:700}
+body[data-midnight] main .native-rsvp.going{border-color:transparent;background:#0F5C4D14}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   .native-hero-compact .native-hero-sub{display:none}
@@ -1943,7 +1946,7 @@ VIEWS.details = () => `<button class="btn-link" data-act="go" data-r="me">Cancel
   ${detailsFields(S.draft)}
   <button class="btn-primary btn-block" style="margin-top:22px" data-act="save-details">Save</button>`;
 
-const fmtWhen = w => { const d = new Date(w); return isNaN(d) ? "" : d.toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); };
+const fmtWhen = w => fmtAt(w);
 const goingTo = eid => Object.keys(S.rsvps).filter(id => ((S.rsvps[id]||{}).going||{})[eid] && S.profiles[id]);
 function upcomingEvents(){
   const cutoff = now() - 3*3600000;
@@ -1961,9 +1964,9 @@ function eventsList(){
         ${e.details ? `<p style="white-space:pre-wrap">${esc(e.details)}</p>` : ""}
         <div class="going">${g.length ? `${g.length} ${g.length===1?"member":"members"} going` : "Be the first to RSVP"}${e.capacity ? (n => ` · ${n} ${n===1?"spot":"spots"} left`)(Math.max(0, e.capacity - g.length)) : ""}</div>
         ${!canRsvp ? `<p class="small muted">You can RSVP once your profile is approved.</p>`
-          : mine ? `<button class="btn-block" data-act="rsvp" data-id="${esc(e.id)}" data-v="0">You're going · Cancel RSVP</button>`
+          : mine ? `<button class="native-rsvp going" data-act="rsvp" data-id="${esc(e.id)}" data-v="0">You're going · Cancel</button>`
           : full ? `<button class="btn-block" disabled>Full</button>`
-          : `<button class="btn-block btn-primary" data-act="rsvp" data-id="${esc(e.id)}" data-v="1">I'm going</button>`}
+          : `<button class="native-rsvp" data-act="rsvp" data-id="${esc(e.id)}" data-v="1">I'm going</button>`}
       </article>`; }).join("") : nativeEmpty("No events yet","The founding team will post the first Atlanta meetup here.")}
     <p class="tiny muted">Meet in public places and tell a friend where you'll be. Members only see how many people are going, not who.</p>`;
 }
@@ -1988,7 +1991,7 @@ VIEWS.dates = () => {
   };
   return `<section class="native-hero"><h1>Dates</h1><p class="native-hero-sub">Plans with your matches, and meetups around Atlanta.</p></section><div class="native-sheet">${announceBanner()}
     <div class="native-section-head"><h3>Upcoming dates</h3></div>
-    ${upcoming.length ? upcoming.map(x => `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">Date with ${esc(S.profiles[x.id].name)}</div><div class="s">${esc(x.st.venue ? x.st.venue.name : "Your spot")} · ${esc(fmtAt(x.st.time))}</div><div class="st locked">Locked</div></div></button>`).join("")
+    ${upcoming.length ? upcoming.map(x => `<button class="ditem" data-act="open-chat" data-id="${esc(x.id)}">${img(x.id,0,"avatar")}<div class="grow" style="flex:1;min-width:0"><div class="t">Date with ${esc(S.profiles[x.id].name)}</div><div class="s">${esc(x.st.venue ? x.st.venue.name : "Your spot")}</div><div class="s">${esc(fmtAt(x.st.time))}</div><div class="st locked">Locked</div></div></button>`).join("")
       : nativeEmpty("No dates yet","After you've chatted with a match, tap Plan a date in your conversation.")}
     ${past ? `<p class="tiny muted">${past} past ${past===1?"date":"dates"}</p>` : ""}
     ${pending.length ? `<div class="native-section-head"><h3>Pending proposals</h3></div>${pending.map(line).join("")}` : ""}
@@ -2037,7 +2040,16 @@ function likeContext(id){
   [[mine,"You",id,"their"],[theirs,name,uid,"your"]].filter(x => x[0]).sort((a,b) => a[0].at - b[0].at).forEach(x => line(...x));
   return out.join("");
 }
+// A time header starts the conversation and follows any pause of an hour or more.
+function chatStamp(list, i){
+  const m = list[i], prev = list[i - 1];
+  if (prev && m.at - prev.at < 3600000) return "";
+  const d = new Date(m.at), today = new Date(), yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+  const day = d.toDateString() === today.toDateString() ? "Today" : d.toDateString() === yesterday.toDateString() ? "Yesterday" : d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+  return `<div class="chat-stamp">${day} · ${d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})}</div>`;
+}
 function renderChat(){
+  S.showDateCard = false;
   const id = S.chatWith, p = S.profiles[id];
   $("#main").innerHTML = `
     <div class="chat-head">
@@ -2072,10 +2084,10 @@ function updateChat(scroll){
   const showMs = pst.stage === "none" && list.length >= MILESTONE && list.some(m => m.me) && list.some(m => !m.me) && !((S.priv.msDismiss||{})[pr]);
   const pinned = pst.stage === "locked";
   const pinEl = $("#dpin");
-  if (pinEl) pinEl.innerHTML = pinned ? `<div class="dpin" role="note"><span class="grow"><b>Date locked</b> · ${esc(pst.venue ? pst.venue.name : "")} · ${esc(fmtAt(pst.time))}</span><button data-act="pin-details">Details</button></div>` : "";
-  el.innerHTML = (pinned ? `<div id="dlocked">${planBlock(id)}</div>` : "") + ctx + (list.length ? list.map((m, mi) => (m.img
+  if (pinEl) pinEl.innerHTML = pinned ? `<div class="dpin" role="note"><span class="grow"><b>Date locked</b> · ${esc(pst.venue ? pst.venue.name : "")} · ${esc(fmtAt(pst.time))}</span><button data-act="pin-details" aria-expanded="${S.showDateCard ? "true" : "false"}">${S.showDateCard ? "Hide" : "Details"}</button></div>` : "";
+  el.innerHTML = (pinned && S.showDateCard ? `<div id="dlocked">${planBlock(id)}</div>` : "") + ctx + (list.length ? list.map((m, mi) => chatStamp(list, mi) + (m.img
       ? `<div class="b img ${m.me?"me":"them"}"><img data-mi="${esc((m.me?uid:id)+"|"+pr+"|"+m.img)}" ${S.msgImg[(m.me?uid:id)+"|"+pr+"|"+m.img]?`src="${S.msgImg[(m.me?uid:id)+"|"+pr+"|"+m.img]}"`:""} alt="Photo from ${m.me?"you":esc(S.profiles[id].name)}"></div>`
-      : `<div class="b ${m.me?"me":"them"}">${esc(m.t)}</div>`) + `<div class="when ${m.me?"me":""}">${ago(m.at)}</div>` + (showMs && mi === MILESTONE - 1 ? milestoneBlock(id) : "")).join("") + (seenLast ? `<div class="seen">Seen</div>` : "") + (pinned ? "" : planBlock(id))
+      : `<div class="b ${m.me?"me":"them"}">${esc(m.t)}</div>`) + (showMs && mi === MILESTONE - 1 ? milestoneBlock(id) : "")).join("") + (seenLast ? `<div class="seen">Seen</div>` : "") + (pinned ? "" : planBlock(id))
     : `<p class="muted" style="text-align:center;margin-top:30px">You matched with ${esc(S.profiles[id].name)}. Say hello.</p><p class="tiny muted" style="text-align:center">Founding beta: don't share sensitive details like your address or money information.</p>` + (pinned ? "" : planBlock(id)));
   if (scroll || atBottom) window.scrollTo(0, document.body.scrollHeight);
   el.querySelectorAll("img[data-mi]:not([src])").forEach(loadMsgImg);
@@ -2510,7 +2522,7 @@ const A = {
   },
   "delete-account": () => confirmSheet("Delete your account?", "This permanently removes your profile, photos, likes and the messages you sent. It can't be undone.", "Delete everything", deleteAll, true),
   "admin-tab": d => { S.adminTab = d.t; render(); },
-  "pin-details": () => { const el = $("#dlocked"); if (el) el.scrollIntoView({behavior: reduceMotion() ? "auto" : "smooth", block:"start"}); },
+  "pin-details": () => { S.showDateCard = !S.showDateCard; updateChat(); const el = $("#dlocked"); if (el) el.scrollIntoView({behavior: reduceMotion() ? "auto" : "smooth", block:"start"}); },
   "plan-start": d => { if (!matchIds().includes(d.id)) return; startPlan(d.id); },
   "milestone-dismiss": d => { savePriv({msDismiss:{...(S.priv.msDismiss||{}), [pairId(d.id)]:now()}}); updateChat(); },
   "pp-budget": d => { S.pp.budget = +d.b; renderPropose(); },
@@ -2914,7 +2926,7 @@ document.addEventListener("change", e => {
 });
 // ---------- Date planner ----------
 const MILESTONE = 10;
-const fmtAt = iso => { const d = new Date(iso); if (isNaN(d)) return ""; return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}) + " @ " + d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); };
+const fmtAt = iso => { const d = new Date(iso); if (isNaN(d)) return ""; return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}) + " · " + d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); };
 const mapUrl = v => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${v.name}, ${v.address||v.area||""}, Atlanta, GA`)}`;
 function planState(other){
   const p = pairId(other), mine = S.myPlans[p], theirs = S.theirPlans[p];
