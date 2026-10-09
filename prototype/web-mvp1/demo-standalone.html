@@ -649,7 +649,7 @@ body[data-midnight] .native-hero .native-hero-sub{margin:10px 0 0;font-size:16px
 .native-sheet{position:relative;margin:-32px -20px 0;padding:8px 20px 8px;border-radius:28px 28px 0 0;background:var(--native-ivory)}
 .native-hero-profile{padding-bottom:128px}
 .native-sheet-profile{padding-top:0}
-.native-sheet-profile>.card{position:relative;z-index:1;margin-top:-104px!important}
+.native-sheet-profile>.native-me-card{margin-top:-104px}
 .native-sheet-profile>.native-pill{width:100%;margin:4px 0 0}
 
 /* Section headings inside the sheet */
@@ -832,6 +832,20 @@ body[data-midnight] .native-moment .btn-primary{margin-top:12px}
 .chat-stamp{align-self:center;margin:14px 0 6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--native-ink-2)}
 body[data-midnight] main .native-rsvp{min-height:44px;padding:8px 20px;border:1px solid var(--native-emerald);border-radius:var(--native-pill-radius);background:transparent;color:var(--native-emerald);font-size:15px;font-weight:700}
 body[data-midnight] main .native-rsvp.going{border-color:transparent;background:#0F5C4D14}
+.native-me-card{position:relative;z-index:1;overflow:hidden;border:1px solid var(--native-hair);border-radius:var(--native-card-radius);background:var(--native-ivory);box-shadow:var(--native-shadow)}
+.native-me-photo{position:relative;aspect-ratio:5/4;background:var(--native-emerald)}
+.native-me-photo>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 22%}
+.native-me-id{display:flex;flex-direction:column;gap:2px;padding:16px 20px 20px;color:var(--native-obsidian)}
+.native-me-id b{font-size:26px;line-height:1.15;font-weight:700;letter-spacing:-.02em}
+.native-me-id>span{margin-bottom:10px;font-size:15px;color:var(--native-ink-2)}
+.native-me-actions{display:flex;flex-direction:column;align-items:center;gap:4px;margin:16px 0 0}
+body[data-midnight] .native-me-actions .btn-link{min-height:44px}
+.native-preview-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+body[data-midnight] .native-preview-head h2{margin:0;font-family:var(--native-serif);font-size:24px}
+body[data-midnight] .sheet .card{margin:0}
+body[data-midnight] .native-sheet>.status{display:flex;flex-direction:column;align-items:center;gap:6px;margin:8px 0;padding:32px 20px;border:0;border-top:0;background:transparent;text-align:center}
+body[data-midnight] .native-sheet>.status::before{content:"";width:40px;height:2px;margin-bottom:14px;border-radius:2px;background:var(--native-gold)}
+body[data-midnight] .native-sheet>.status p{max-width:320px}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   .native-hero-compact .native-hero-sub{display:none}
@@ -2041,7 +2055,7 @@ function statusBlock(){
   if (isSuspended(uid)) return `<div class="status bad"><h2 style="margin-top:0">Your account is suspended.</h2><p>You can't use Discover or chat while it's under review. You can still use settings, delete your account or contact support.</p></div>`;
   if (p.ineligible) return `<div class="status bad"><h2 style="margin-top:0">You're hidden from Discover.</h2><p>Your current eligibility answers don't match this community. If that was a mistake, update them in Profile.</p></div>`;
   if (a && a.status === "changes" && a.revision === p.revision) return `<div class="status bad"><h2 style="margin-top:0">Your profile needs a few changes.</h2><p><b>From the review team:</b> ${esc(a.note || "Please review your profile and resubmit.")}</p><button class="btn-primary" data-act="go" data-r="editor">Edit profile</button></div>`;
-  if (!a || a.revision !== p.revision) return `<div class="status"><h2 style="margin-top:0">Your profile is in review.</h2><p>In this demo, approve it from Demo → Review queue.</p></div>`;
+  if (!a || a.revision !== p.revision) return `<div class="status"><h2 style="margin-top:0">Your profile is in review.</h2><p>In this demo, approve it from Demo → Review queue.</p><button class="btn-quiet" data-act="preview-profile">Preview my profile</button></div>`;
   if (p.paused) return `<div class="status"><h2 style="margin-top:0">Your profile is paused.</h2><p>No one can see you and you won't get new cards. Your existing chats still work.</p><button data-act="pause">Resume my profile</button></div>`;
   return "";
 }
@@ -2349,8 +2363,8 @@ VIEWS.me = () => {
   const row = (ico, attrs, label, sub="") => `<li><button class="item native-row" ${attrs}><span class="native-ico">${icon(ico)}</span><div class="grow"><div class="t">${label}</div>${sub?`<div class="s">${sub}</div>`:""}</div></button></li>`;
   return `<section class="native-hero native-hero-profile"><div class="native-page-head"><h1>Your profile</h1><p class="native-status${live?" live":""}"><span class="sr-only">Status: </span>${esc(status)}</p></div><p class="native-hero-sub">This is how members see you.</p></section>
     <div class="native-sheet native-sheet-profile">
-    ${card(uid).replace('class="card"','class="card" style="margin-top:0"')}
-    <button class="btn-block btn-primary native-pill" data-act="go" data-r="editor">Edit profile</button>
+    <div class="native-me-card"><div class="native-me-photo">${img(uid,0)}</div><div class="native-me-id"><b>${esc(p.name)}, ${p.age}</b><span>${esc(p.city)} · ${esc(p.gender)}</span><div class="native-profile-badges">${nativeBadge("Childfree by choice")}${p.goal?nativeBadge(p.goal,true):""}</div></div></div>
+    <div class="native-me-actions"><button class="btn-primary btn-block" data-act="go" data-r="editor">Edit profile</button><button class="btn-link" data-act="preview-profile">Preview my profile</button></div>
     <div class="native-section-head"><h3>Profile details</h3></div>
     <ul class="list native-group native-rows">
       ${row("compat",'data-act="edit-compatibility"',"Edit compatibility answers")}
@@ -2541,6 +2555,7 @@ const A = {
   "compat-retry": () => { if (S.draft) persistCompatibilityDraft(); },
   go: d => go(d.r),
   close: closeSheet,
+  "preview-profile": () => sheet(`<div class="native-preview-head"><h2>How members see you</h2><button class="btn-link" data-act="close">Done</button></div>${card(uid)}`),
   "close-scrim": (d, el, e) => { if (e.target === el) closeSheet(); },
   "confirm-yes": () => { const f = S._confirm; S._confirm = null; closeSheet(); if (f) f(); },
   "submit-elig": () => {

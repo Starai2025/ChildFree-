@@ -140,3 +140,9 @@ Still to come, two screens at a time: Discover + Matches, Chat + Dates, Profile 
 - **Dates:**
   - Every date and time uses one format, "Sat, Oct 10 · 11:00 AM", with venue and time on separate lines.
   - The event "I'm going" action is a quiet emerald outline, so it no longer competes with the date rows.
+
+## Pristine pass, step 4: Profile + in review (October 8, 2026), awaiting founder sign-off
+
+- **Profile card:** a compact card (photo, then name, location and badges on ivory) overlaps the hero. Below it are a full-width "Edit profile" button and a "Preview my profile" link.
+- **Preview sheet:** the link opens the full public card ("How members see you") in a sheet, so settings are reached without scrolling past every prompt and answer.
+- **In review:** Discover's "Your profile is in review" is now a calm, centred moment (gold rule, Lora headline, one line) with "Preview my profile".

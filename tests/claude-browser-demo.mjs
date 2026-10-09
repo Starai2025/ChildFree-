@@ -108,10 +108,12 @@ try {
   assert.equal(Object.keys(completed.find(([key])=>key==='profiles/amara')[1].compatibility.answers).length,10);
   await page.locator('.compat-summary').getByText('Same first-date budget preference',{exact:true}).waitFor();
   await page.locator('#tabs').getByRole('button',{name:'Profile',exact:true}).click();
+  await page.getByRole('button',{name:'Preview my profile',exact:true}).click();
   await page.locator('.compat-summary summary').click();
   await page.locator('.compat-summary').getByText('A casual café or affordable outing',{exact:true}).waitFor();
   await page.locator('.compat-summary').evaluate(section=>section.scrollIntoView({block:'start'}));
   await page.screenshot({path:'docs/evidence/compatibility/profile-answers.png'});
+  await page.locator('.sheet [data-act="close"]').click();
   await page.getByRole('button',{name:'Edit compatibility answers',exact:true}).click();
   assert.equal(await page.locator('#compat-answer').inputValue(),'personal');
   for (const width of [320,390,768]) {
