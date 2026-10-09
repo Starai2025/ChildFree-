@@ -166,3 +166,12 @@ Sign-up is now nine short screens: Eligibility → Pledge → About you → Phot
 - **Sheets** (conversation options, report, block, preview): Lora titles and uniform 15px buttons.
 - **The life you'd share (sign-up):** the question card's own Next is now a quiet emerald outline and Back is a text button, so the sticky Continue is the only primary action.
 - **Filters, Passions and The basics:** already consistent from earlier steps (Lora titles, pill fields, sticky save bar); no changes needed.
+
+## Pristine pass, step 7: desktop presentation (October 8, 2026), awaiting founder sign-off
+
+On screens 1100px and wider, the phone-width app stays centred and gets:
+- a soft emerald glow behind it and a thin gold edge
+- on the left, the headline ("The Only Thing We're Raising / Is the Bar.") and tagline in Lora and gold
+- on the right, three short promises
+
+The panels are text only, so each screen still has one logo; the left panel hides on Welcome, which already shows the headline. Phones and tablets are unchanged. The design, full-browser and prototype tests pass, including the 1280px layout check.

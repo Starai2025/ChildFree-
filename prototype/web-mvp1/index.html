@@ -867,6 +867,20 @@ body[data-midnight] .sheet :is(.btn-block,.btn-danger){font-size:15px;font-weigh
 body[data-midnight] #compat-editor .compat-buttons .btn-primary{border:1px solid var(--native-emerald);background:transparent;color:var(--native-emerald);box-shadow:none}
 body[data-midnight] #compat-editor .compat-buttons button:not([class]){border-color:transparent;color:var(--native-ink-2)}
 body[data-midnight] .planner .phead b{font-family:var(--native-serif);font-size:18px}
+.desk-side{display:none}
+@media(min-width:1100px){
+  body[data-midnight]{background:radial-gradient(70% 90% at 50% 0%,#0F5C4D66,#0F5C4D00 70%) fixed,var(--native-obsidian)}
+  body[data-midnight] .app{box-shadow:0 0 0 1px #C89A2B4D,0 40px 120px #000000B3}
+  .desk-side{display:block;position:fixed;top:50%;z-index:1;width:min(340px,calc(50% - 300px));transform:translateY(-50%);color:var(--native-ivory);font-family:var(--native-sans);pointer-events:none}
+  .desk-left{right:calc(50% + 288px);text-align:right}
+  .desk-right{left:calc(50% + 288px)}
+  .desk-eyebrow{margin:0 0 18px;color:var(--native-gold);font-size:13px;font-weight:800;letter-spacing:.32em;text-transform:uppercase}
+  .desk-head{margin:0 0 18px;font-family:var(--native-serif);font-size:46px;line-height:1.08;font-weight:700;letter-spacing:-.02em}
+  .desk-head span{display:block;color:var(--native-gold)}
+  .desk-sub{margin:0;color:var(--native-on-dark-2);font-size:18px;font-weight:600}
+  .desk-right p{margin:0 0 16px;padding-left:16px;border-left:2px solid var(--native-gold);color:var(--native-on-dark-2);font-size:17px;font-weight:600;line-height:1.4}
+  body[data-route=welcome] .desk-left{visibility:hidden}
+}
 @media(max-height:740px){
   body[data-midnight] header.top{min-height:56px;padding-top:8px;padding-bottom:8px}
   .native-hero-compact .native-hero-sub{display:none}
@@ -1373,6 +1387,8 @@ function nativeLogo(arrangement="row"){
   return `<div class="native-logo ${arrangement}" aria-label="FREE MIDNIGHT"><img class="brand-emblem" src="${FREE_MIDNIGHT_MARK}" alt="" aria-hidden="true"><span class="native-word" aria-hidden="true">FREE MIDNIGHT</span></div>`;
 }
 function nativeEmpty(title,text){ return `<div class="native-empty" role="note"><b>${esc(title)}</b><p>${esc(text)}</p></div>`; }
+// Wide screens: a quiet brand panel either side of the phone-width app. Text only, so each screen still has one logo.
+document.body.insertAdjacentHTML("beforeend", `<aside class="desk-side desk-left" aria-hidden="true"><p class="desk-eyebrow">Free Midnight</p><p class="desk-head">The Only Thing We're Raising <span>Is the Bar.</span></p><p class="desk-sub">Black Singles. No Children. Not Ever.</p></aside><aside class="desk-side desk-right" aria-hidden="true"><p>Intentional connections</p><p>Free conversations</p><p>Every profile reviewed by a person</p></aside>`);
 function nativeBadge(label,soft=false){ return `<span class="native-badge${soft?" soft":""}">${esc(label)}</span>`; }
 function nativePrimary(label,attrs){ return `<button class="btn-primary native-pill" ${attrs}>${esc(label)}<svg class="native-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></button>`; }
 function renderHeader(r){
