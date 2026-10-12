@@ -67,13 +67,13 @@ create index profiles_review_queue_idx on public.profiles (submitted_at) where s
 -- ---------- Rules applicants cannot bypass ----------
 -- True for the service role, the SQL editor and other privileged sessions.
 create function public.is_privileged() returns boolean
-language sql stable as $$
+language sql stable set search_path = '' as $$
   select current_user in ('service_role', 'postgres', 'supabase_admin');
 $$;
 
 -- What a profile needs before it can be submitted for review. Photos are optional.
 create function public.profile_missing(p public.profiles) returns text[]
-language sql stable as $$
+language sql stable set search_path = '' as $$
   select array_remove(array[
     case when p.first_name is null then 'first name' end,
     case when p.birth_date is null then 'date of birth'
@@ -90,7 +90,7 @@ language sql stable as $$
 $$;
 
 create function public.profiles_guard() returns trigger
-language plpgsql as $$
+language plpgsql set search_path = '' as $$
 declare
   missing text[];
 begin
