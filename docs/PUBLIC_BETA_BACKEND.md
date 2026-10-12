@@ -112,3 +112,62 @@ These 8 checks cover:
 | 5 | Admin review | Call `admin-review` with the passcode: `queue`, then `decide` → `changes_requested` with a note, then the applicant resubmits, then `approved` | Applicant sees the note while changes are requested; status ends `approved`; 2 rows in `admin_reviews`. A wrong passcode returns 401 |
 | 6 | Unauthorized user cannot read another profile | Signed in as applicant B, run `supabase.from('profiles').select('*').eq('id', '<A id>')`; signed out, run `supabase.from('profiles').select('*')`; as B, try `supabase.storage.from('profile-photos').download('<A id>/…')` | B gets `[]`; signed-out gets a permission error or `[]`; the photo download is refused |
 | 7 | No self-approval | As an applicant, run `update({ status: 'approved' })` | Error: "applicants cannot change status" |
+
+## Matching and chat (second migration)
+
+`supabase/migrations/202610120002_matching_and_chat.sql` runs after the first. Paste it into the SQL Editor once.
+
+| Table | Purpose |
+|---|---|
+| `profile_reactions` | One like or pass per member per person (`actor_id`, `target_id`, `kind`) |
+| `matches` | One row per pair (`user_one < user_two`, unique); `active` or `closed`, with `closed_at` and `closed_reason` |
+| `messages` | Text messages inside a match (1–2000 characters) |
+| `blocks` | Who blocked whom |
+
+**Rules the database enforces:**
+- **Liking:**
+  - Only approved members can like or pass, never themselves and never across a block.
+  - A like that meets a like back creates exactly one match; repeats and simultaneous likes can't duplicate it.
+- **Seeing matches and messages:**
+  - Members see only matches they belong to.
+  - They read and send messages only in their own active matches, and only while both people are approved and neither has blocked the other.
+  - The sender is always the signed-in member.
+- **Closing a match:**
+  - A block closes the pair's match (`closed_reason = 'blocked'`).
+  - Removing a profile closes all of its matches.
+  - `close_match(match_id, reason)` lets a member unmatch.
+  - A closed match never reopens.
+- **What members see of each other:** `member_cards()` returns today's discovery list: approved, mutually compatible (gender and age), not blocked, not already reacted to. `member_cards(array[ids])` returns cards for known people, e.g. matches. Both return public card fields only, never birth date, ZIP, eligibility answers or review notes.
+- **Photos:** approved members can view approved members' photos; never unapproved, removed or blocked owners'.
+- **Visitors:** see nothing.
+
+Internal helpers live in the `app_private` schema, which the API does not expose.
+
+**Frontend calls:**
+
+    // discovery
+    await supabase.rpc('member_cards')
+    // like / pass (repeat-safe)
+    await supabase.from('profile_reactions').upsert({ actor_id: me, target_id, kind: 'like' })
+    // my matches
+    await supabase.from('matches').select('*')
+    // chat
+    await supabase.from('messages').select('*').eq('match_id', id).order('created_at')
+    await supabase.from('messages').insert({ match_id: id, sender_id: me, body })
+    // block / unmatch
+    await supabase.from('blocks').insert({ blocker_id: me, blocked_id: them })
+    await supabase.rpc('close_match', { p_match: id, p_reason: 'unmatched' })
+
+**Automated checks:** `node tests/matching-chat-sql.mjs`. Its 10 checks cover:
+- visitors seeing nothing
+- approved-only and no self-likes
+- discovery privacy
+- a one-way like making no chat
+- a mutual like making one match, with no duplicates
+- outsiders unable to read or post, spoof a sender, or create a match
+- blocks closing chats
+- a closed match refusing messages
+- removed profiles leaving matching
+- photo visibility
+
+For live chat updates later, add `messages` to Supabase Realtime. Policies already limit what each member receives.
