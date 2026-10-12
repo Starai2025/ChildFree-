@@ -24,3 +24,7 @@ content_path = "./supabase/templates/email-otp.html"
 
 [functions.onboarding]
 verify_jwt = false
+
+# Founder review for the public web beta: authorised by ADMIN_PASSCODE, not a user JWT.
+[functions.admin-review]
+verify_jwt = false
