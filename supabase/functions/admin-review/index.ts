@@ -3,6 +3,8 @@
 //
 // POST { "action": "queue" }                                         -> submitted profiles + signed photo URLs
 // POST { "action": "decide", "profile_id": "...", "decision": "approved" | "changes_requested" | "removed", "note": "..." }
+// POST { "action": "reports" }                                       -> open safety reports (after migration 0003)
+// POST { "action": "resolve_report", "report_id": "...", "status": "reviewed" | "actioned", "note": "..." }
 // Header: x-admin-passcode: <ADMIN_PASSCODE>
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
@@ -76,6 +78,28 @@ Deno.serve(async (req) => {
     if (body.decision === "changes_requested" && !note) return reply(400, { error: "Say what needs to change." }, origin);
     // One insert; the admin_reviews trigger applies the decision to the profile in the same transaction.
     const { error } = await admin.from("admin_reviews").insert({ profile_id: body.profile_id, decision: body.decision, note });
+    if (error) return reply(409, { error: error.message }, origin);
+    return reply(200, { ok: true }, origin);
+  }
+
+  if (body.action === "reports") {
+    const { data, error } = await admin
+      .from("reports")
+      .select("id, reason, details, created_at, match_id, reporter:profiles!reports_reporter_id_fkey(id, first_name), reported:profiles!reports_reported_id_fkey(id, first_name, status)")
+      .eq("status", "open")
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (error) return reply(500, { error: error.message }, origin);
+    return reply(200, { reports: data }, origin);
+  }
+
+  if (body.action === "resolve_report") {
+    const { report_id, status, note } = body as { report_id?: string; status?: string; note?: string };
+    if (!report_id || !UUID.test(report_id)) return reply(400, { error: "report_id must be a UUID." }, origin);
+    if (status !== "reviewed" && status !== "actioned") return reply(400, { error: "status must be reviewed or actioned." }, origin);
+    const { error } = await admin.from("reports")
+      .update({ status, resolved_at: new Date().toISOString(), resolution_note: typeof note === "string" ? note.trim().slice(0, 1000) : null })
+      .eq("id", report_id);
     if (error) return reply(409, { error: error.message }, origin);
     return reply(200, { ok: true }, origin);
   }

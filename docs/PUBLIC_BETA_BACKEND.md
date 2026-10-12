@@ -171,3 +171,13 @@ Internal helpers live in the `app_private` schema, which the API does not expose
 - photo visibility
 
 For live chat updates later, add `messages` to Supabase Realtime. Policies already limit what each member receives.
+
+## Reports, member views and the frontend contract
+
+`supabase/migrations/202610120003_reports_and_member_views.sql` adds:
+- `reports`: members file their own; only the founder resolves them, through `admin-review` actions `reports` and `resolve_report`.
+- `my_matches()` and `likes_received()`.
+
+The member-app contract (tables, fields, query patterns, error messages) is in [FRONTEND_CONTRACT.md](FRONTEND_CONTRACT.md).
+
+The repeatable live check is `supabase/tests/matching_live_check.sql`. Paste it into the SQL Editor; it rolls itself back.

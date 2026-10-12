@@ -11,7 +11,8 @@ const db = new PGlite();
 await db.exec(`
   create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
   create schema auth; create schema storage;
-  create table auth.users (id uuid primary key, email text);
+  create table auth.users (id uuid primary key, instance_id uuid, aud text, role text, email text, encrypted_password text,
+    email_confirmed_at timestamptz, raw_app_meta_data jsonb, raw_user_meta_data jsonb, created_at timestamptz, updated_at timestamptz);
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
   create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
   create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text);
@@ -22,7 +23,7 @@ await db.exec(`
   grant execute on function auth.uid() to anon, authenticated, service_role;
   grant select, insert, update, delete on storage.objects to authenticated, service_role;
 `);
-for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql'])
+for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql'])
   await db.exec(await readFile(`supabase/migrations/${file}`, 'utf8'));
 
 // Members: Jessica (woman, seeks men), Marcus and Chris (men, seek women), Devon (not yet approved), Erin (approved, later removed).
@@ -135,6 +136,33 @@ const visible = (await as('authenticated', J, `select name from storage.objects`
 assert.ok(visible.includes(M) && !visible.includes(D) && !visible.includes(C));
 assert.equal((await as('authenticated', D, `select name from storage.objects where name not like '${D}/%'`)).rows.length, 0);
 check('photos: visible to approved members only, never unapproved or blocked owners');
+
+// Reports: members file their own; nobody but the founder changes them; others never see them.
+await fails('report as someone else', () => as('authenticated', M, `insert into public.reports (reporter_id, reported_id, reason) values ('${J}', '${M}', 'other')`), /row-level security/);
+await fails('report wrong match', () => as('authenticated', M, `insert into public.reports (reporter_id, reported_id, match_id, reason) values ('${M}', '${C}', '${mJM}', 'other')`), /does not belong/);
+await as('authenticated', M, `insert into public.reports (reporter_id, reported_id, match_id, reason, details, status) values ('${M}', '${J}', '${mJM}', 'harassment', 'test', 'actioned')`);
+assert.equal((await db.query(`select status from public.reports`)).rows[0].status, 'open');
+await fails('edit report', () => as('authenticated', M, `update public.reports set details = 'changed'`), /permission denied/);
+assert.equal((await as('authenticated', J, `select * from public.reports`)).rows.length, 0);
+assert.equal((await as('authenticated', M, `select * from public.reports`)).rows.length, 1);
+check('reports: filed as yourself only, always open, unchangeable, invisible to the reported person');
+
+// Likes received and my matches.
+const F = '10000000-0000-4000-8000-000000000006';
+await db.exec(`insert into auth.users (id) values ('${F}')`);
+await fill(F, 'Felix', 'Man', 'Woman', 'approved');
+await like(F, J);
+assert.deepEqual((await as('authenticated', J, `select first_name from public.likes_received()`)).rows.map(r => r.first_name), ['Felix']);
+await like(J, F);
+assert.equal((await as('authenticated', J, `select * from public.likes_received()`)).rows.length, 0);
+assert.deepEqual((await as('authenticated', J, `select other_first_name from public.my_matches()`)).rows.map(r => r.other_first_name), ['Felix']);
+check('likes_received lists unanswered likes; my_matches lists only open matches with the other card');
+
+// The paste-able live check passes here too and rolls itself back.
+const live = await db.exec(await readFile('supabase/tests/matching_live_check.sql', 'utf8'));
+assert.ok(live.some(r => r.rows?.[0]?.result === 'ALL MATCHING CHECKS PASSED'));
+assert.equal((await db.query(`select count(*)::int as n from auth.users where email like 'qa-%'`)).rows[0].n, 0);
+check('supabase/tests/matching_live_check.sql passes and leaves no data behind');
 
 console.log(results.join('\n'));
 console.log(`\nALL ${results.length} CHECKS PASSED`);
