@@ -22,6 +22,12 @@ const PROMPTS = [
   ["building", "The life I want to build with someone is..."],
 ];
 
+const GOAL_OPTIONS = ["Committed relationship", "Marriage-minded", "Long-term partnership", "Intentional dating"];
+const MARRIAGE_OPTIONS = ["Open to marriage", "Want marriage", "Partnership without marriage", "Unsure"];
+const FAITH_OPTIONS = ["Christian", "Muslim", "Spiritual", "Agnostic", "Atheist", "Other", "Prefer not to say"];
+const PACE_OPTIONS = ["Homebody", "Balanced", "Social weekends", "Always on the go"];
+const SPENDING_OPTIONS = ["Budget-minded", "Balanced", "Treat ourselves", "Investing for the future"];
+
 const INTEREST_OPTIONS = [
   "Travel",
   "Fitness",
@@ -32,6 +38,9 @@ const INTEREST_OPTIONS = [
   "Quiet nights",
   "Foodie",
   "Dancing",
+  "Reading",
+  "Outdoors",
+  "Cooking",
 ];
 
 const ELIGIBILITY_KEYS = ["black", "noChildren", "neverChildren", "noStepParent", "honest", "respect"];
@@ -45,7 +54,7 @@ const PROFILE_STEPS = [
   ["prompt0", "STEP 6 OF 10", "Answer one good prompt.", "One thoughtful answer beats ten shallow ones."],
   ["prompt1", "STEP 7 OF 10", "Add one more.", "This gives matches something real to respond to."],
   ["story", "STEP 8 OF 10", "Show your vibe.", "A short bio and a few interests are enough for beta."],
-  ["life", "STEP 9 OF 10", "Describe the life you'd share.", "A few compatibility signals for grown dating."],
+  ["life", "STEP 9 OF 10", "Describe the life you'd share.", "One question about the life your childfree choice makes room for."],
   ["photos", "STEP 10 OF 10", "Preview and submit.", "Photos are optional for this beta, but your profile must be complete."],
 ];
 
@@ -65,6 +74,8 @@ const state = {
   matches: null,
   messages: null,
   selectedMatch: null,
+  viewing: null,
+  viewingMatch: null,
   loadingArea: "",
   saving: false,
   message: "",
@@ -390,7 +401,7 @@ function formToProfile(form) {
       .filter(Boolean)
       .slice(0, 6);
   }
-  ["faith", "spendingStyle", "lifestylePace"].forEach((key) => {
+  ["faith", "spendingStyle", "lifestylePace", "travelDistance", "willingToFly"].forEach((key) => {
     if (data.has(key)) payload.basics[key] = String(data.get(key) || "").trim();
   });
   ["childfreeLife", "familyBoundaries", "idealDate"].forEach((key) => {
@@ -678,6 +689,39 @@ async function loadMessages(match) {
   renderApp();
 }
 
+// Open another member's full profile: from a like (card already loaded) or a match (fetched by id).
+function openProfileCard(cardId) {
+  const card = [...(state.likes || []), ...(state.cards || [])].find((item) => item.id === cardId);
+  if (!card) return;
+  state.viewing = card;
+  state.viewingMatch = null;
+  state.error = "";
+  renderApp();
+}
+
+async function openMatchProfile(matchId) {
+  const match = (state.matches || []).find((item) => item.match_id === matchId) || (state.selectedMatch?.match_id === matchId ? state.selectedMatch : null);
+  if (!match?.other_id) return;
+  state.viewingMatch = match;
+  state.viewing = { id: match.other_id, first_name: match.other_first_name, age: match.other_age, city: match.other_city, photo_urls: match.other_photo_url ? [match.other_photo_url] : [], loading: true };
+  renderApp();
+  const { data, error } = await supabase.rpc("member_cards", { p_ids: [match.other_id] });
+  if (state.viewingMatch !== match) return;
+  if (error || !data?.length) {
+    state.viewing = { ...state.viewing, loading: false, unavailable: true };
+  } else {
+    const [card] = await hydrateCards(data);
+    state.viewing = card;
+  }
+  renderApp();
+}
+
+function closeProfile() {
+  state.viewing = null;
+  state.viewingMatch = null;
+  renderApp();
+}
+
 async function reactToProfile(targetId, kind) {
   if (requiresApproved()) return;
   state.saving = true;
@@ -693,12 +737,15 @@ async function reactToProfile(targetId, kind) {
   } else {
     const matched = kind === "like" ? await findMatch(targetId) : null;
     state.cards = (state.cards || []).filter((card) => card.id !== targetId);
+    state.viewing = null;
+    state.viewingMatch = null;
     state.likes = null;
     state.matches = null;
     state.message = matched ? "It's a match. Say hello when you're ready." : (kind === "like" ? "Like sent." : "Passed.");
   }
   state.saving = false;
   renderApp();
+  window.scrollTo({ top: 0 });
 }
 
 async function findMatch(targetId) {
@@ -821,6 +868,13 @@ function renderAuth() {
       renderAuth();
     });
   });
+  const interestBoxes = [...document.querySelectorAll('input[name="interests"]')];
+  const capInterests = () => {
+    const full = interestBoxes.filter((box) => box.checked).length >= 6;
+    interestBoxes.forEach((box) => { box.disabled = full && !box.checked; });
+  };
+  interestBoxes.forEach((box) => box.addEventListener("change", capInterests));
+  capInterests();
   document.querySelector("#account-google")?.addEventListener("click", async () => {
     // Keep anything already typed (first name, birthday) so it is there when Google sends them back.
     state.publicProfile = formToPublicProfile(document.querySelector("#intake-form"));
@@ -842,12 +896,28 @@ function renderAuth() {
   setTimeout(() => window.scrollTo({ top: 0, left: 0 }), 0);
 }
 
+// The one No Seeds logo on a screen: emblem plus live-text wordmark, sharp on every phone.
+function renderLockup() {
+  return `
+    <div class="ns-lockup" role="img" aria-label="No Seeds Dating">
+      <img src="./assets/no-seeds-emblem.png" alt="" />
+      <span class="ns-wordmark">No Seeds<small>DATING</small></span>
+    </div>
+  `;
+}
+
 function renderWelcome() {
   app.innerHTML = `
-    <main class="screen welcome-screen">
-      <img class="welcome-art" src="./assets/no-seeds-welcome.png" alt="No Seeds Dating. Black Singles. No Kids. Not Now. Not Ever." />
-      <button class="welcome-join" type="button" id="welcome-join" aria-label="Join No Seeds"></button>
-      <button class="welcome-signin" type="button" id="welcome-signin" aria-label="Sign in"></button>
+    <main class="screen ns-welcome">
+      <div class="ns-welcome-photo" aria-hidden="true"></div>
+      ${renderLockup()}
+      <section class="ns-welcome-copy">
+        <h1>Black Singles.</h1>
+        <p class="ns-welcome-line">No Kids. Not Now. Not Ever.</p>
+        <p class="ns-welcome-sub">Black love. Childfree by choice.</p>
+        <button class="ns-btn-primary" type="button" id="welcome-join">Join No Seeds</button>
+        <p class="ns-welcome-signin">Already a member? <button type="button" id="welcome-signin">Sign in</button></p>
+      </section>
     </main>
   `;
   document.querySelector("#welcome-join")?.addEventListener("click", () => {
@@ -869,19 +939,17 @@ function renderAgreement() {
   app.innerHTML = `
     <main class="screen gate-screen">
       <section class="gate-hero">
-        <div class="agreement-logo-wrap">
-          <img class="agreement-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" />
-        </div>
-        <h1>Let's be clear...</h1>
+        ${renderLockup()}
+        <h1>Let's be clear…</h1>
         <p class="gate-line">Black. Single.<br>Absolutely No Seeds.</p>
-        <div class="pledge-list">
-          <div class="pledge-item"><span>✓</span><p>I do not have children of any age.</p></div>
-          <div class="pledge-item"><span>✓</span><p>I never want biological, adopted, or step children.</p></div>
-          <div class="pledge-item"><span>✓</span><p>I understand fence-sitters and parents are removed immediately.</p></div>
-        </div>
+        <ul class="pledge-list">
+          <li class="pledge-item"><span aria-hidden="true">✓</span><p>I do not have children of any age.</p></li>
+          <li class="pledge-item"><span aria-hidden="true">✓</span><p>I never want biological, adopted, or step children.</p></li>
+          <li class="pledge-item"><span aria-hidden="true">✓</span><p>I understand fence-sitters and parents are removed immediately.</p></li>
+        </ul>
         ${notice()}
-        <button class="btn primary gate-cta" type="button" id="open-public-application">I Agree, Let's Go →</button>
-        <button class="link-btn" type="button" id="show-signin">Already a member? Sign in</button>
+        <button class="ns-btn-primary gate-cta" type="button" id="open-public-application">I Agree, Let's Go</button>
+        <p class="ns-welcome-signin gate-signin">Already a member? <button type="button" id="show-signin">Sign in</button></p>
       </section>
     </main>
   `;
@@ -916,6 +984,8 @@ function renderPublicApplication() {
   if (state.publicStep === 5) return renderPromptApplicationStep(0, p);
   if (state.publicStep === 6) return renderPromptApplicationStep(1, p);
   if (state.publicStep === 7) return renderStoryApplicationStep(p);
+  if (state.publicStep === 8) return renderLifeStep(p);
+  if (state.publicStep === 9) return renderReviewStep(p, missing);
   return `
     <form id="intake-form" class="panel flat">
       <div class="step-kicker">PUBLIC APPLICATION · ${eyebrow}</div>
@@ -935,26 +1005,28 @@ function renderPublicApplication() {
 
 function renderGenderLookingForStep(p) {
   return `
-    <form id="intake-form" class="account-screen choice-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 2 OF 10</p>
-      <h1>Gender &<br>Looking For</h1>
-      <p class="account-tagline">Tell us who you are and who you want to meet.</p>
+    <form id="intake-form" class="account-screen ns-step ns-choice-step ns-sheet-step">
+      <div class="ns-hero">
+        ${renderStepTop()}
+        <h1>Gender & Looking For</h1>
+        <p class="account-tagline">Tell us who you are and who you want to meet.</p>
+      </div>
+      <div class="ns-sheet">
       ${notice()}
       <div class="choice-group">
-        <label>My gender</label>
+        <label>I am a</label>
         <div class="choice-grid">
           ${["Woman", "Man", "Non-binary"].map((item) => choiceRadio("gender", item, p.gender)).join("")}
         </div>
       </div>
       <div class="choice-group">
-        <label>I'm looking for</label>
+        <label>I'm looking for <em>Choose all that apply</em></label>
         <div class="choice-grid">
           ${["Woman", "Man", "Non-binary"].map((item) => choiceCheck("seeking", item, p.seeking)).join("")}
         </div>
       </div>
-      <button class="btn primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue →</button>
-      <button class="link-btn choice-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+      </div>
     </form>
   `;
 }
@@ -971,29 +1043,42 @@ function choiceCheck(name, value, selected = []) {
 
 function renderLocationAgeStep(p) {
   return `
-    <form id="intake-form" class="account-screen choice-screen location-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 3 OF 10</p>
-      <h1>Location &<br>Age</h1>
-      <p class="account-tagline">Set where and who you want to meet.</p>
+    <form id="intake-form" class="account-screen ns-step ns-location-step">
+      ${renderStepTop()}
+      <h1>Location & Age</h1>
+      <p class="account-tagline">Where you are and who you want to meet.</p>
       ${notice()}
-      <div class="field account-field">
-        <label for="city">City</label>
-        <input id="city" name="city" type="text" autocomplete="address-level2" required value="${escapeHtml(p.city || "")}" placeholder="Atlanta" />
-      </div>
-      <div class="field account-field">
-        <label for="zip">ZIP Code</label>
-        <input id="zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" required maxlength="10" value="${escapeHtml(p.zip || "")}" placeholder="30308" />
-      </div>
-      <div class="choice-group">
-        <label>Show me ages</label>
-        <div class="age-row">
-          ${ageSelect("age_min", "Minimum", p.age_min || 25)}
-          ${ageSelect("age_max", "Maximum", p.age_max || 70)}
+      <div class="ns-row-city">
+        <div class="field account-field">
+          <label for="city">City</label>
+          <input id="city" name="city" type="text" autocomplete="address-level2" required value="${escapeHtml(p.city || "")}" placeholder="Atlanta" />
+        </div>
+        <div class="field account-field">
+          <label for="zip">ZIP code</label>
+          <input id="zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" required maxlength="10" value="${escapeHtml(p.zip || "")}" placeholder="30308" />
         </div>
       </div>
-      <button class="btn primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue →</button>
-      <button class="link-btn choice-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
+      <div class="choice-group">
+        <label>Show me people aged</label>
+        <div class="age-row">
+          ${ageSelect("age_min", "From", p.age_min || 25)}
+          <span class="ns-age-dash" aria-hidden="true">to</span>
+          ${ageSelect("age_max", "To", p.age_max || 70)}
+        </div>
+      </div>
+      <div class="choice-group">
+        <label>How far will you go for a date?</label>
+        <div class="choice-grid ns-grid-4">
+          ${["25 mi", "50 mi", "100 mi", "Anywhere"].map((item) => choiceRadio("travelDistance", item, p.basics?.travelDistance)).join("")}
+        </div>
+      </div>
+      <div class="choice-group">
+        <label>Willing to fly to meet someone?</label>
+        <div class="choice-grid ns-grid-3">
+          ${["Yes", "Maybe", "No"].map((item) => choiceRadio("willingToFly", item, p.basics?.willingToFly)).join("")}
+        </div>
+      </div>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
     </form>
   `;
 }
@@ -1012,25 +1097,29 @@ function ageSelect(name, label, selected) {
 
 function renderRelationshipIntentionsStep(p) {
   return `
-    <form id="intake-form" class="account-screen choice-screen intent-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 4 OF 10</p>
-      <h1>Relationship<br>Intentions</h1>
-      <p class="account-tagline">Be clear about what you are actually open to.</p>
+    <form id="intake-form" class="account-screen ns-step ns-intent-step">
+      ${renderStepTop()}
+      <h1>Intentions & Lifestyle</h1>
+      <p class="account-tagline">Be clear about what you're actually open to.</p>
       ${notice()}
-      ${intentSelect("relationship_goal", "Relationship goal", p.relationship_goal, ["Committed relationship", "Marriage-minded", "Long-term partnership", "Intentional dating"])}
-      ${intentSelect("marriage_view", "Marriage view", p.marriage_view, ["Open to marriage", "Want marriage", "Partnership without marriage", "Unsure"])}
-      <button class="btn primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue →</button>
-      <button class="link-btn choice-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
+      ${intentSelect("relationship_goal", "Relationship goal", p.relationship_goal, GOAL_OPTIONS)}
+      ${intentSelect("marriage_view", "Marriage view", p.marriage_view, MARRIAGE_OPTIONS)}
+      <p class="ns-section-label">Lifestyle <em>Optional</em></p>
+      <div class="ns-row-2">
+        ${intentSelect("faith", "Faith", p.basics?.faith, FAITH_OPTIONS, false)}
+        ${intentSelect("lifestylePace", "Pace of life", p.basics?.lifestylePace, PACE_OPTIONS, false)}
+      </div>
+      ${intentSelect("spendingStyle", "Spending style", p.basics?.spendingStyle, SPENDING_OPTIONS, false)}
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
     </form>
   `;
 }
 
-function intentSelect(name, label, value, options) {
+function intentSelect(name, label, value, options, required = true) {
   return `
     <div class="field account-field intent-field">
       <label for="${name}">${label}</label>
-      <select id="${name}" name="${name}" required>
+      <select id="${name}" name="${name}" ${required ? "required" : ""}>
         <option value="">Choose</option>
         ${options.map((option) => `<option value="${escapeHtml(option)}" ${value === option ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
       </select>
@@ -1040,10 +1129,9 @@ function intentSelect(name, label, value, options) {
 
 function renderNoKidsClauseStep(p) {
   return `
-    <form id="intake-form" class="account-screen choice-screen clause-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 5 OF 10</p>
-      <h1>The No Seeds<br>Pledge</h1>
+    <form id="intake-form" class="account-screen ns-step ns-pledge-step">
+      ${renderStepTop()}
+      <h1>The No Seeds Pledge</h1>
       <p class="account-tagline">Black. Childfree. Honest about it.</p>
       ${notice()}
       <div class="clause-stack">
@@ -1061,8 +1149,7 @@ function renderNoKidsClauseStep(p) {
           ${pledgeChoice(p)}
         </section>
       </div>
-      <button class="btn primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>I Agree →</button>
-      <button class="link-btn choice-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>I Agree</button>
     </form>
   `;
 }
@@ -1088,32 +1175,27 @@ function pledgeChoice(profile) {
 
 function renderPromptApplicationStep(index, p) {
   const prompt = getPrompt(index, p);
-  const [, eyebrow, title, subtitle] = PROFILE_STEPS[state.publicStep];
+  const [, , title, subtitle] = PROFILE_STEPS[state.publicStep];
   return `
-    <form id="intake-form" class="prompt-screen vibe-reference-screen">
-      ${renderPhoneTemplateTop()}
-      <section class="prompt-card vibe-reference-card">
-        <p class="prompt-kicker">PUBLIC APPLICATION · ${eyebrow}</p>
-        <h1>${escapeHtml(title)}</h1>
-        <p class="prompt-copy">${escapeHtml(subtitle)}</p>
-        ${renderPromptBars()}
-        <div class="prompt-field">
-          <label for="prompt_${index}_id">PROMPT ${index + 1}</label>
-          <select id="prompt_${index}_id" name="prompt_${index}_id">
-            ${PROMPTS.map(([id, text]) => `<option value="${id}" ${prompt.id === id ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}
-          </select>
-        </div>
-        <div class="prompt-field">
-          <textarea name="prompt_${index}_answer" placeholder="Answer in your voice.">${escapeHtml(prompt.answer || "")}</textarea>
-        </div>
-        ${notice()}
-        <div class="prompt-actions">
-          <button class="prompt-btn prompt-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
-          <button class="prompt-btn prompt-save" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save draft</button>
-          <button class="prompt-btn prompt-next" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
-        </div>
-        <p class="prompt-footnote">Your answers save on this phone as you continue.</p>
-      </section>
+    <form id="intake-form" class="account-screen ns-step ns-prompt-step">
+      ${renderStepTop()}
+      <h1>${escapeHtml(title.replace(/\.$/, ""))}</h1>
+      <p class="account-tagline">${escapeHtml(subtitle)}</p>
+      ${notice()}
+      <div class="field account-field">
+        <label for="prompt_${index}_id">Choose a prompt</label>
+        <select id="prompt_${index}_id" name="prompt_${index}_id">
+          ${PROMPTS.map(([id, text]) => `<option value="${id}" ${prompt.id === id ? "selected" : ""}>${escapeHtml(text)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="field account-field">
+        <label for="prompt_${index}_answer">Your answer</label>
+        <textarea id="prompt_${index}_answer" name="prompt_${index}_answer" maxlength="500" placeholder="Answer in your own voice.">${escapeHtml(prompt.answer || "")}</textarea>
+      </div>
+      <div class="ns-actions">
+        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
+      </div>
     </form>
   `;
 }
@@ -1132,55 +1214,130 @@ function renderPhoneTemplateTop() {
   `;
 }
 
-function renderStoryApplicationStep(p) {
-  const [, eyebrow, title, subtitle] = PROFILE_STEPS[state.publicStep];
+function renderReviewStep(p, missing) {
+  const [, , title] = PROFILE_STEPS[state.publicStep];
+  const age = p.birth_date ? ageFromBirthDate(p.birth_date) : "";
+  const initial = escapeHtml((p.first_name || "?").trim().charAt(0).toUpperCase());
+  const details = [p.city, p.relationship_goal].filter(Boolean).join(" · ");
   return `
-    <form id="intake-form" class="prompt-screen story-screen vibe-reference-screen">
-      ${renderPhoneTemplateTop()}
-      <section class="prompt-card story-card vibe-reference-card">
-        <p class="prompt-kicker">PUBLIC APPLICATION · ${eyebrow}</p>
-        <h1>${escapeHtml(title)}</h1>
-        <p class="prompt-copy">${escapeHtml(subtitle)}</p>
-        ${renderPromptBars()}
-        <div class="prompt-field">
-          <label for="bio">BIO</label>
-          <textarea id="bio" name="bio" maxlength="280" placeholder="Tell members what dating you feels like.">${escapeHtml(p.bio || "")}</textarea>
+    <form id="intake-form" class="account-screen ns-step ns-review-step">
+      ${renderStepTop()}
+      <h1>${escapeHtml(title.replace(/[.]$/, ""))}</h1>
+      <p class="account-tagline">This is how members will see you once you're approved.</p>
+      ${notice()}
+      <article class="ns-preview">
+        <div class="ns-preview-photo">${state.photos[0]?.url ? `<img src="${state.photos[0].url}" alt="" />` : `<span>${initial}</span>`}</div>
+        <div class="ns-preview-body">
+          <h2>${escapeHtml(p.first_name || "Your name")}${age ? `<span>, ${age}</span>` : ""}</h2>
+          ${details ? `<p class="ns-preview-meta">${escapeHtml(details)}</p>` : ""}
+          <div class="ns-preview-tags"><span>No kids</span><span>No step-parent role</span>${(p.interests || []).slice(0, 3).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
+          ${p.bio ? `<p class="ns-preview-bio">${escapeHtml(p.bio)}</p>` : ""}
         </div>
-        <div class="prompt-field">
-          <label for="interests">INTERESTS (COMMA-SEPARATED, UP TO 6)</label>
-          <input id="interests" name="interests" type="text" value="${escapeHtml((p.interests || []).join(", "))}" placeholder="Jazz, travel, fitness" />
-        </div>
-        <div class="prompt-actions">
-          <button class="prompt-btn prompt-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
-          <button class="prompt-btn prompt-save" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save draft</button>
-          <button class="prompt-btn prompt-next" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
-        </div>
-        <p class="prompt-footnote">Your answers save on this phone as you continue.</p>
-      </section>
+      </article>
+      ${missing.length
+        ? `<p class="ns-review-missing"><strong>Before you submit, finish:</strong> ${escapeHtml(missing.join(", "))}.</p>`
+        : `<p class="ns-review-ready">Everything's in. The founder reviews every profile personally before it goes live.</p>`}
+      <p class="ns-review-note">Photos are optional for this beta and open after sign-in, so private images stay protected.</p>
+      <div class="ns-actions">
+        <button class="ns-btn-primary" type="submit" data-action="submit" ${state.saving ? "disabled" : ""}>Submit for review</button>
+        <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
+      </div>
     </form>
   `;
 }
 
-function renderAccountStep(p) {
+function renderLifeStep(p) {
+  const [, , title, subtitle] = PROFILE_STEPS[state.publicStep];
   return `
-    <form id="intake-form" class="account-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <h1>Create your account</h1>
-      <p class="account-tagline">Black Singles - No Kids. Not Now. Not Ever.</p>
+    <form id="intake-form" class="account-screen ns-step ns-life-step">
+      ${renderStepTop()}
+      <h1>${escapeHtml(title.replace(/[.]$/, ""))}</h1>
+      <p class="account-tagline">${escapeHtml(subtitle)}</p>
       ${notice()}
-      ${field("first_name", "First Name", p.first_name || "", "text", "Enter your first name")}
       <div class="field account-field">
-        <label for="intake_email">Email Address</label>
-        <input id="intake_email" name="intake_email" type="email" autocomplete="email" required value="${escapeHtml(p.email || "")}" placeholder="Enter your email" />
+        <label for="childfreeLife">My childfree life gives me room for…</label>
+        <textarea id="childfreeLife" name="childfreeLife" maxlength="500" placeholder="Travel, business, rest, faith, fitness, art…">${escapeHtml(p.compatibility?.childfreeLife || "")}</textarea>
+      </div>
+      <div class="ns-actions">
+        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
+      </div>
+    </form>
+  `;
+}
+
+function renderStoryApplicationStep(p) {
+  const [, , title, subtitle] = PROFILE_STEPS[state.publicStep];
+  const chosen = p.interests || [];
+  const options = [...INTEREST_OPTIONS, ...chosen.filter((item) => !INTEREST_OPTIONS.includes(item))];
+  return `
+    <form id="intake-form" class="account-screen ns-step ns-story-step">
+      ${renderStepTop()}
+      <h1>${escapeHtml(title.replace(/\.$/, ""))}</h1>
+      <p class="account-tagline">${escapeHtml(subtitle)}</p>
+      ${notice()}
+      <div class="field account-field">
+        <label for="bio">Bio</label>
+        <textarea id="bio" name="bio" maxlength="280" placeholder="Tell members what dating you feels like.">${escapeHtml(p.bio || "")}</textarea>
+      </div>
+      <div class="choice-group">
+        <label>Interests <em>Pick up to 6</em></label>
+        <div class="ns-chips">
+          ${options.map((item) => {
+            const id = `interest_${item.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`;
+            return `<label class="ns-chip" for="${id}"><input id="${id}" type="checkbox" name="interests" value="${escapeHtml(item)}" ${chosen.includes(item) ? "checked" : ""}><span>${escapeHtml(item)}</span></label>`;
+          }).join("")}
+        </div>
+      </div>
+      <div class="ns-actions">
+        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
+      </div>
+    </form>
+  `;
+}
+
+// Shared top of every application step: back, the one small logo, step count, progress.
+function renderStepTop() {
+  const step = state.publicStep + 1;
+  const back = state.publicStep > 0
+    ? `<button class="ns-back" type="button" data-public-back aria-label="Back" ${state.saving ? "disabled" : ""}><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
+    : `<span class="ns-back-space"></span>`;
+  return `
+    <header class="ns-step-top">
+      ${back}
+      <img class="ns-step-emblem" src="./assets/no-seeds-emblem.png" alt="No Seeds Dating" />
+      <span class="ns-step-count">${step} of ${PROFILE_STEPS.length}</span>
+    </header>
+    <div class="ns-progress" aria-hidden="true"><span style="width:${(step / PROFILE_STEPS.length) * 100}%"></span></div>
+  `;
+}
+
+const GOOGLE_G = `<svg viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+
+function renderAccountStep(p) {
+  const signedIn = Boolean(state.user);
+  return `
+    <form id="intake-form" class="account-screen ns-step">
+      ${renderStepTop()}
+      <h1>Create your account</h1>
+      <p class="account-tagline">Black singles. No kids. Not now. Not ever.</p>
+      ${notice()}
+      ${signedIn ? "" : `
+        <button class="ns-btn-google" type="button" id="account-google" ${state.saving ? "disabled" : ""}>${GOOGLE_G}<span>Continue with Google</span></button>
+        <div class="account-divider"><span></span><em>or use email</em><span></span></div>
+      `}
+      ${field("first_name", "First name", p.first_name || "", "text", "Your first name")}
+      <div class="field account-field">
+        <label for="intake_email">Email</label>
+        <input id="intake_email" name="intake_email" type="email" autocomplete="email" required value="${escapeHtml(p.email || "")}" placeholder="you@example.com" ${signedIn ? "readonly" : ""} />
       </div>
       <div class="field account-field">
-        <label for="birth_date">Date of Birth</label>
+        <label for="birth_date">Date of birth</label>
         <input id="birth_date" name="birth_date" type="date" required value="${escapeHtml(p.birth_date || "")}" />
       </div>
-      <button class="btn primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue →</button>
-      <div class="account-divider"><span></span><em>or</em><span></span></div>
-      <button class="btn account-google" type="button" id="account-google">G&nbsp; Sign up with Google</button>
-      <p class="account-signin">Already have an account? <button type="button" id="account-signin">Sign in here</button></p>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+      ${signedIn ? "" : `<p class="account-signin">Already a member? <button type="button" id="account-signin">Sign in</button></p>`}
     </form>
   `;
 }
@@ -1220,9 +1377,14 @@ function renderApp() {
     document.querySelector("#signout")?.addEventListener("click", signOut);
     return;
   }
+  if (state.viewing) {
+    app.innerHTML = renderMemberProfile(state.viewing);
+    bindAppEvents();
+    return;
+  }
   app.innerHTML = `
     <main class="screen">
-      ${renderHero()}
+      ${["matches", "discover"].includes(state.tab) ? "" : renderHero()}
       ${state.tab === "discover" ? renderDiscover() : ""}
       ${state.tab === "matches" ? renderMatches() : ""}
       ${state.tab === "chat" ? renderChat() : ""}
@@ -1320,8 +1482,11 @@ function renderProfileStep(key, p) {
   }
   if (key === "intention") {
     return `
-      ${select("relationship_goal", "Relationship goal", p.relationship_goal, ["Committed relationship", "Marriage-minded", "Long-term partnership", "Intentional dating"])}
-      ${select("marriage_view", "Marriage view", p.marriage_view, ["Open to marriage", "Want marriage", "Partnership without marriage", "Unsure"])}
+      ${select("relationship_goal", "Relationship goal", p.relationship_goal, GOAL_OPTIONS)}
+      ${select("marriage_view", "Marriage view", p.marriage_view, MARRIAGE_OPTIONS)}
+      ${select("faith", "Faith", p.basics?.faith, FAITH_OPTIONS)}
+      ${select("lifestylePace", "Pace of life", p.basics?.lifestylePace, PACE_OPTIONS)}
+      ${select("spendingStyle", "Spending style", p.basics?.spendingStyle, SPENDING_OPTIONS)}
     `;
   }
   if (key === "clauseA") {
@@ -1345,8 +1510,6 @@ function renderProfileStep(key, p) {
   }
   if (key === "life") {
     return `
-      ${field("faith", "Faith / worldview", p.basics?.faith || "", "text", "Grounded, spiritual, church-going, nonreligious...")}
-      ${field("lifestylePace", "Lifestyle pace", p.basics?.lifestylePace || "", "text", "Quiet homebody, social weekends, travel-ready...")}
       ${textarea("childfreeLife", "My childfree life gives me room for...", p.compatibility?.childfreeLife || "", "Travel, business, rest, faith, fitness, art...")}
     `;
   }
@@ -1402,43 +1565,207 @@ function renderPhotos() {
 
 function renderDiscover() {
   const approved = state.profile.status === "approved";
-  if (!approved) {
-    return `<section class="panel"><h2>Discover</h2><p class="copy">Discover unlocks after founder approval.</p>${notice()}<button class="btn secondary" data-tab="status" type="button">Check review status</button></section>`;
-  }
   const cards = state.cards || [];
   const loading = state.loadingArea === "discover";
+  const card = cards[0];
+  const summary = !approved
+    ? "Unlocks after founder approval."
+    : loading ? "Finding people for you…" : cards.length ? `${cards.length} ${cards.length === 1 ? "person" : "people"} to meet` : "You're all caught up";
+  const photo = card?.photo_urls?.[0];
   return `
-    <section class="panel">
-      <h2>Discover</h2>
-      <p class="copy">Approved members who fit your age and gender preferences appear here.</p>
+    <section class="ns-member-hero ns-disc-hero">
+      <div class="ns-member-top">${renderLockup()}</div>
+      <h1>Discover</h1>
+      <p>${escapeHtml(summary)}</p>
+    </section>
+    <section class="ns-member-sheet ns-disc-sheet">
       ${notice()}
-      ${loading ? `<div class="status gold">Loading members...</div>` : ""}
-      ${!loading && !cards.length ? `<div class="status gold">No new approved members are available right now. Check back after more beta approvals.</div>` : ""}
-      <div class="card-list">${cards.map(renderMemberCard).join("")}</div>
-      <div class="btn-row"><button class="btn secondary" data-refresh-discover type="button">Refresh</button></div>
+      ${!approved ? `
+        <div class="ns-empty"><h2>Almost there</h2><p>The founder reviews every profile personally. Once you're approved, compatible members appear here.</p></div>` : ""}
+      ${approved && !loading && !card ? `
+        <div class="ns-empty"><h2>You're all caught up</h2><p>New approved members join every week. Check back soon.</p><button class="ns-btn-quiet ns-refresh" data-refresh-discover type="button">Refresh</button></div>` : ""}
+      ${approved && card ? `
+        <article class="ns-disc-card">
+          <button class="ns-disc-cover" type="button" data-view-card="${card.id}" aria-label="Open ${escapeHtml(card.first_name || "member")}'s full profile">
+            ${photo ? `<img src="${photo}" alt="" />` : `<span class="ns-pv-initial">${escapeHtml((card.first_name || "?").charAt(0))}</span>`}
+            <span class="ns-disc-name">
+              <strong>${escapeHtml(card.first_name || "Member")}${card.age ? `<em>, ${card.age}</em>` : ""}</strong>
+              ${card.city ? `<small>${escapeHtml(card.city)}</small>` : ""}
+            </span>
+          </button>
+          <div class="ns-pv-body ns-disc-body">${renderProfileSections(card)}</div>
+        </article>
+        <div class="ns-disc-actions">
+          <button class="ns-round ns-disc-pass" data-react="pass" data-target="${card.id}" type="button" aria-label="Pass on ${escapeHtml(card.first_name || "member")}" ${state.saving ? "disabled" : ""}>
+            <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          </button>
+          <button class="ns-round ns-disc-like" data-react="like" data-target="${card.id}" type="button" aria-label="Like ${escapeHtml(card.first_name || "member")}" ${state.saving ? "disabled" : ""}>
+            <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z" fill="currentColor"/></svg>
+          </button>
+        </div>` : ""}
     </section>
   `;
 }
 
 function renderMatches() {
-  if (state.profile.status !== "approved") {
-    return `<section class="panel"><h2>Matches</h2><p class="copy">Matches unlock after founder approval.</p>${notice()}</section>`;
-  }
   const likes = state.likes || [];
   const matches = state.matches || [];
+  const approved = state.profile.status === "approved";
   const loading = state.loadingArea === "matches";
+  const waiting = matches.filter((m) => m.last_message && !m.last_message_mine).length;
+  const summary = !approved
+    ? "Unlocks after founder approval."
+    : [`${matches.length} ${matches.length === 1 ? "match" : "matches"}`, likes.length ? `${likes.length} ${likes.length === 1 ? "like" : "likes"} waiting` : "", waiting ? `${waiting} your turn` : ""].filter(Boolean).join(" · ");
   return `
-    <section class="panel">
-      <h2>Matches</h2>
-      <p class="copy">Likes waiting for you and mutual matches live here.</p>
+    <section class="ns-member-hero">
+      <div class="ns-member-top">${renderLockup()}</div>
+      <h1>Matches</h1>
+      <p>${escapeHtml(summary)}</p>
+    </section>
+    <section class="ns-member-sheet">
       ${notice()}
-      ${loading ? `<div class="status gold">Loading matches...</div>` : ""}
-      ${likes.length ? `<h2 class="section-title">Likes you</h2><div class="card-list">${likes.map(renderMemberCard).join("")}</div>` : ""}
-      <h2 class="section-title">Conversations</h2>
-      ${matches.length ? `<div class="card-list">${matches.map(renderMatchRow).join("")}</div>` : `<div class="status gold">No mutual matches yet.</div>`}
-      <div class="btn-row"><button class="btn secondary" data-refresh-matches type="button">Refresh</button></div>
+      ${!approved ? `
+        <div class="ns-empty">
+          <h2>Almost there</h2>
+          <p>The founder reviews every profile personally. Your matches and conversations will appear here once you're approved.</p>
+        </div>` : `
+        ${loading ? `<p class="ns-loading">Loading your matches…</p>` : ""}
+        ${likes.length ? `
+          <div class="ns-section-head"><h2>Likes you</h2><span>${likes.length}</span></div>
+          <div class="ns-like-rail">${likes.map(renderLikeTile).join("")}</div>` : ""}
+        <div class="ns-section-head"><h2>Conversations</h2><button type="button" data-refresh-matches>Refresh</button></div>
+        ${matches.length
+          ? `<div class="ns-convo-list">${matches.map(renderMatchRow).join("")}</div>`
+          : `<div class="ns-empty"><h2>No matches yet</h2><p>When someone you like likes you back, your conversation starts here.</p></div>`}
+      `}
     </section>
   `;
+}
+
+const BASIC_ICONS = Object.fromEntries(Object.entries({
+  heart: '<path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/>',
+  ring: '<circle cx="12" cy="14.5" r="5.5"/><path d="M9.5 5.5L12 3l2.5 2.5L12 8.5z"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.5 2.5M15.2 15.2l2.5 2.5M6.3 17.7l2.5-2.5M15.2 8.8l2.5-2.5"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  coin: '<circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.2c-.5-.8-1.4-1.2-2.5-1.2-1.5 0-2.6.8-2.6 2s1.1 1.7 2.6 2 2.6.8 2.6 2-1.1 2-2.6 2c-1.1 0-2-.4-2.5-1.2M12 6.5v1.5M12 16v1.5"/>',
+  pin: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+  plane: '<path d="M10.5 13.5L4 11l1.2-1.6 7.1.9 4.2-4.5c.8-.8 2-.8 2.6-.2.6.6.6 1.8-.2 2.6l-4.5 4.2.9 7.1L13.7 21l-2.5-6.5"/>',
+}).map(([key, path]) => [key, `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`]));
+
+// Everything about a member below their cover photo; shared by Discover and the profile view.
+function renderProfileSections(card) {
+  const photos = card.photo_urls || [];
+  const promptText = (id) => PROMPTS.find(([key]) => key === id)?.[1] || "";
+  const prompts = (card.prompts || []).filter((item) => item?.answer);
+  const basics = card.basics || {};
+  const travel = basics.travelDistance === "Anywhere" ? "Will travel anywhere" : basics.travelDistance ? `Will travel ${basics.travelDistance}` : "";
+  const fly = { Yes: "Would fly to meet", Maybe: "Might fly to meet", No: "Prefers to stay local" }[basics.willingToFly] || "";
+  const pace = basics.lifestylePace === "Balanced" ? "Balanced pace" : basics.lifestylePace;
+  const spending = { Balanced: "Balanced spender", "Treat ourselves": "Likes to treat" }[basics.spendingStyle] || basics.spendingStyle;
+  const details = [
+    ["heart", card.relationship_goal],
+    ["ring", card.marriage_view],
+    ["spark", basics.faith],
+    ["clock", pace],
+    ["coin", spending],
+    ["pin", travel],
+    ["plane", fly],
+  ].filter(([, value]) => value);
+  return `
+          <div class="ns-pv-tags"><span>No kids</span><span>No step-parent role</span>${card.relationship_goal ? `<span>${escapeHtml(card.relationship_goal)}</span>` : ""}</div>
+          ${card.bio ? `<p class="ns-pv-bio">${escapeHtml(card.bio)}</p>` : ""}
+          ${prompts[0] ? `<article class="ns-pv-prompt"><p>${escapeHtml(promptText(prompts[0].id))}</p><h3>${escapeHtml(prompts[0].answer)}</h3></article>` : ""}
+          ${extraPhoto(1)}
+          ${details.length ? `<div class="ns-pv-basics"><h2>The basics</h2><ul>${details.map(([icon, value]) => `<li>${BASIC_ICONS[icon]}<span>${escapeHtml(value)}</span></li>`).join("")}</ul></div>` : ""}
+          ${prompts[1] ? `<article class="ns-pv-prompt"><p>${escapeHtml(promptText(prompts[1].id))}</p><h3>${escapeHtml(prompts[1].answer)}</h3></article>` : ""}
+          ${card.compatibility?.childfreeLife ? `<article class="ns-pv-prompt"><p>My childfree life gives me room for…</p><h3>${escapeHtml(card.compatibility.childfreeLife)}</h3></article>` : ""}
+          ${extraPhoto(2)}
+          ${(card.interests || []).length ? `<div class="ns-pv-section"><h2>Interests</h2><div class="ns-pv-interests">${card.interests.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>` : ""}
+  `;
+}
+
+function renderMemberProfile(card) {
+  const photos = card.photo_urls || [];
+  const promptText = (id) => PROMPTS.find(([key]) => key === id)?.[1] || "";
+  const prompts = (card.prompts || []).filter((item) => item?.answer);
+  const basics = card.basics || {};
+  const travel = basics.travelDistance === "Anywhere" ? "Will travel anywhere" : basics.travelDistance ? `Will travel ${basics.travelDistance}` : "";
+  const fly = { Yes: "Would fly to meet", Maybe: "Might fly to meet", No: "Prefers to stay local" }[basics.willingToFly] || "";
+  const pace = basics.lifestylePace === "Balanced" ? "Balanced pace" : basics.lifestylePace;
+  const spending = { Balanced: "Balanced spender", "Treat ourselves": "Likes to treat" }[basics.spendingStyle] || basics.spendingStyle;
+  const details = [
+    ["heart", card.relationship_goal],
+    ["ring", card.marriage_view],
+    ["spark", basics.faith],
+    ["clock", pace],
+    ["coin", spending],
+    ["pin", travel],
+    ["plane", fly],
+  ].filter(([, value]) => value);
+  const match = state.viewingMatch;
+  const fromLike = !match && (state.likes || []).some((item) => item.id === card.id);
+  const name = escapeHtml(card.first_name || "Member");
+  const extraPhoto = (index) => photos[index] ? `<figure class="ns-pv-photo"><img src="${photos[index]}" alt="" /></figure>` : "";
+  return `
+    <main class="screen ns-pv">
+      <header class="ns-pv-cover">
+        ${photos[0] ? `<img src="${photos[0]}" alt="${name}" />` : `<span class="ns-pv-initial">${escapeHtml((card.first_name || "?").charAt(0))}</span>`}
+        <button class="ns-pv-back" type="button" data-close-profile aria-label="Back">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="ns-pv-name">
+          <h1>${name}${card.age ? `<span>, ${card.age}</span>` : ""}</h1>
+          ${card.city ? `<p>${escapeHtml(card.city)}</p>` : ""}
+        </div>
+      </header>
+      <section class="ns-pv-body">
+        ${notice()}
+        ${card.loading ? `<p class="ns-loading">Loading profile…</p>` : ""}
+        ${card.unavailable ? `<div class="ns-empty"><h2>Profile unavailable</h2><p>This member's profile can't be shown right now.</p></div>` : ""}
+        ${card.loading || card.unavailable ? "" : `
+          ${renderProfileSections(card)}
+        `}
+      </section>
+      <footer class="ns-pv-actions">
+        ${match
+          ? `<button class="ns-btn-primary" type="button" data-open-match="${match.match_id}">Message ${name}</button>`
+          : fromLike
+            ? `<button class="ns-round ns-round-pass ns-pv-pass" data-react="pass" data-target="${card.id}" type="button" aria-label="Pass" ${state.saving ? "disabled" : ""}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+               <button class="ns-btn-primary" data-react="like" data-target="${card.id}" type="button" ${state.saving ? "disabled" : ""}>Like ${name} back</button>`
+            : `<button class="ns-btn-primary" data-react="like" data-target="${card.id}" type="button" ${state.saving ? "disabled" : ""}>Like</button>`}
+      </footer>
+    </main>
+  `;
+}
+
+function renderLikeTile(card) {
+  const photo = card.photo_urls?.[0];
+  return `
+    <article class="ns-like-tile" data-card-id="${card.id}">
+      <button class="ns-like-photo" type="button" data-view-card="${card.id}" aria-label="View ${escapeHtml(card.first_name || "member")}'s profile">
+        ${photo ? `<img src="${photo}" alt="" />` : `<span>${escapeHtml((card.first_name || "?").charAt(0))}</span>`}
+        <p><strong>${escapeHtml(card.first_name || "Member")}</strong>${card.age ? ` ${card.age}` : ""}${card.city ? `<small>${escapeHtml(card.city)}</small>` : ""}</p>
+      </button>
+      <div class="ns-like-actions">
+        <button class="ns-round ns-round-pass" data-react="pass" data-target="${card.id}" type="button" aria-label="Pass on ${escapeHtml(card.first_name || "member")}">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </button>
+        <button class="ns-round ns-round-like" data-react="like" data-target="${card.id}" type="button" aria-label="Like ${escapeHtml(card.first_name || "member")} back">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+function timeAgo(value) {
+  if (!value) return "";
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 60000));
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 1440) return `${Math.round(minutes / 60)}h`;
+  if (minutes < 10080) return `${Math.round(minutes / 1440)}d`;
+  return new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 function renderChat() {
@@ -1454,7 +1781,7 @@ function renderChat() {
     <section class="panel">
       <div class="chat-head">
         <button class="pill dark-pill" data-tab="matches" type="button">Back</button>
-        <div><h2>${escapeHtml(other)}</h2><p class="copy">${escapeHtml(state.selectedMatch.other_city || "")}</p></div>
+        <div><h2><button class="ns-chat-name" type="button" data-view-match="${state.selectedMatch.match_id}">${escapeHtml(other)}</button></h2><p class="copy">${escapeHtml(state.selectedMatch.other_city || "")}</p></div>
       </div>
       ${notice()}
       ${state.loadingArea === "chat" ? `<div class="status gold">Loading chat...</div>` : ""}
@@ -1496,14 +1823,24 @@ function firstPromptAnswer(card) {
 }
 
 function renderMatchRow(match) {
+  const yourTurn = match.last_message && !match.last_message_mine;
+  const preview = match.last_message
+    ? `${match.last_message_mine ? "You: " : ""}${match.last_message}`
+    : "New match. Say hello.";
   return `
-    <button class="match-row" type="button" data-open-match="${match.match_id}">
-      <div class="match-avatar">${match.other_photo_url ? `<img src="${match.other_photo_url}" alt="" />` : "NS"}</div>
-      <div>
-        <strong>${escapeHtml(match.other_first_name || "Match")}${match.other_age ? `, ${match.other_age}` : ""}</strong>
-        <p class="copy">${escapeHtml(match.last_message || "Say hello.")}</p>
-      </div>
-    </button>
+    <div class="ns-convo ${yourTurn ? "is-your-turn" : ""} ${match.last_message ? "" : "is-new"}">
+      <button class="ns-convo-avatar" type="button" data-view-match="${match.match_id}" aria-label="View ${escapeHtml(match.other_first_name || "match")}'s profile">${match.other_photo_url ? `<img src="${match.other_photo_url}" alt="" />` : escapeHtml((match.other_first_name || "?").charAt(0))}</button>
+      <button class="ns-convo-main" type="button" data-open-match="${match.match_id}">
+      <span class="ns-convo-text">
+        <strong>${escapeHtml(match.other_first_name || "Match")}${match.other_age ? `<em>, ${match.other_age}</em>` : ""}</strong>
+        <span>${escapeHtml(preview)}</span>
+      </span>
+      <span class="ns-convo-meta">
+        <time>${escapeHtml(timeAgo(match.last_message_at || match.matched_at))}</time>
+        ${yourTurn ? `<i>Your turn</i>` : ""}
+      </span>
+      </button>
+    </div>
   `;
 }
 
@@ -1533,12 +1870,18 @@ function renderStatus() {
 }
 
 function renderTabs() {
+  const icons = {
+    discover: '<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+    matches: '<path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/>',
+    chat: '<path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z"/>',
+    profile: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+  };
   return `<nav class="tabs" aria-label="Main tabs">${[
     ["discover", "Discover"],
     ["matches", "Matches"],
     ["chat", "Chat"],
     ["profile", "Profile"],
-  ].map(([key, label]) => `<button class="tab ${state.tab === key ? "active" : ""}" data-tab="${key}" type="button">${label}</button>`).join("")}</nav>`;
+  ].map(([key, label]) => `<button class="tab ${state.tab === key ? "active" : ""}" data-tab="${key}" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[key]}</svg><span>${label}</span></button>`).join("")}</nav>`;
 }
 
 function notice() {
@@ -1593,13 +1936,24 @@ function bindAppEvents() {
   });
   document.querySelector("[data-refresh-discover]")?.addEventListener("click", () => loadDiscover({ force: true }));
   document.querySelector("[data-refresh-matches]")?.addEventListener("click", () => loadMatches({ force: true }));
+  document.querySelector("[data-close-profile]")?.addEventListener("click", closeProfile);
+  document.querySelectorAll("[data-view-card]").forEach((button) => {
+    button.addEventListener("click", () => openProfileCard(button.dataset.viewCard));
+  });
+  document.querySelectorAll("[data-view-match]").forEach((button) => {
+    button.addEventListener("click", () => openMatchProfile(button.dataset.viewMatch));
+  });
   document.querySelectorAll("[data-react]").forEach((button) => {
     button.addEventListener("click", () => reactToProfile(button.dataset.target, button.dataset.react));
   });
   document.querySelectorAll("[data-open-match]").forEach((button) => {
     button.addEventListener("click", () => {
       const match = (state.matches || []).find((item) => item.match_id === button.dataset.openMatch);
-      if (match) loadMessages(match);
+      if (match) {
+        state.viewing = null;
+        state.viewingMatch = null;
+        loadMessages(match);
+      }
     });
   });
   document.querySelector("#message-form")?.addEventListener("submit", (event) => {

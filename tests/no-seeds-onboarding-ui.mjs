@@ -80,7 +80,7 @@ try {
     await page.fill('[name=intake_email]', 'Nia@Example.com');
     await page.fill('[name=birth_date]', '1992-03-04');
     await page.click('.account-continue');
-    await page.waitForSelector('text=STEP 2 OF 10');
+    await page.waitForSelector('text=2 of 10');
     assert.equal(otpRequests.length, 1);
     assert.equal(otpRequests[0].email, 'nia@example.com');
     assert.equal(otpRequests[0].create_user, true);
@@ -92,12 +92,12 @@ try {
     await page.click('[data-public-back]');
     await page.waitForSelector('text=Create your account');
     await page.click('.account-continue');
-    await page.waitForSelector('text=STEP 2 OF 10');
+    await page.waitForSelector('text=2 of 10');
     assert.equal(otpRequests.length, 1, 'going back and forward does not resend the email');
-    await page.check('input[name=gender][value=Woman]');
-    await page.check('input[name=seeking][value=Man]');
+    await page.click('label[for=gender_woman]');
+    await page.click('label[for=seeking_man]');
     await page.click('.account-continue');
-    await page.waitForSelector('text=STEP 3 OF 10');
+    await page.waitForSelector('text=3 of 10');
     const draft = JSON.parse(await page.evaluate(() => localStorage.getItem('noSeedsPublicDraft')));
     assert.equal(draft.gender, 'Woman');
     assert.deepEqual(draft.seeking, ['Man']);
@@ -107,7 +107,7 @@ try {
   await check('opening the emailed link moves phone answers to the account and continues at step 3', async () => {
     await page.evaluate(([key, value]) => localStorage.setItem(key, value), [STORAGE_KEY, fakeSession()]);
     await page.reload();
-    await page.waitForSelector('text=STEP 3 OF 10');
+    await page.waitForSelector('text=3 of 10');
     assert.equal(patches.length, 1);
     assert.equal(row.first_name, 'Nia', 'first name saved at sign-up');
     assert.equal(row.birth_date, '1992-03-04', 'birthday saved at sign-up');
@@ -120,15 +120,19 @@ try {
     await page.fill('[name=zip]', '30303');
     await page.selectOption('[name=age_min]', '30');
     await page.selectOption('[name=age_max]', '45');
+    await page.click('label[for=travelDistance_50_mi]');
+    await page.click('label[for=willingToFly_maybe]');
     await page.click('.account-continue');
-    await page.waitForSelector('text=STEP 4 OF 10');
+    await page.waitForSelector('text=4 of 10');
     assert.equal(row.city, 'Atlanta');
     assert.equal(row.zip, '30303');
     assert.deepEqual([row.age_min, row.age_max], [30, 45]);
+    assert.equal(row.basics.travelDistance, '50 mi');
+    assert.equal(row.basics.willingToFly, 'Maybe');
     await page.selectOption('[name=relationship_goal]', 'Marriage-minded');
     await page.selectOption('[name=marriage_view]', 'Want marriage');
     await page.click('.account-continue');
-    await page.waitForSelector('text=STEP 5 OF 10');
+    await page.waitForSelector('text=5 of 10');
     assert.equal(row.relationship_goal, 'Marriage-minded');
   });
 
@@ -140,10 +144,11 @@ try {
     page = await otherPhone.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(server.url);
-    await page.waitForSelector('text=STEP 5 OF 10');
+    await page.waitForSelector('text=5 of 10');
     await page.click('[data-public-back]');
+    await page.waitForSelector('text=4 of 10');
     await page.click('[data-public-back]');
-    await page.waitForSelector('text=STEP 3 OF 10');
+    await page.waitForSelector('text=3 of 10');
     assert.equal(await page.inputValue('[name=city]'), 'Atlanta', 'saved answers are shown, not a blank form');
     assert.equal(await page.inputValue('[name=age_min]'), '30');
   });
@@ -152,7 +157,7 @@ try {
     row = {...row, eligibility: {black: true, noChildren: true, neverChildren: true, noStepParent: true, honest: true, respect: true},
       pledge_accepted_at: '2026-10-13T00:00:00Z', bio: 'Hi.', prompts: [{id: 'ordinary_sunday', answer: 'Market.'}, {id: 'green_flag', answer: 'Follow-through.'}]};
     await page.reload();
-    await page.waitForSelector('text=Submit application');
+    await page.waitForSelector('text=Submit for review');
     await page.click('button[data-action=submit]');
     await page.waitForFunction(() => !document.querySelector('#intake-form'));
     assert.equal(patches.at(-1).status, 'submitted');
@@ -170,7 +175,7 @@ try {
     await page.click('#open-public-application');
     await page.fill('[name=birth_date]', '1994-07-21');
     await page.click('#account-google');
-    await page.waitForSelector('text=STEP 2 OF 10');
+    await page.waitForSelector('text=2 of 10');
     assert.equal(googleRequests.length, 1);
     assert.equal(googleRequests[0].searchParams.get('provider'), 'google');
     assert.equal(new URL(googleRequests[0].searchParams.get('redirect_to')).origin, server.url);
