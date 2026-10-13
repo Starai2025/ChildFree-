@@ -33,6 +33,20 @@ const INTEREST_SEARCH: Record<string, string> = {
   "Faith": "coffee shop",
 };
 const DEFAULT_SEARCHES = ["highly rated restaurant", "coffee shop", "wine bar"];
+const INTEREST_REASON: Record<string, string> = {
+  "Foodie": "You're both foodies",
+  "Live music": "You both love live music",
+  "Dancing": "You both love to dance",
+  "Art": "You both love art",
+  "Outdoors": "You both love the outdoors",
+  "Fitness": "You're both into fitness",
+  "Travel": "You both love to travel",
+  "Business": "You're both building something",
+  "Quiet nights": "You both like quiet nights",
+  "Reading": "You're both readers",
+  "Cooking": "You both love to cook",
+  "Faith": "Faith matters to you both",
+};
 
 function cors(origin: string | null): Record<string, string> {
   const allow = origin && allowedOrigins.includes(origin) ? origin : "";
@@ -89,7 +103,7 @@ async function areaName(point: { lat: number; lng: number }): Promise<string | n
 }
 
 // ---------- Places ----------
-type Place = { id: string; label: string; detail: string; reason: string; maps_url: string | null; rating: number | null };
+type Place = { id: string; label: string; detail: string; reason: string; maps_url: string | null; rating: number | null; km: number };
 
 async function searchPlaces(query: string, center: { lat: number; lng: number }, radiusM: number): Promise<Omit<Place, "reason">[]> {
   const response = await fetch("https://places.googleapis.com/v1/places:searchText", {
@@ -97,42 +111,56 @@ async function searchPlaces(query: string, center: { lat: number; lng: number },
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": GOOGLE_KEY,
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.googleMapsUri,places.businessStatus",
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.userRatingCount,places.googleMapsUri,places.businessStatus",
     },
     body: JSON.stringify({
       textQuery: query,
-      maxResultCount: 8,
+      maxResultCount: 20,
+      rankPreference: "RELEVANCE",
       locationBias: { circle: { center: { latitude: center.lat, longitude: center.lng }, radius: radiusM } },
     }),
   }).catch(() => null);
   const data = await response?.json().catch(() => null);
+  type Raw = { id: string; displayName?: { text?: string }; formattedAddress?: string; location?: { latitude: number; longitude: number };
+    rating?: number; userRatingCount?: number; googleMapsUri?: string; businessStatus?: string };
+  // Google treats the circle as a hint, so keep only places that really are near the halfway point,
+  // then prefer well-reviewed ones, with a gentle preference for the closest.
   return (data?.places ?? [])
-    .filter((p: { businessStatus?: string }) => !p.businessStatus || p.businessStatus === "OPERATIONAL")
-    .sort((a: { rating?: number; userRatingCount?: number }, b: { rating?: number; userRatingCount?: number }) =>
-      ((b.rating ?? 0) * Math.log10((b.userRatingCount ?? 0) + 10)) - ((a.rating ?? 0) * Math.log10((a.userRatingCount ?? 0) + 10)))
-    .map((p: { id: string; displayName?: { text?: string }; formattedAddress?: string; rating?: number; googleMapsUri?: string }) => ({
+    .filter((p: Raw) => (!p.businessStatus || p.businessStatus === "OPERATIONAL") && p.location && (p.userRatingCount ?? 0) >= 20)
+    .map((p: Raw) => ({ p, km: distanceKm(center, { lat: p.location!.latitude, lng: p.location!.longitude }) }))
+    .filter(({ km }: { km: number }) => km * 1000 <= radiusM)
+    .sort((a: { p: Raw; km: number }, b: { p: Raw; km: number }) => {
+      const score = ({ p, km }: { p: Raw; km: number }) => (p.rating ?? 0) * Math.log10((p.userRatingCount ?? 0) + 10) - km * 0.15;
+      return score(b) - score(a);
+    })
+    .map(({ p, km }: { p: Raw; km: number }) => ({
       id: p.id,
       label: (p.displayName?.text ?? "Suggested spot").slice(0, 120),
       detail: (p.formattedAddress ?? "").slice(0, 240),
       maps_url: p.googleMapsUri?.startsWith("https://") ? p.googleMapsUri : null,
       rating: typeof p.rating === "number" ? Math.round(p.rating * 10) / 10 : null,
+      km: Math.round(km * 10) / 10,
     }));
 }
 
 async function suggestPlaces(center: { lat: number; lng: number }, apartKm: number, shared: string[]): Promise<Place[]> {
   if (!GOOGLE_KEY) return [];
-  // Search a little wider when the two people live far apart, but keep it to a short drive either way.
-  const radiusM = Math.min(20000, Math.max(4000, apartKm * 250));
-  const searches = shared.filter((i) => INTEREST_SEARCH[i]).map((i) => ({ query: INTEREST_SEARCH[i], reason: `You both like ${i}` }));
+  // A short drive from the halfway point: about a fifth of the distance between them, 5-15 km.
+  // If nothing fits, look once more a little wider.
+  const searches = shared.filter((i) => INTEREST_SEARCH[i]).map((i) => ({ query: INTEREST_SEARCH[i], reason: INTEREST_REASON[i] ?? `You both like ${i.toLowerCase()}` }));
   for (const query of DEFAULT_SEARCHES) searches.push({ query, reason: "Popular near your halfway point" });
-  const chosen: Place[] = [];
-  for (const search of searches) {
-    if (chosen.length >= 3) break;
-    const found = await searchPlaces(search.query, center, radiusM);
-    const next = found.find((p) => !chosen.some((c) => c.id === p.id));
-    if (next) chosen.push({ ...next, reason: search.reason });
+  const baseRadius = Math.min(15000, Math.max(5000, apartKm * 200));
+  for (const radiusM of [baseRadius, baseRadius * 2]) {
+    const chosen: Place[] = [];
+    for (const search of searches) {
+      if (chosen.length >= 3) break;
+      const found = await searchPlaces(search.query, center, radiusM);
+      const next = found.find((p) => !chosen.some((c) => c.id === p.id));
+      if (next) chosen.push({ ...next, reason: search.reason });
+    }
+    if (chosen.length >= 3 || radiusM !== baseRadius) return chosen;
   }
-  return chosen;
+  return [];
 }
 
 // ---------- Times ----------
@@ -165,11 +193,45 @@ function suggestTimes(timeZone: string, now = new Date()) {
   return slots;
 }
 
+// ---------- Founder self-test ----------
+// POST { "zip_a": "30308", "zip_b": "30060", "interests": ["Live music"] }   Header: x-admin-passcode: <ADMIN_PASSCODE>
+// Runs the halfway point + Google places search for two ZIP codes and returns what members would be offered.
+// Writes nothing except the ZIP cache.
+const passcode = Deno.env.get("ADMIN_PASSCODE") ?? "";
+function samePasscode(given: string): boolean {
+  const a = new TextEncoder().encode(given), b = new TextEncoder().encode(passcode);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
+  return passcode.length >= 24 && diff === 0;
+}
+
+async function selfTest(req: Request, origin: string | null): Promise<Response> {
+  if (!samePasscode(req.headers.get("x-admin-passcode") ?? "")) return reply(401, { error: "Not authorized." }, origin);
+  let body: { zip_a?: string; zip_b?: string; interests?: string[] };
+  try { body = await req.json(); } catch { return reply(400, { error: "Send JSON." }, origin); }
+  const [pointA, pointB] = await Promise.all([zipPoint(body.zip_a ?? ""), zipPoint(body.zip_b ?? "")]);
+  if (!pointA || !pointB) {
+    return reply(200, { ok: false, google_key_set: Boolean(GOOGLE_KEY), error: "Could not locate one of the ZIP codes (is the Geocoding API enabled for the key?)." }, origin);
+  }
+  const center = midpoint(pointA, pointB);
+  const apart = distanceKm(pointA, pointB);
+  const [places, label] = await Promise.all([suggestPlaces(center, apart, body.interests ?? []), areaName(center)]);
+  return reply(200, {
+    ok: places.length > 0,
+    google_key_set: Boolean(GOOGLE_KEY),
+    apart_km: Math.round(apart),
+    midpoint_label: label,
+    places: places.map((p) => ({ label: p.label, detail: p.detail, rating: p.rating, reason: p.reason, km_from_halfway: p.km, has_map_link: Boolean(p.maps_url) })),
+    times: suggestTimes("America/New_York").map((t) => t.label),
+  }, origin);
+}
+
 // ---------- Handler ----------
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin");
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
   if (req.method !== "POST") return reply(405, { error: "Use POST." }, origin);
+  if (req.headers.has("x-admin-passcode")) return selfTest(req, origin);
 
   const auth = req.headers.get("authorization") ?? "";
   const member = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
