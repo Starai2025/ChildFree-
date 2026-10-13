@@ -76,6 +76,11 @@ const state = {
   selectedMatch: null,
   viewing: null,
   viewingMatch: null,
+  chatMenuOpen: false,
+  plan: null,
+  plannerOpen: false,
+  chatChannel: null,
+  chatChannelMatch: null,
   loadingArea: "",
   saving: false,
   message: "",
@@ -708,7 +713,12 @@ async function loadMatches({ force = false } = {}) {
 
 async function loadMessages(match) {
   if (!match || requiresApproved() || state.loadingArea) return;
+  if (state.selectedMatch?.match_id !== match.match_id) {
+    state.plan = null;
+    state.plannerOpen = false;
+  }
   state.selectedMatch = match;
+  state.chatMenuOpen = false;
   state.tab = "chat";
   state.loadingArea = "chat";
   state.error = "";
@@ -726,8 +736,153 @@ async function loadMessages(match) {
   } else {
     state.messages = data || [];
   }
+  await loadPlan(match);
   state.loadingArea = "";
+  watchChat(match);
   renderApp();
+}
+
+// The match's date plan with its options and who picked each one.
+async function loadPlan(match) {
+  const { data } = await supabase
+    .from("date_plans")
+    .select("*, date_plan_options(*, date_plan_picks(member_id))")
+    .eq("match_id", match.match_id)
+    .neq("status", "cancelled")
+    .maybeSingle();
+  if (state.selectedMatch?.match_id === match.match_id) state.plan = data || null;
+}
+
+async function refreshPlan(match) {
+  await loadPlan(match);
+  if (state.selectedMatch?.match_id === match.match_id) rerenderChat();
+}
+
+// Live updates for the open chat: new messages and date-plan changes appear without reopening.
+function watchChat(match) {
+  if (state.chatChannelMatch === match.match_id) return;
+  stopWatchingChat();
+  state.chatChannelMatch = match.match_id;
+  const planEvent = () => { if (state.selectedMatch?.match_id === match.match_id) void refreshPlan(match); };
+  state.chatChannel = supabase
+    .channel(`match-${match.match_id}`)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${match.match_id}` }, ({ new: message }) => {
+      if (state.selectedMatch?.match_id !== match.match_id || (state.messages || []).some((m) => m.id === message.id)) return;
+      state.messages = [...(state.messages || []), message];
+      state.matches = null;
+      rerenderChat();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "date_plans", filter: `match_id=eq.${match.match_id}` }, planEvent)
+    .on("postgres_changes", { event: "*", schema: "public", table: "date_plan_options" }, planEvent)
+    .on("postgres_changes", { event: "*", schema: "public", table: "date_plan_picks" }, planEvent)
+    .subscribe();
+}
+
+function stopWatchingChat() {
+  if (state.chatChannel) void supabase.removeChannel(state.chatChannel);
+  state.chatChannel = null;
+  state.chatChannelMatch = null;
+}
+
+// Redraw the chat without losing what the member is typing.
+function rerenderChat() {
+  const box = document.querySelector(".ns-composer textarea, .ns-plan-custom input:focus");
+  const draft = document.querySelector(".ns-composer textarea")?.value || "";
+  const focused = document.activeElement === box;
+  renderApp();
+  const again = document.querySelector(".ns-composer textarea");
+  if (again) {
+    again.value = draft;
+    if (focused) again.focus();
+  }
+}
+
+// ---------- Date planner ----------
+const PLAN_MIN_MESSAGES = 5;
+
+function plannerReady() {
+  const counts = {};
+  (state.messages || []).forEach((m) => { counts[m.sender_id] = (counts[m.sender_id] || 0) + 1; });
+  return (counts[state.user.id] || 0) >= PLAN_MIN_MESSAGES
+    && (counts[state.selectedMatch?.other_id] || 0) >= PLAN_MIN_MESSAGES;
+}
+
+function planPromptHidden(match) {
+  try {
+    const later = Number(localStorage.getItem(`noSeedsPlanLater:${match.match_id}`) || 0);
+    return later && (state.messages || []).length < later + 10;
+  } catch {
+    return false;
+  }
+}
+
+async function startPlan() {
+  const match = state.selectedMatch;
+  if (!match || state.saving) return;
+  state.saving = true;
+  state.error = "";
+  rerenderChat();
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York";
+  const { error } = await supabase.functions.invoke("date-planner", { body: { match_id: match.match_id, time_zone: timeZone } });
+  state.saving = false;
+  if (error) {
+    let detail = "";
+    try { detail = (await error.context?.json())?.error || ""; } catch { /* keep the generic message */ }
+    state.error = detail || "We couldn't start the date planner. Try again in a moment.";
+  } else {
+    await loadPlan(match);
+    state.plannerOpen = true;
+  }
+  rerenderChat();
+  window.scrollTo({ top: 0 });
+}
+
+async function togglePick(optionId) {
+  const plan = state.plan;
+  const option = plan?.date_plan_options?.find((o) => o.id === optionId);
+  if (!option || plan.status !== "open") return;
+  const mine = (option.date_plan_picks || []).some((pk) => pk.member_id === state.user.id);
+  // Show the change straight away; the database is the source of truth and live updates follow.
+  option.date_plan_picks = mine
+    ? option.date_plan_picks.filter((pk) => pk.member_id !== state.user.id)
+    : [...(option.date_plan_picks || []), { member_id: state.user.id }];
+  rerenderChat();
+  const { error } = mine
+    ? await supabase.from("date_plan_picks").delete().eq("option_id", optionId).eq("member_id", state.user.id)
+    : await supabase.from("date_plan_picks").insert({ option_id: optionId, member_id: state.user.id });
+  if (error) state.error = error.message;
+  await refreshPlan(state.selectedMatch);
+}
+
+async function addPlanOption(kind, form) {
+  const plan = state.plan;
+  if (!plan || plan.status !== "open") return;
+  const data = new FormData(form);
+  let row;
+  if (kind === "place") {
+    const label = String(data.get("label") || "").trim();
+    if (!label) return;
+    row = { plan_id: plan.id, kind, label: label.slice(0, 120), created_by: state.user.id };
+  } else {
+    const when = String(data.get("when") || "");
+    const at = when ? new Date(when) : null;
+    if (!at || Number.isNaN(at.getTime())) return;
+    if (at < new Date()) {
+      state.error = "Pick a time in the future.";
+      rerenderChat();
+      return;
+    }
+    const label = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(at);
+    row = { plan_id: plan.id, kind, label, starts_at: at.toISOString(), created_by: state.user.id };
+  }
+  state.saving = true;
+  state.error = "";
+  rerenderChat();
+  const { data: added, error } = await supabase.from("date_plan_options").insert(row).select("id").single();
+  state.saving = false;
+  if (error) state.error = error.message;
+  else await supabase.from("date_plan_picks").insert({ option_id: added.id, member_id: state.user.id });
+  await refreshPlan(state.selectedMatch);
 }
 
 // Open another member's full profile: from a like (card already loaded) or a match (fetched by id).
@@ -826,6 +981,8 @@ async function closeMatch(reason = "unmatched") {
   if (error) state.error = error.message;
   else {
     state.message = "Conversation closed.";
+    stopWatchingChat();
+    state.plan = null;
     state.selectedMatch = null;
     state.messages = null;
     state.matches = null;
@@ -847,6 +1004,8 @@ async function blockMember() {
   if (error) state.error = error.message;
   else {
     state.message = "Member blocked and conversation closed.";
+    stopWatchingChat();
+    state.plan = null;
     state.selectedMatch = null;
     state.messages = null;
     state.matches = null;
@@ -876,7 +1035,7 @@ async function reportMember(reason, details = "") {
 function ensureTabData() {
   if (state.loadingArea || state.profile?.status !== "approved") return;
   if (state.tab === "discover" && state.cards === null) void loadDiscover();
-  if (state.tab === "matches" && (state.likes === null || state.matches === null)) void loadMatches();
+  if ((state.tab === "matches" || (state.tab === "chat" && !state.selectedMatch)) && (state.likes === null || state.matches === null)) void loadMatches();
 }
 
 function renderAuth() {
@@ -1425,13 +1584,13 @@ function renderApp() {
   }
   app.innerHTML = `
     <main class="screen">
-      ${["matches", "discover"].includes(state.tab) ? "" : renderHero()}
+      ${["matches", "discover", "chat"].includes(state.tab) ? "" : renderHero()}
       ${state.tab === "discover" ? renderDiscover() : ""}
       ${state.tab === "matches" ? renderMatches() : ""}
       ${state.tab === "chat" ? renderChat() : ""}
       ${state.tab === "profile" ? renderProfileForm() : ""}
       ${state.tab === "status" ? renderStatus() : ""}
-      ${renderTabs()}
+      ${state.tab === "chat" && state.selectedMatch ? "" : renderTabs()}
     </main>
   `;
   bindAppEvents();
@@ -1816,32 +1975,70 @@ function timeAgo(value) {
 }
 
 function renderChat() {
-  if (state.profile.status !== "approved") {
-    return `<section class="panel"><h2>Chat</h2><p class="copy">Chat unlocks after founder approval.</p>${notice()}</section>`;
-  }
-  if (!state.selectedMatch) {
-    return `<section class="panel"><h2>Chat</h2><p class="copy">Open a mutual match to start chatting.</p>${notice()}<button class="btn primary" data-tab="matches" type="button">Go to matches</button></section>`;
+  const approved = state.profile.status === "approved";
+  const match = state.selectedMatch;
+  if (!approved || !match) {
+    const matches = state.matches || [];
+    return `
+      <section class="ns-member-hero">
+        <div class="ns-member-top">${renderLockup()}</div>
+        <h1>Chats</h1>
+        <p>${approved ? (matches.length ? "Pick up where you left off." : "Your conversations will live here.") : "Unlocks after founder approval."}</p>
+      </section>
+      <section class="ns-member-sheet">
+        ${notice()}
+        ${!approved
+          ? `<div class="ns-empty"><h2>Almost there</h2><p>Chat opens once the founder approves your profile and you match with someone.</p></div>`
+          : state.loadingArea === "matches" ? `<p class="ns-loading">Loading your chats…</p>`
+          : matches.length ? `<div class="ns-convo-list">${matches.map(renderMatchRow).join("")}</div>`
+          : `<div class="ns-empty"><h2>No chats yet</h2><p>When you and someone like each other, you can message them here.</p><button class="ns-btn-quiet ns-refresh" data-tab="discover" type="button">Go to Discover</button></div>`}
+      </section>
+    `;
   }
   const messages = state.messages || [];
-  const other = state.selectedMatch.other_first_name || "Match";
+  const name = escapeHtml(match.other_first_name || "Match");
+  const avatar = match.other_photo_url ? `<img src="${match.other_photo_url}" alt="" />` : escapeHtml((match.other_first_name || "?").charAt(0));
   return `
-    <section class="panel">
-      <div class="chat-head">
-        <button class="pill dark-pill" data-tab="matches" type="button">Back</button>
-        <div><h2><button class="ns-chat-name" type="button" data-view-match="${state.selectedMatch.match_id}">${escapeHtml(other)}</button></h2><p class="copy">${escapeHtml(state.selectedMatch.other_city || "")}</p></div>
-      </div>
-      ${notice()}
-      ${state.loadingArea === "chat" ? `<div class="status gold">Loading chat...</div>` : ""}
-      <div class="messages">${messages.length ? messages.map(renderMessage).join("") : `<div class="status gold">No messages yet. Send the first one.</div>`}</div>
-      <form id="message-form" class="message-form">
-        <textarea name="message" maxlength="2000" placeholder="Write a thoughtful message..." ${state.saving ? "disabled" : ""}></textarea>
-        <button class="btn primary" type="submit" ${state.saving ? "disabled" : ""}>Send</button>
-      </form>
-      <div class="btn-row">
-        <button class="btn secondary" data-report type="button">Report</button>
-        <button class="btn secondary" data-unmatch type="button">Unmatch</button>
-        <button class="btn secondary danger" data-block type="button">Block</button>
-      </div>
+    <section class="ns-chat">
+      <header class="ns-chat-bar">
+        <button class="ns-chat-icon" type="button" data-chat-back aria-label="Back to chats">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="ns-chat-who" type="button" data-view-match="${match.match_id}" aria-label="View ${name}'s profile">
+          <span class="ns-chat-avatar">${avatar}</span>
+          <span><strong>${name}${match.other_age ? `<em>, ${match.other_age}</em>` : ""}</strong><small>${escapeHtml(match.other_city || "View profile")}</small></span>
+        </button>
+        <button class="ns-chat-icon" type="button" data-chat-menu aria-label="Safety options" aria-expanded="${state.chatMenuOpen}">
+          <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg>
+        </button>
+      </header>
+      ${state.chatMenuOpen ? `
+        <div class="ns-chat-menu">
+          <p>Your safety comes first. The founder reviews every report.</p>
+          <button type="button" data-report ${state.saving ? "disabled" : ""}>Report ${name}</button>
+          <button type="button" data-unmatch ${state.saving ? "disabled" : ""}>Unmatch</button>
+          <button type="button" class="is-danger" data-block ${state.saving ? "disabled" : ""}>Block ${name}</button>
+        </div>` : ""}
+      ${state.plannerOpen && state.plan ? renderPlanner(match) : `
+      <div class="ns-chat-thread">
+        ${notice()}
+        ${state.loadingArea === "chat" ? `<p class="ns-loading">Loading messages…</p>` : ""}
+        ${messages.length
+          ? `<p class="ns-chat-start">You matched ${escapeHtml(timeAgo(match.matched_at) === "now" ? "just now" : `${timeAgo(match.matched_at)} ago`)}</p>${messages.map(renderMessage).join("")}`
+          : state.loadingArea === "chat" ? "" : `
+            <div class="ns-chat-empty">
+              <span class="ns-chat-avatar is-big">${avatar}</span>
+              <h2>You matched with ${name}</h2>
+              <p>Say hello. A question about their profile is a great way to start.</p>
+            </div>`}
+        ${renderPlanCard(match)}
+      </div>`}
+      ${state.plannerOpen && state.plan ? "" : `<form id="message-form" class="ns-composer">
+        <textarea name="message" rows="1" maxlength="2000" placeholder="Message ${name}…" aria-label="Message" ${state.saving ? "disabled" : ""}></textarea>
+        <button type="submit" aria-label="Send" ${state.saving ? "disabled" : ""}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </form>`}
     </section>
   `;
 }
@@ -1891,9 +2088,114 @@ function renderMatchRow(match) {
   `;
 }
 
+function planOptions(kind) {
+  const options = (state.plan?.date_plan_options || []).filter((o) => o.kind === kind);
+  return kind === "time"
+    ? options.sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at))
+    : options.sort((a, b) => (a.created_by ? 1 : 0) - (b.created_by ? 1 : 0) || new Date(a.created_at) - new Date(b.created_at));
+}
+
+function renderPlanCard(match) {
+  const plan = state.plan;
+  const name = escapeHtml(match.other_first_name || "your match");
+  if (plan?.status === "confirmed") {
+    const place = plan.date_plan_options?.find((o) => o.id === plan.confirmed_place);
+    const time = plan.date_plan_options?.find((o) => o.id === plan.confirmed_time);
+    return `
+      <article class="ns-plan-card is-confirmed">
+        <p class="ns-plan-eyebrow">It's a date</p>
+        <h3>${escapeHtml(place?.label || "Your spot")}</h3>
+        <p class="ns-plan-when">${escapeHtml(time?.label || "")}</p>
+        ${place?.detail ? `<p class="ns-plan-where">${escapeHtml(place.detail)}</p>` : ""}
+        ${place?.maps_url ? `<a class="ns-plan-link" href="${escapeHtml(place.maps_url)}" target="_blank" rel="noopener noreferrer">Open in Maps</a>` : ""}
+        <p class="ns-plan-safety">Meet in public, get there on your own, and tell a friend where you'll be.</p>
+      </article>`;
+  }
+  if (plan?.status === "open") {
+    const picked = (plan.date_plan_options || []).filter((o) => (o.date_plan_picks || []).some((pk) => pk.member_id === state.user.id)).length;
+    const theirs = (plan.date_plan_options || []).filter((o) => (o.date_plan_picks || []).some((pk) => pk.member_id !== state.user.id)).length;
+    return `
+      <article class="ns-plan-card">
+        <p class="ns-plan-eyebrow">Date plan</p>
+        <h3>Find a time and place you both like</h3>
+        <p>${picked ? `You picked ${picked}` : "You haven't picked yet"} · ${theirs ? `${name} picked ${theirs}` : `${name} hasn't picked yet`}</p>
+        <button class="ns-btn-primary" type="button" data-open-planner>Open the date planner</button>
+      </article>`;
+  }
+  if (plannerReady() && !planPromptHidden(match)) {
+    return `
+      <article class="ns-plan-card is-invite">
+        <p class="ns-plan-eyebrow">You two are clicking</p>
+        <h3>Ready to meet ${name}?</h3>
+        <p>We'll suggest three spots halfway between you, picked from interests you share, and a few times to choose from.</p>
+        <button class="ns-btn-primary" type="button" data-start-plan ${state.saving ? "disabled" : ""}>${state.saving ? "Finding spots…" : "Plan a date"}</button>
+        <button class="ns-btn-quiet" type="button" data-plan-later>Not yet</button>
+      </article>`;
+  }
+  return "";
+}
+
+function renderPlanner(match) {
+  const plan = state.plan;
+  const name = escapeHtml(match.other_first_name || "Match");
+  const open = plan.status === "open";
+  const who = (option) => {
+    const picks = option.date_plan_picks || [];
+    const me = picks.some((pk) => pk.member_id === state.user.id);
+    const them = picks.some((pk) => pk.member_id !== state.user.id);
+    return `<span class="ns-plan-who">${me ? `<i class="is-me">You</i>` : ""}${them ? `<i>${name}</i>` : ""}</span>`;
+  };
+  const mine = (option) => (option.date_plan_picks || []).some((pk) => pk.member_id === state.user.id);
+  const places = planOptions("place");
+  const times = planOptions("time");
+  return `
+    <div class="ns-planner">
+      ${notice()}
+      <h2>Plan your date</h2>
+      <p class="ns-planner-sub">${plan.midpoint_label ? `Halfway between you, near <strong>${escapeHtml(plan.midpoint_label)}</strong>.` : "Pick a public spot that's easy for you both to reach."} Tap everything that works for you. When you both pick the same place and time, it's set.</p>
+      ${plan.status === "confirmed" ? renderPlanCard(match) : ""}
+      <h3>Where</h3>
+      <div class="ns-plan-places">
+        ${places.map((o) => `
+          <div class="ns-plan-place ${mine(o) ? "is-picked" : ""}">
+            <button type="button" data-pick="${o.id}" ${open ? "" : "disabled"} aria-pressed="${mine(o)}">
+              <span class="ns-plan-check" aria-hidden="true"></span>
+              <span class="ns-plan-text">
+                <strong>${escapeHtml(o.label)}</strong>
+                <small>${[o.rating ? `★ ${o.rating}` : "", o.detail ? escapeHtml(o.detail) : (o.created_by ? `Suggested by ${o.created_by === state.user.id ? "you" : name}` : "")].filter(Boolean).join(" · ")}</small>
+                ${o.reason ? `<em>${escapeHtml(o.reason)}</em>` : ""}
+              </span>
+            </button>
+            <div class="ns-plan-foot">${who(o)}${o.maps_url ? `<a href="${escapeHtml(o.maps_url)}" target="_blank" rel="noopener noreferrer">Map</a>` : ""}</div>
+          </div>`).join("") || `<p class="ns-plan-empty">No suggestions yet. Add a spot you'd both enjoy.</p>`}
+      </div>
+      ${open ? `
+        <form class="ns-plan-custom" data-custom="place">
+          <input name="label" maxlength="120" placeholder="Suggest your own place" aria-label="Suggest your own place" />
+          <button type="submit" ${state.saving ? "disabled" : ""}>Add</button>
+        </form>` : ""}
+      <h3>When</h3>
+      <div class="ns-plan-times">
+        ${times.map((o) => `
+          <button type="button" class="ns-plan-time ${mine(o) ? "is-picked" : ""}" data-pick="${o.id}" ${open ? "" : "disabled"} aria-pressed="${mine(o)}">
+            <strong>${escapeHtml(o.label)}</strong>
+            ${who(o)}
+          </button>`).join("")}
+      </div>
+      ${open ? `
+        <form class="ns-plan-custom" data-custom="time">
+          <input name="when" type="datetime-local" aria-label="Suggest your own day and time" />
+          <button type="submit" ${state.saving ? "disabled" : ""}>Add</button>
+        </form>` : ""}
+      <p class="ns-plan-safety">Always meet somewhere public, get there on your own, and tell a friend where you'll be.</p>
+      <button class="ns-btn-primary ns-planner-done" type="button" data-planner-close>Back to chat</button>
+    </div>
+  `;
+}
+
 function renderMessage(message) {
   const mine = message.sender_id === state.user.id;
-  return `<div class="message ${mine ? "mine" : ""}"><p>${escapeHtml(message.body)}</p><span>${new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></div>`;
+  return `<div class="ns-bubble ${mine ? "is-mine" : ""}"><p>${escapeHtml(message.body)}</p><time>${new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</time></div>`;
 }
 
 function renderStatus() {
@@ -1943,8 +2245,11 @@ function bindAppEvents() {
     button.addEventListener("click", () => {
       state.tab = button.dataset.tab;
       if (state.tab !== "chat") {
+        stopWatchingChat();
         state.selectedMatch = null;
         state.messages = null;
+        state.plan = null;
+        state.plannerOpen = false;
       }
       state.error = "";
       state.message = "";
@@ -2007,6 +2312,59 @@ function bindAppEvents() {
     event.preventDefault();
     sendMessage(event.currentTarget);
   });
+  const composer = document.querySelector(".ns-composer textarea");
+  composer?.addEventListener("input", () => {
+    composer.style.height = "auto";
+    composer.style.height = `${Math.min(composer.scrollHeight, 120)}px`;
+  });
+  composer?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      composer.form.requestSubmit();
+    }
+  });
+  document.querySelector("[data-start-plan]")?.addEventListener("click", startPlan);
+  document.querySelector("[data-open-planner]")?.addEventListener("click", () => {
+    state.plannerOpen = true;
+    rerenderChat();
+    window.scrollTo({ top: 0 });
+  });
+  document.querySelectorAll("[data-planner-close]").forEach((button) => button.addEventListener("click", () => {
+    state.plannerOpen = false;
+    state.error = "";
+    rerenderChat();
+  }));
+  document.querySelector("[data-plan-later]")?.addEventListener("click", () => {
+    try { localStorage.setItem(`noSeedsPlanLater:${state.selectedMatch.match_id}`, String((state.messages || []).length)); } catch { /* private mode */ }
+    rerenderChat();
+  });
+  document.querySelectorAll("[data-pick]").forEach((button) => button.addEventListener("click", () => togglePick(button.dataset.pick)));
+  document.querySelectorAll("[data-custom]").forEach((form) => form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addPlanOption(form.dataset.custom, form);
+  }));
+  document.querySelector("[data-chat-back]")?.addEventListener("click", () => {
+    if (state.plannerOpen) {
+      state.plannerOpen = false;
+      rerenderChat();
+      return;
+    }
+    stopWatchingChat();
+    state.plan = null;
+    state.selectedMatch = null;
+    state.messages = null;
+    state.chatMenuOpen = false;
+    state.error = "";
+    state.message = "";
+    renderApp();
+  });
+  document.querySelector("[data-chat-menu]")?.addEventListener("click", () => {
+    state.chatMenuOpen = !state.chatMenuOpen;
+    renderApp();
+  });
+  if (state.tab === "chat" && state.selectedMatch && !state.viewing && !state.plannerOpen) {
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight }), 0);
+  }
   document.querySelector("[data-unmatch]")?.addEventListener("click", () => {
     if (window.confirm("Close this match?")) closeMatch("unmatched");
   });
