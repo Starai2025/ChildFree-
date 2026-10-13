@@ -197,7 +197,7 @@ button {
   position: relative;
   z-index: 1;
   justify-self: center;
-  width: min(220px, 64vw);
+  width: min(130px, 36vw);
 }
 
 .agreement-logo {
@@ -343,7 +343,7 @@ button {
 }
 
 .account-logo-wrap {
-  width: min(168px, 46vw);
+  width: min(130px, 36vw);
   margin: 0 auto 36px;
 }
 
@@ -530,7 +530,7 @@ button {
 }
 
 .location-screen .account-logo-wrap {
-  width: min(142px, 38vw);
+  width: min(130px, 36vw);
   margin-bottom: 20px;
 }
 
@@ -587,7 +587,7 @@ button {
 }
 
 .intent-screen .account-logo-wrap {
-  width: min(146px, 40vw);
+  width: min(130px, 36vw);
   margin-bottom: 22px;
 }
 
@@ -644,7 +644,7 @@ button {
 }
 
 .clause-screen .account-logo-wrap {
-  width: min(104px, 31vw);
+  width: min(116px, 32vw);
   margin-bottom: 8px;
 }
 
@@ -874,6 +874,262 @@ button {
   color: rgba(25, 21, 18, 0.82);
   font-size: 15px;
   line-height: 1.35;
+}
+
+.story-screen {
+  padding-top: calc(18px + env(safe-area-inset-top));
+}
+
+.story-screen .prompt-logo-wrap {
+  width: min(108px, 30vw);
+  margin-bottom: 14px;
+}
+
+.story-card {
+  padding: 20px 21px 18px;
+}
+
+.story-card h1 {
+  font-size: clamp(31px, 7.8vw, 39px);
+}
+
+.story-card .prompt-field textarea {
+  min-height: 104px;
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.story-interest-wrap {
+  margin: 13px 0 2px;
+}
+
+.story-interest-wrap > p {
+  margin: 0 0 10px;
+  color: var(--emerald);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.story-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.story-chip {
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(25, 21, 18, 0.13);
+  background: #fffaf3;
+  color: rgba(25, 21, 18, 0.82);
+  font-size: 14px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.story-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.story-chip:has(input:checked) {
+  border-color: rgba(15, 92, 77, 0.86);
+  background: var(--emerald);
+  color: var(--ivory);
+  box-shadow: 0 9px 18px rgba(15, 92, 77, 0.16);
+}
+
+.story-card .prompt-actions {
+  margin-top: 17px;
+}
+
+.vibe-reference-screen {
+  min-height: 100vh;
+  padding: calc(16px + env(safe-area-inset-top)) 26px calc(28px + env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 6%, rgba(15, 92, 77, 0.16), transparent 24%),
+    linear-gradient(180deg, #05090b 0%, #07100e 100%);
+}
+
+.phone-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto 2px;
+  width: min(100%, 382px);
+  color: var(--ivory);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.status-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.signal-icon {
+  width: 22px;
+  height: 14px;
+  display: inline-block;
+  background:
+    linear-gradient(to top, var(--ivory) 0 42%, transparent 43%) 0 100% / 4px 100% no-repeat,
+    linear-gradient(to top, var(--ivory) 0 58%, transparent 59%) 6px 100% / 4px 100% no-repeat,
+    linear-gradient(to top, var(--ivory) 0 76%, transparent 77%) 12px 100% / 4px 100% no-repeat,
+    linear-gradient(to top, var(--ivory) 0 100%, transparent 0) 18px 100% / 4px 100% no-repeat;
+}
+
+.wifi-icon {
+  width: 18px;
+  height: 14px;
+  display: inline-block;
+  position: relative;
+}
+
+.wifi-icon::before,
+.wifi-icon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  border: 2px solid var(--ivory);
+  border-color: var(--ivory) transparent transparent transparent;
+  border-radius: 999px;
+  transform: translateX(-50%);
+}
+
+.wifi-icon::before {
+  top: 1px;
+  width: 18px;
+  height: 18px;
+}
+
+.wifi-icon::after {
+  top: 6px;
+  width: 10px;
+  height: 10px;
+}
+
+.battery-icon {
+  width: 27px;
+  height: 14px;
+  display: inline-block;
+  position: relative;
+  border: 2px solid var(--ivory);
+  border-radius: 4px;
+}
+
+.battery-icon::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ivory);
+}
+
+.battery-icon::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: -5px;
+  width: 3px;
+  height: 6px;
+  border-radius: 0 2px 2px 0;
+  background: var(--ivory);
+}
+
+.vibe-reference-screen .prompt-logo-wrap {
+  width: min(130px, 34vw);
+  margin: 0 auto 31px;
+}
+
+.vibe-reference-card {
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 24px;
+  padding: 20px 18px 24px;
+  background: #f6f0e8;
+}
+
+.vibe-reference-card .prompt-kicker {
+  margin-bottom: 8px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+
+.vibe-reference-card h1 {
+  margin-bottom: 14px;
+  font-size: clamp(29px, 7.4vw, 34px);
+}
+
+.vibe-reference-card .prompt-copy {
+  margin-bottom: 17px;
+  font-size: 16px;
+}
+
+.vibe-reference-card .prompt-bars {
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.vibe-reference-card .prompt-bars span {
+  height: 8px;
+}
+
+.vibe-reference-card .prompt-field {
+  margin-bottom: 15px;
+}
+
+.vibe-reference-card .prompt-field label {
+  font-size: 13px;
+}
+
+.vibe-reference-card .prompt-field textarea,
+.vibe-reference-card .prompt-field input {
+  width: 100%;
+  border: 1px solid rgba(25, 21, 18, 0.12);
+  border-radius: 18px;
+  background: #fffaf3;
+  color: var(--ink);
+  font-size: 16px;
+  outline: none;
+}
+
+.vibe-reference-card .prompt-field textarea {
+  min-height: 82px;
+  padding: 15px;
+}
+
+.vibe-reference-card .prompt-field input {
+  min-height: 48px;
+  padding: 0 15px;
+}
+
+.vibe-reference-card .prompt-field textarea::placeholder,
+.vibe-reference-card .prompt-field input::placeholder {
+  color: rgba(25, 21, 18, 0.55);
+}
+
+.vibe-reference-card .prompt-actions {
+  grid-template-columns: 0.82fr 1.22fr 1.18fr;
+  gap: 10px;
+  margin: 17px 0 13px;
+}
+
+.vibe-reference-card .prompt-btn {
+  min-height: 50px;
+  font-size: 16px;
+}
+
+.vibe-reference-card .prompt-footnote {
+  font-size: 14px;
 }
 
 .hero {

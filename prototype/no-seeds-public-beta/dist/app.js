@@ -6,6 +6,12 @@ const SUPABASE_ANON_KEY = "sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const app = document.querySelector("#app");
+const urlParams = new URLSearchParams(window.location.search);
+
+if (urlParams.get("resetDraft") === "1") {
+  localStorage.removeItem("noSeedsPublicDraft");
+  localStorage.removeItem("freeMidnightPublicDraft");
+}
 
 const PROMPTS = [
   ["ordinary_sunday", "An ordinary Sunday with me looks like..."],
@@ -14,6 +20,18 @@ const PROMPTS = [
   ["culture", "A part of my culture I'd love to share is..."],
   ["joy", "Something that always brings me joy is..."],
   ["building", "The life I want to build with someone is..."],
+];
+
+const INTEREST_OPTIONS = [
+  "Travel",
+  "Fitness",
+  "Live music",
+  "Faith",
+  "Business",
+  "Art",
+  "Quiet nights",
+  "Foodie",
+  "Dancing",
 ];
 
 const ELIGIBILITY_KEYS = ["black", "noChildren", "neverChildren", "noStepParent", "honest", "respect"];
@@ -366,7 +384,11 @@ function formToProfile(form) {
   setNumber("age_max", 70);
   if (form.querySelector('[name="seeking"]')) payload.seeking = data.getAll("seeking");
   if (data.has("interests")) {
-    payload.interests = String(data.get("interests") || "").split(",").map((item) => item.trim()).filter(Boolean).slice(0, 6);
+    payload.interests = data.getAll("interests")
+      .flatMap((item) => String(item || "").split(","))
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 6);
   }
   ["faith", "spendingStyle", "lifestylePace"].forEach((key) => {
     if (data.has(key)) payload.basics[key] = String(data.get(key) || "").trim();
@@ -839,7 +861,7 @@ function renderAgreement() {
     <main class="screen gate-screen">
       <section class="gate-hero">
         <div class="agreement-logo-wrap">
-          <img class="agreement-logo" src="./assets/no-seeds-logo.png" alt="No Seeds Dating" />
+          <img class="agreement-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" />
         </div>
         <h1>Let's be clear...</h1>
         <p class="gate-line">Black. Single.<br>Absolutely No Seeds.</p>
@@ -884,6 +906,7 @@ function renderPublicApplication() {
   if (state.publicStep === 4) return renderNoKidsClauseStep(p);
   if (state.publicStep === 5) return renderPromptApplicationStep(0, p);
   if (state.publicStep === 6) return renderPromptApplicationStep(1, p);
+  if (state.publicStep === 7) return renderStoryApplicationStep(p);
   return `
     <form id="intake-form" class="panel flat">
       <div class="step-kicker">PUBLIC APPLICATION · ${eyebrow}</div>
@@ -904,7 +927,7 @@ function renderPublicApplication() {
 function renderGenderLookingForStep(p) {
   return `
     <form id="intake-form" class="account-screen choice-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-logo.png" alt="No Seeds Dating" /></div>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
       <p class="step-kicker choice-kicker">STEP 2 OF 10</p>
       <h1>Gender &<br>Looking For</h1>
       <p class="account-tagline">Tell us who you are and who you want to meet.</p>
@@ -940,7 +963,7 @@ function choiceCheck(name, value, selected = []) {
 function renderLocationAgeStep(p) {
   return `
     <form id="intake-form" class="account-screen choice-screen location-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-logo.png" alt="No Seeds Dating" /></div>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
       <p class="step-kicker choice-kicker">STEP 3 OF 10</p>
       <h1>Location &<br>Age</h1>
       <p class="account-tagline">Set where and who you want to meet.</p>
@@ -981,7 +1004,7 @@ function ageSelect(name, label, selected) {
 function renderRelationshipIntentionsStep(p) {
   return `
     <form id="intake-form" class="account-screen choice-screen intent-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-logo.png" alt="No Seeds Dating" /></div>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
       <p class="step-kicker choice-kicker">STEP 4 OF 10</p>
       <h1>Relationship<br>Intentions</h1>
       <p class="account-tagline">Be clear about what you are actually open to.</p>
@@ -1009,7 +1032,7 @@ function intentSelect(name, label, value, options) {
 function renderNoKidsClauseStep(p) {
   return `
     <form id="intake-form" class="account-screen choice-screen clause-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-logo.png" alt="No Seeds Dating" /></div>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
       <p class="step-kicker choice-kicker">STEP 5 OF 10</p>
       <h1>The No Seeds<br>Pledge</h1>
       <p class="account-tagline">Black. Childfree. Honest about it.</p>
@@ -1058,9 +1081,9 @@ function renderPromptApplicationStep(index, p) {
   const prompt = getPrompt(index, p);
   const [, eyebrow, title, subtitle] = PROFILE_STEPS[state.publicStep];
   return `
-    <form id="intake-form" class="prompt-screen">
-      <div class="prompt-logo-wrap"><img class="prompt-logo" src="./assets/no-seeds-logo.png" alt="No Seeds Dating" /></div>
-      <section class="prompt-card">
+    <form id="intake-form" class="prompt-screen vibe-reference-screen">
+      ${renderPhoneTemplateTop()}
+      <section class="prompt-card vibe-reference-card">
         <p class="prompt-kicker">PUBLIC APPLICATION · ${eyebrow}</p>
         <h1>${escapeHtml(title)}</h1>
         <p class="prompt-copy">${escapeHtml(subtitle)}</p>
@@ -1090,10 +1113,49 @@ function renderPromptBars() {
   return `<div class="prompt-bars" aria-label="Application step progress">${PROFILE_STEPS.map((step, index) => `<span class="${index < state.publicStep ? "done" : ""} ${index === state.publicStep ? "active" : ""}"></span>`).join("")}</div>`;
 }
 
+function renderPhoneTemplateTop() {
+  return `
+    <div class="phone-status" aria-hidden="true">
+      <span>9:41</span>
+      <span class="status-icons"><i class="signal-icon"></i><i class="wifi-icon"></i><i class="battery-icon"></i></span>
+    </div>
+    <div class="prompt-logo-wrap"><img class="prompt-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
+  `;
+}
+
+function renderStoryApplicationStep(p) {
+  const [, eyebrow, title, subtitle] = PROFILE_STEPS[state.publicStep];
+  return `
+    <form id="intake-form" class="prompt-screen story-screen vibe-reference-screen">
+      ${renderPhoneTemplateTop()}
+      <section class="prompt-card story-card vibe-reference-card">
+        <p class="prompt-kicker">PUBLIC APPLICATION · ${eyebrow}</p>
+        <h1>${escapeHtml(title)}</h1>
+        <p class="prompt-copy">${escapeHtml(subtitle)}</p>
+        ${renderPromptBars()}
+        <div class="prompt-field">
+          <label for="bio">BIO</label>
+          <textarea id="bio" name="bio" maxlength="280" placeholder="Tell members what dating you feels like.">${escapeHtml(p.bio || "")}</textarea>
+        </div>
+        <div class="prompt-field">
+          <label for="interests">INTERESTS (COMMA-SEPARATED, UP TO 6)</label>
+          <input id="interests" name="interests" type="text" value="${escapeHtml((p.interests || []).join(", "))}" placeholder="Jazz, travel, fitness" />
+        </div>
+        <div class="prompt-actions">
+          <button class="prompt-btn prompt-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
+          <button class="prompt-btn prompt-save" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save draft</button>
+          <button class="prompt-btn prompt-next" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        </div>
+        <p class="prompt-footnote">Your answers save on this phone as you continue.</p>
+      </section>
+    </form>
+  `;
+}
+
 function renderAccountStep(p) {
   return `
     <form id="intake-form" class="account-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-logo.png" alt="No Seeds Dating" /></div>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
       <h1>Create your account</h1>
       <p class="account-tagline">Black Singles - No Kids. Not Now. Not Ever.</p>
       ${notice()}
