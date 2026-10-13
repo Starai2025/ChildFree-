@@ -11,6 +11,7 @@ const urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get("resetDraft") === "1") {
   localStorage.removeItem("noSeedsPublicDraft");
   localStorage.removeItem("freeMidnightPublicDraft");
+  localStorage.removeItem("noSeedsPledgeAcceptedAt");
 }
 
 const PROMPTS = [
@@ -37,16 +38,15 @@ const INTEREST_OPTIONS = [
 const ELIGIBILITY_KEYS = ["black", "noChildren", "neverChildren", "noStepParent", "honest", "respect"];
 
 const PROFILE_STEPS = [
-  ["basics", "STEP 1 OF 10", "Start with the basics.", "Two details, then keep moving."],
-  ["identity", "STEP 2 OF 10", "Gender & Looking For", "Tell us how you identify and who you want to meet."],
-  ["location", "STEP 3 OF 10", "Location & Age Preferences", "Keep matching local and age-aligned."],
-  ["intention", "STEP 4 OF 10", "Name the kind of love you want.", "Keep it intentional and easy to review."],
-  ["clauseA", "STEP 5 OF 10", "The No Seeds Pledge.", "Black singles, childfree by choice, and honest about it."],
-  ["prompt0", "STEP 6 OF 10", "Answer one good prompt.", "One thoughtful answer beats ten shallow ones."],
-  ["prompt1", "STEP 7 OF 10", "Add one more.", "This gives matches something real to respond to."],
-  ["story", "STEP 8 OF 10", "Show your vibe.", "A short bio and a few interests are enough for beta."],
-  ["life", "STEP 9 OF 10", "Describe the life you'd share.", "A few compatibility signals for grown dating."],
-  ["photos", "STEP 10 OF 10", "Preview and submit.", "Photos are optional for this beta, but your profile must be complete."],
+  ["basics", "STEP 1 OF 9", "Start with the basics.", "Two details, then keep moving."],
+  ["identity", "STEP 2 OF 9", "Gender & Looking For", "Tell us how you identify and who you want to meet."],
+  ["location", "STEP 3 OF 9", "Location & Age Preferences", "Keep matching local and age-aligned."],
+  ["intention", "STEP 4 OF 9", "Name the kind of love you want.", "Keep it intentional and easy to review."],
+  ["prompt0", "STEP 5 OF 9", "Answer one good prompt.", "One thoughtful answer beats ten shallow ones."],
+  ["prompt1", "STEP 6 OF 9", "Add one more.", "This gives matches something real to respond to."],
+  ["story", "STEP 7 OF 9", "Show your vibe.", "A short bio and a few interests are enough for beta."],
+  ["life", "STEP 8 OF 9", "Picture the life.", "No kids changes the future. Say what that opens up for you."],
+  ["photos", "STEP 9 OF 9", "Preview and submit.", "Photos are optional for this beta, but your profile must be complete."],
 ];
 
 const state = {
@@ -56,6 +56,7 @@ const state = {
   publicProfile: loadPublicDraft(),
   publicGateOpen: hasPublicDraft(),
   agreementOpen: false,
+  signInOpen: false,
   publicStep: 0,
   photos: [],
   tab: "profile",
@@ -109,6 +110,22 @@ function hasPublicDraft() {
 
 function savePublicDraft() {
   localStorage.setItem("noSeedsPublicDraft", JSON.stringify(state.publicProfile || emptyPublicProfile()));
+}
+
+function acceptedEligibility() {
+  return Object.fromEntries(ELIGIBILITY_KEYS.map((key) => [key, true]));
+}
+
+function acceptStyledPledge() {
+  const acceptedAt = state.publicProfile?.pledge_accepted_at || localStorage.getItem("noSeedsPledgeAcceptedAt") || new Date().toISOString();
+  state.publicProfile = {
+    ...emptyPublicProfile(),
+    ...(state.publicProfile || {}),
+    eligibility: acceptedEligibility(),
+    pledge_accepted_at: acceptedAt,
+  };
+  localStorage.setItem("noSeedsPledgeAcceptedAt", acceptedAt);
+  savePublicDraft();
 }
 
 function escapeHtml(value = "") {
@@ -366,8 +383,8 @@ function formToProfile(form) {
     basics: {...(p.basics || {})},
     interests: Array.isArray(p.interests) ? p.interests : [],
     compatibility: {...(p.compatibility || {})},
-    eligibility: {...(p.eligibility || {})},
-    pledge_accepted_at: p.pledge_accepted_at ?? null,
+    eligibility: p.pledge_accepted_at || localStorage.getItem("noSeedsPledgeAcceptedAt") ? { ...acceptedEligibility(), ...(p.eligibility || {}) } : {...(p.eligibility || {})},
+    pledge_accepted_at: p.pledge_accepted_at ?? localStorage.getItem("noSeedsPledgeAcceptedAt") ?? null,
   };
   const setText = (key) => {
     if (data.has(key)) payload[key] = String(data.get(key) || "").trim() || null;
@@ -792,6 +809,10 @@ function ensureTabData() {
 }
 
 function renderAuth() {
+  if (state.signInOpen) {
+    renderSignIn();
+    return;
+  }
   if (!state.publicGateOpen && !state.message) {
     if (state.agreementOpen) renderAgreement();
     else renderWelcome();
@@ -836,8 +857,12 @@ function renderAuth() {
     renderAuth();
   });
   document.querySelector("#account-signin")?.addEventListener("click", () => {
-    const email = state.publicProfile?.email || window.prompt("Enter your email for a sign-in link:");
-    if (email) signIn(email);
+    state.signInOpen = true;
+    state.publicGateOpen = false;
+    state.agreementOpen = false;
+    state.message = "";
+    state.error = "";
+    renderAuth();
   });
   setTimeout(() => window.scrollTo({ top: 0, left: 0 }), 0);
 }
@@ -852,12 +877,14 @@ function renderWelcome() {
   `;
   document.querySelector("#welcome-join")?.addEventListener("click", () => {
     state.agreementOpen = true;
+    state.signInOpen = false;
     state.message = "";
     state.error = "";
     renderAuth();
   });
   document.querySelector("#welcome-signin")?.addEventListener("click", () => {
-    state.publicGateOpen = true;
+    state.signInOpen = true;
+    state.publicGateOpen = false;
     state.agreementOpen = false;
     state.message = "";
     state.error = "";
@@ -870,7 +897,7 @@ function renderAgreement() {
     <main class="screen gate-screen">
       <section class="gate-hero">
         <div class="agreement-logo-wrap">
-          <img class="agreement-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" />
+          <img class="agreement-logo" src="./assets/no-seeds-welcome-logo.png" alt="No Seeds Dating" />
         </div>
         <h1>Let's be clear...</h1>
         <p class="gate-line">Black. Single.<br>Absolutely No Seeds.</p>
@@ -886,15 +913,54 @@ function renderAgreement() {
     </main>
   `;
   document.querySelector("#open-public-application")?.addEventListener("click", () => {
+    acceptStyledPledge();
     state.publicGateOpen = true;
     state.agreementOpen = false;
+    state.signInOpen = false;
     state.message = "";
     state.error = "";
     renderAuth();
   });
   document.querySelector("#show-signin")?.addEventListener("click", () => {
-    state.publicGateOpen = true;
+    state.signInOpen = true;
+    state.publicGateOpen = false;
     state.agreementOpen = false;
+    state.message = "";
+    state.error = "";
+    renderAuth();
+  });
+}
+
+function renderSignIn() {
+  const email = state.publicProfile?.email || "";
+  app.innerHTML = `
+    <main class="screen auth-journey">
+      <form id="signin-form" class="account-screen signin-screen">
+        <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-welcome-logo.png" alt="No Seeds Dating" /></div>
+        <h1>Sign in</h1>
+        <p class="account-tagline">Enter your email and we will send your No Seeds sign-in link.</p>
+        ${notice()}
+        <div class="field account-field">
+          <label for="signin_email">Email Address</label>
+          <input id="signin_email" name="signin_email" type="email" autocomplete="email" required value="${escapeHtml(email)}" placeholder="Enter your email" />
+        </div>
+        <button class="btn primary account-continue" type="submit" ${state.saving ? "disabled" : ""}>${state.saving ? "Sending..." : "Send sign-in link →"}</button>
+        <p class="account-signin">New here? <button type="button" id="signin-create">Create an account</button></p>
+      </form>
+    </main>
+  `;
+  document.querySelector("#signin-form")?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const emailValue = String(data.get("signin_email") || "").trim().toLowerCase();
+    state.publicProfile = { ...(state.publicProfile || emptyPublicProfile()), email: emailValue };
+    savePublicDraft();
+    signIn(emailValue);
+  });
+  document.querySelector("#signin-create")?.addEventListener("click", () => {
+    state.signInOpen = false;
+    state.publicGateOpen = false;
+    state.agreementOpen = true;
     state.message = "";
     state.error = "";
     renderAuth();
@@ -912,10 +978,11 @@ function renderPublicApplication() {
   if (state.publicStep === 1) return renderGenderLookingForStep(p);
   if (state.publicStep === 2) return renderLocationAgeStep(p);
   if (state.publicStep === 3) return renderRelationshipIntentionsStep(p);
-  if (state.publicStep === 4) return renderNoKidsClauseStep(p);
-  if (state.publicStep === 5) return renderPromptApplicationStep(0, p);
-  if (state.publicStep === 6) return renderPromptApplicationStep(1, p);
-  if (state.publicStep === 7) return renderStoryApplicationStep(p);
+  if (state.publicStep === 4) return renderPromptApplicationStep(0, p);
+  if (state.publicStep === 5) return renderPromptApplicationStep(1, p);
+  if (state.publicStep === 6) return renderStoryApplicationStep(p);
+  if (state.publicStep === 7) return renderLifeApplicationStep(p);
+  if (state.publicStep === 8) return renderSubmitApplicationStep(p);
   return `
     <form id="intake-form" class="panel flat">
       <div class="step-kicker">PUBLIC APPLICATION · ${eyebrow}</div>
@@ -928,7 +995,7 @@ function renderPublicApplication() {
         <button class="btn secondary" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save draft</button>
         <button class="btn dark" type="submit" data-action="${finalStep ? "submit" : "next"}" ${state.saving ? "disabled" : ""}>${finalStep ? "Submit application" : "Continue"}</button>
       </div>
-      <p class="copy">${finalStep ? `Missing: ${missing.length ? escapeHtml(missing.join(", ")) : "Ready to submit."}` : "Your answers save on this phone as you continue."}</p>
+      <p class="copy">${finalStep ? (missing.length ? `Finish before submitting: ${escapeHtml(missing.join(", "))}.` : "Ready to submit.") : "Your answers save on this phone as you continue."}</p>
     </form>
   `;
 }
@@ -936,8 +1003,8 @@ function renderPublicApplication() {
 function renderGenderLookingForStep(p) {
   return `
     <form id="intake-form" class="account-screen choice-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 2 OF 10</p>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-welcome-logo.png" alt="No Seeds Dating" /></div>
+      <p class="step-kicker choice-kicker">STEP 2 OF 9</p>
       <h1>Gender &<br>Looking For</h1>
       <p class="account-tagline">Tell us who you are and who you want to meet.</p>
       ${notice()}
@@ -972,8 +1039,8 @@ function choiceCheck(name, value, selected = []) {
 function renderLocationAgeStep(p) {
   return `
     <form id="intake-form" class="account-screen choice-screen location-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 3 OF 10</p>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-welcome-logo.png" alt="No Seeds Dating" /></div>
+      <p class="step-kicker choice-kicker">STEP 3 OF 9</p>
       <h1>Location &<br>Age</h1>
       <p class="account-tagline">Set where and who you want to meet.</p>
       ${notice()}
@@ -1013,8 +1080,8 @@ function ageSelect(name, label, selected) {
 function renderRelationshipIntentionsStep(p) {
   return `
     <form id="intake-form" class="account-screen choice-screen intent-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 4 OF 10</p>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-welcome-logo.png" alt="No Seeds Dating" /></div>
+      <p class="step-kicker choice-kicker">STEP 4 OF 9</p>
       <h1>Relationship<br>Intentions</h1>
       <p class="account-tagline">Be clear about what you are actually open to.</p>
       ${notice()}
@@ -1035,54 +1102,6 @@ function intentSelect(name, label, value, options) {
         ${options.map((option) => `<option value="${escapeHtml(option)}" ${value === option ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
       </select>
     </div>
-  `;
-}
-
-function renderNoKidsClauseStep(p) {
-  return `
-    <form id="intake-form" class="account-screen choice-screen clause-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
-      <p class="step-kicker choice-kicker">STEP 5 OF 10</p>
-      <h1>The No Seeds<br>Pledge</h1>
-      <p class="account-tagline">Black. Childfree. Honest about it.</p>
-      ${notice()}
-      <div class="clause-stack">
-        <section class="pledge-group" aria-label="Who this is for">
-          <p>Who this is for</p>
-          ${clauseChoice("black", "I identify as Black, including multiracial Black.", p)}
-          ${clauseChoice("noChildren", "I do not have children of any age.", p)}
-          ${clauseChoice("neverChildren", "I never want biological, adopted, or step children.", p)}
-        </section>
-        <section class="pledge-group" aria-label="How we protect the room">
-          <p>How we protect the room</p>
-          ${clauseChoice("noStepParent", "I am not looking for a parent or step-parent role.", p)}
-          ${clauseChoice("honest", "I will be honest about my relationship history and childfree choice.", p)}
-          ${clauseChoice("respect", "I will not pressure anyone to change their childfree choice.", p)}
-          ${pledgeChoice(p)}
-        </section>
-      </div>
-      <button class="btn primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>I Agree →</button>
-      <button class="link-btn choice-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
-    </form>
-  `;
-}
-
-function clauseChoice(key, label, profile) {
-  const id = `clause_${key}`;
-  return `
-    <label class="clause-card" for="${id}">
-      <input id="${id}" type="checkbox" name="${key}" ${profile?.eligibility?.[key] ? "checked" : ""} required>
-      <span>${escapeHtml(label)}</span>
-    </label>
-  `;
-}
-
-function pledgeChoice(profile) {
-  return `
-    <label class="clause-card pledge-card" for="pledge">
-      <input id="pledge" type="checkbox" name="pledge" ${profile?.pledge_accepted_at ? "checked" : ""} required>
-      <span>I agree to the No Seeds Community Pledge.</span>
-    </label>
   `;
 }
 
@@ -1128,7 +1147,7 @@ function renderPhoneTemplateTop() {
       <span>9:41</span>
       <span class="status-icons"><i class="signal-icon"></i><i class="wifi-icon"></i><i class="battery-icon"></i></span>
     </div>
-    <div class="prompt-logo-wrap"><img class="prompt-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
+    <div class="prompt-logo-wrap"><img class="prompt-logo" src="./assets/no-seeds-welcome-logo.png" alt="No Seeds Dating" /></div>
   `;
 }
 
@@ -1161,10 +1180,82 @@ function renderStoryApplicationStep(p) {
   `;
 }
 
+function renderLifeApplicationStep(p) {
+  const [, eyebrow, title, subtitle] = PROFILE_STEPS[state.publicStep];
+  return `
+    <form id="intake-form" class="prompt-screen story-screen vibe-reference-screen life-screen">
+      ${renderPhoneTemplateTop()}
+      <section class="prompt-card story-card vibe-reference-card">
+        <p class="prompt-kicker">PUBLIC APPLICATION · ${eyebrow}</p>
+        <h1>${escapeHtml(title)}</h1>
+        <p class="prompt-copy">${escapeHtml(subtitle)}</p>
+        ${renderPromptBars()}
+        <div class="prompt-field">
+          <label for="childfreeLife">CHILDFREE LIFE</label>
+          <textarea id="childfreeLife" name="childfreeLife" maxlength="280" placeholder="My childfree life gives me room for...">${escapeHtml(p.compatibility?.childfreeLife || "")}</textarea>
+        </div>
+        <div class="prompt-actions">
+          <button class="prompt-btn prompt-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
+          <button class="prompt-btn prompt-save" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save draft</button>
+          <button class="prompt-btn prompt-next" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        </div>
+        <p class="prompt-footnote">Your answers save on this phone as you continue.</p>
+      </section>
+    </form>
+  `;
+}
+
+function renderSubmitApplicationStep(p) {
+  const [, eyebrow, title, subtitle] = PROFILE_STEPS[state.publicStep];
+  const missing = missingFieldsForPayload(p);
+  if (!p.email) missing.unshift("email");
+  const ready = missing.length === 0;
+  const age = p.birth_date ? ageFromBirthDate(p.birth_date) : "";
+  const details = [p.city, p.relationship_goal].filter(Boolean).join(" · ");
+  const initial = (p.first_name || "N").trim().slice(0, 1).toUpperCase();
+  const interests = (p.interests || []).slice(0, 4);
+  const prompt = (p.prompts || []).find((item) => item?.answer)?.answer || "";
+  const childfreeLife = p.compatibility?.childfreeLife || "";
+  return `
+    <form id="intake-form" class="prompt-screen vibe-reference-screen submit-screen">
+      ${renderPhoneTemplateTop()}
+      <section class="prompt-card vibe-reference-card submit-card">
+        <p class="prompt-kicker">PUBLIC APPLICATION · ${eyebrow}</p>
+        <h1>${escapeHtml(title)}</h1>
+        <p class="prompt-copy">${escapeHtml(subtitle)}</p>
+        ${renderPromptBars()}
+        ${notice()}
+        <article class="final-profile-card" aria-label="Profile preview">
+          <div class="final-photo-preview"><span>${escapeHtml(initial)}</span></div>
+          <div class="final-profile-body">
+            <h2>${escapeHtml(p.first_name || "Your profile")}${age ? `, ${age}` : ""}</h2>
+            <p>${escapeHtml(details || "Your details will show here.")}</p>
+            <div class="final-chip-row">
+              <span>No kids</span>
+              <span>No step-parent role</span>
+              ${interests.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}
+            </div>
+            <p class="final-bio">${escapeHtml(p.bio || "Your bio will show here.")}</p>
+            ${prompt ? `<p class="final-answer">${escapeHtml(prompt)}</p>` : ""}
+            ${childfreeLife ? `<p class="final-answer">${escapeHtml(childfreeLife)}</p>` : ""}
+          </div>
+        </article>
+        <p class="final-photo-note">Photos can be added after email sign-in; this saves your written profile for founder review today.</p>
+        <div class="prompt-actions">
+          <button class="prompt-btn prompt-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>Back</button>
+          <button class="prompt-btn prompt-save" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save draft</button>
+          <button class="prompt-btn prompt-next" type="submit" data-action="submit" ${state.saving || !ready ? "disabled" : ""}>${state.saving ? "Submitting" : "Submit"}</button>
+        </div>
+        <p class="final-readiness ${ready ? "ready" : "pending"}">${ready ? "Ready to submit." : `Finish before submitting: ${escapeHtml(missing.join(", "))}.`}</p>
+      </section>
+    </form>
+  `;
+}
+
 function renderAccountStep(p) {
   return `
     <form id="intake-form" class="account-screen">
-      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-stacked-logo.png" alt="No Seeds Dating" /></div>
+      <div class="account-logo-wrap"><img class="account-logo" src="./assets/no-seeds-welcome-logo.png" alt="No Seeds Dating" /></div>
       <h1>Create your account</h1>
       <p class="account-tagline">Black Singles - No Kids. Not Now. Not Ever.</p>
       ${notice()}
@@ -1279,7 +1370,7 @@ function renderProfileForm() {
         <button class="btn secondary" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save</button>
         <button class="btn primary" type="submit" data-action="${finalStep ? "submit" : "next"}" ${state.saving ? "disabled" : ""}>${finalStep ? "Submit for review" : "Continue"}</button>
       </div>
-      <p class="copy">${finalStep ? `Missing: ${missingFields().length ? escapeHtml(missingFields().join(", ")) : "Ready to submit."}` : "Your answers save when you continue."}</p>
+      <p class="copy">${finalStep ? (missingFields().length ? `Finish before submitting: ${escapeHtml(missingFields().join(", "))}.` : "Ready to submit.") : "Your answers save when you continue."}</p>
     </form>
   `;
 }
@@ -1324,17 +1415,6 @@ function renderProfileStep(key, p) {
       ${select("marriage_view", "Marriage view", p.marriage_view, ["Open to marriage", "Want marriage", "Partnership without marriage", "Unsure"])}
     `;
   }
-  if (key === "clauseA") {
-    return `<div class="checks">
-      ${clauseCheck("black", "I identify as Black, including multiracial Black.", p)}
-      ${clauseCheck("noChildren", "I have no biological, adopted, step, or dependent children.", p)}
-      ${clauseCheck("neverChildren", "I never want children, not now and not someday.", p)}
-      ${clauseCheck("noStepParent", "I am not looking for a parent or step-parent role.", p)}
-      ${clauseCheck("honest", "I will be honest about my relationship history and childfree choice.", p)}
-      ${clauseCheck("respect", "I will not pressure anyone to change their childfree choice.", p)}
-      <label class="check"><input type="checkbox" name="pledge" ${p.pledge_accepted_at ? "checked" : ""}> <span>I agree to the No Seeds Community Pledge.</span></label>
-    </div>`;
-  }
   if (key === "prompt0") return promptField(0, getPrompt(0, p));
   if (key === "prompt1") return promptField(1, getPrompt(1, p));
   if (key === "story") {
@@ -1345,9 +1425,7 @@ function renderProfileStep(key, p) {
   }
   if (key === "life") {
     return `
-      ${field("faith", "Faith / worldview", p.basics?.faith || "", "text", "Grounded, spiritual, church-going, nonreligious...")}
-      ${field("lifestylePace", "Lifestyle pace", p.basics?.lifestylePace || "", "text", "Quiet homebody, social weekends, travel-ready...")}
-      ${textarea("childfreeLife", "My childfree life gives me room for...", p.compatibility?.childfreeLife || "", "Travel, business, rest, faith, fitness, art...")}
+      ${textarea("childfreeLife", "Childfree life", p.compatibility?.childfreeLife || "", "My childfree life gives me room for...")}
     `;
   }
   return `
