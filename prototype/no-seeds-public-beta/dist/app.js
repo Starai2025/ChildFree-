@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { startAccount, startGoogle, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, friendlyAuthError } from "./onboarding-sync.js";
+import { profilePatch, startAccount, startGoogle, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, friendlyAuthError } from "./onboarding-sync.js";
 
 const SUPABASE_URL = "https://btnrophnyfuwnqzwiooh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw";
@@ -181,6 +181,8 @@ function missingFields() {
 }
 
 async function init() {
+  const urlAuthError = authErrorFromUrl();
+  if (urlAuthError) state.error = urlAuthError;
   const { data } = await supabase.auth.getSession();
   state.session = data.session;
   state.user = data.session?.user ?? null;
@@ -197,8 +199,10 @@ async function init() {
 }
 
 async function load() {
+  const currentError = state.error;
   state.error = "";
   state.message = "";
+  if (currentError) state.error = currentError;
   if (!state.user) {
     state.profile = null;
     state.photos = [];
@@ -236,11 +240,19 @@ async function resumeOnboarding() {
 }
 
 async function loadProfile() {
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from("profiles")
     .select("*, profile_photos(*)")
     .eq("id", state.user.id)
     .maybeSingle();
+  if (!error && !data) {
+    const created = await createMissingProfileDraft();
+    if (created.error) {
+      error = created.error;
+    } else {
+      data = created.data;
+    }
+  }
   if (error) {
     state.error = error.message;
     state.profile = null;
@@ -256,6 +268,35 @@ async function loadProfile() {
   state.profile = data;
   state.photos = [...(data.profile_photos || [])].sort((a, b) => a.position - b.position);
   await loadPhotoUrls();
+}
+
+function authErrorFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const error = params.get("error_description") || hash.get("error_description") || params.get("error") || hash.get("error");
+  if (!error) return "";
+  const clean = String(error).replaceAll("+", " ");
+  if (/provider|google/i.test(clean)) return friendlyAuthError(clean);
+  return clean;
+}
+
+function googleNameFromUser() {
+  const meta = state.user?.user_metadata || {};
+  const raw = meta.first_name || meta.given_name || meta.full_name || meta.name || "";
+  return String(raw).trim().split(/\s+/)[0]?.slice(0, 40) || null;
+}
+
+async function createMissingProfileDraft() {
+  const local = loadPublicDraft();
+  const draft = mergeDrafts({ first_name: googleNameFromUser() }, local);
+  const { error } = await supabase.from("profiles").insert({ id: state.user.id, ...profilePatch(draft) });
+  if (error && !/duplicate key|already exists/i.test(error.message || "")) return { data: null, error };
+  const result = await supabase
+    .from("profiles")
+    .select("*, profile_photos(*)")
+    .eq("id", state.user.id)
+    .maybeSingle();
+  return { data: result.data, error: result.error };
 }
 
 async function loadPhotoUrls() {
