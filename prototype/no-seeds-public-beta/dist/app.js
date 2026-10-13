@@ -1671,18 +1671,23 @@ function renderProfileSections(card) {
     ["pin", travel],
     ["plane", fly],
   ].filter(([, value]) => value);
-  const extraPhoto = (index) => photos[index] ? `<figure class="ns-pv-photo"><img src="${photos[index]}" alt="" /></figure>` : "";
-  return `
-          <div class="ns-pv-tags"><span>No kids</span><span>No step-parent role</span>${card.relationship_goal ? `<span>${escapeHtml(card.relationship_goal)}</span>` : ""}</div>
-          ${card.bio ? `<p class="ns-pv-bio">${escapeHtml(card.bio)}</p>` : ""}
-          ${prompts[0] ? `<article class="ns-pv-prompt"><p>${escapeHtml(promptText(prompts[0].id))}</p><h3>${escapeHtml(prompts[0].answer)}</h3></article>` : ""}
-          ${extraPhoto(1)}
-          ${details.length ? `<div class="ns-pv-basics"><h2>The basics</h2><ul>${details.map(([icon, value]) => `<li>${BASIC_ICONS[icon]}<span>${escapeHtml(value)}</span></li>`).join("")}</ul></div>` : ""}
-          ${prompts[1] ? `<article class="ns-pv-prompt"><p>${escapeHtml(promptText(prompts[1].id))}</p><h3>${escapeHtml(prompts[1].answer)}</h3></article>` : ""}
-          ${card.compatibility?.childfreeLife ? `<article class="ns-pv-prompt"><p>My childfree life gives me room for…</p><h3>${escapeHtml(card.compatibility.childfreeLife)}</h3></article>` : ""}
-          ${extraPhoto(2)}
-          ${(card.interests || []).length ? `<div class="ns-pv-section"><h2>Interests</h2><div class="ns-pv-interests">${card.interests.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>` : ""}
-  `;
+  const promptCard = (question, answer) => `<article class="ns-pv-prompt"><p>${escapeHtml(question)}</p><h3>${escapeHtml(answer)}</h3></article>`;
+  const sections = [
+    `<div class="ns-pv-tags"><span>No kids</span><span>No step-parent role</span>${card.relationship_goal ? `<span>${escapeHtml(card.relationship_goal)}</span>` : ""}</div>${card.bio ? `<p class="ns-pv-bio">${escapeHtml(card.bio)}</p>` : ""}`,
+    prompts[0] ? promptCard(promptText(prompts[0].id), prompts[0].answer) : "",
+    details.length ? `<div class="ns-pv-basics"><h2>The basics</h2><ul>${details.map(([icon, value]) => `<li>${BASIC_ICONS[icon]}<span>${escapeHtml(value)}</span></li>`).join("")}</ul></div>` : "",
+    prompts[1] ? promptCard(promptText(prompts[1].id), prompts[1].answer) : "",
+    card.compatibility?.childfreeLife ? promptCard("My childfree life gives me room for…", card.compatibility.childfreeLife) : "",
+    (card.interests || []).length ? `<div class="ns-pv-section"><h2>Interests</h2><div class="ns-pv-interests">${card.interests.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>` : "",
+  ].filter(Boolean);
+  // Photo 1 is the cover; photos 2-6 alternate with the sections, and any extras follow the last one.
+  const morePhotos = photos.slice(1, 6).map((url) => `<figure class="ns-pv-photo"><img src="${url}" alt="" loading="lazy" /></figure>`);
+  const blocks = [];
+  sections.forEach((section, index) => {
+    blocks.push(section);
+    if (index < sections.length - 1 && morePhotos.length) blocks.push(morePhotos.shift());
+  });
+  return blocks.concat(morePhotos).join("\n");
 }
 
 function renderMemberProfile(card) {
