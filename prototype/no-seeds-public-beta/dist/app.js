@@ -1671,6 +1671,7 @@ function renderProfileSections(card) {
     ["pin", travel],
     ["plane", fly],
   ].filter(([, value]) => value);
+  const extraPhoto = (index) => photos[index] ? `<figure class="ns-pv-photo"><img src="${photos[index]}" alt="" /></figure>` : "";
   return `
           <div class="ns-pv-tags"><span>No kids</span><span>No step-parent role</span>${card.relationship_goal ? `<span>${escapeHtml(card.relationship_goal)}</span>` : ""}</div>
           ${card.bio ? `<p class="ns-pv-bio">${escapeHtml(card.bio)}</p>` : ""}
