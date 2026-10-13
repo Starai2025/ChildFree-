@@ -23,7 +23,7 @@ await db.exec(`
   grant execute on function auth.uid() to anon, authenticated, service_role;
   grant select, insert, update, delete on storage.objects to authenticated, service_role;
 `);
-for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql', '202610130001_signup_profile_basics.sql', '202610130002_google_signup_name.sql'])
+for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql', '202610130001_signup_profile_basics.sql', '202610130002_google_signup_name.sql', '202610130003_date_planner_and_live_chat.sql', '202610130004_chat_pass_location_privacy.sql'])
   await db.exec(await readFile(`supabase/migrations/${file}`, 'utf8'));
 
 // Members: Jessica (woman, seeks men), Marcus and Chris (men, seek women), Devon (not yet approved), Erin (approved, later removed).
@@ -85,7 +85,7 @@ check('one-way like does not create a match or chat');
 // Mutual like creates exactly one match; repeats and re-likes never duplicate it.
 await like(M, J);
 assert.equal(await matchCount(), 1);
-await like(M, J); await like(J, M); await like(J, M, 'pass'); await like(J, M);
+await like(M, J); await like(J, M);
 assert.equal(await matchCount(), 1);
 const mJM = (await as('authenticated', J, `select id from public.matches`)).rows[0].id;
 assert.equal((await as('authenticated', M, `select id from public.matches`)).rows[0].id, mJM);
@@ -147,6 +147,36 @@ assert.equal((await as('authenticated', J, `select * from public.reports`)).rows
 assert.equal((await as('authenticated', M, `select * from public.reports`)).rows.length, 1);
 check('reports: filed as yourself only, always open, unchangeable, invisible to the reported person');
 
+// Distance matching uses private ZIP centroids and travel settings; ZIP never appears in cards.
+const P = '10000000-0000-4000-8000-000000000007';
+await db.exec(`insert into auth.users (id) values ('${P}')`);
+await fill(P, 'Paul', 'Man', 'Woman', 'approved');
+await db.exec(`
+  update public.profiles set city = 'San Francisco', zip = '94102', basics = '{"travelDistance":"25 mi"}' where id = '${P}';
+  update public.profiles set basics = '{"travelDistance":"25 mi"}' where id = '${J}';
+  insert into public.zip_locations (zip, lat, lng) values
+    ('30308', 33.771, -84.381),
+    ('94102', 37.779, -122.419)
+  on conflict (zip) do update set lat = excluded.lat, lng = excluded.lng;
+`);
+assert.ok(!(await as('authenticated', J, `select first_name from public.member_cards()`)).rows.some(r => r.first_name === 'Paul'));
+await db.exec(`update public.profiles set basics = '{"travelDistance":"Anywhere"}' where id = '${P}'`);
+cards = (await as('authenticated', J, `select * from public.member_cards()`)).rows;
+assert.ok(cards.some(r => r.first_name === 'Paul'));
+assert.ok(!('zip' in cards.find(r => r.first_name === 'Paul')));
+check('distance matching uses private ZIP centroids and never returns ZIP in member cards');
+
+// A pass is final, hides both directions, removes incoming likes and blocks later likes.
+await like(P, J);
+assert.ok((await as('authenticated', J, `select first_name from public.likes_received()`)).rows.some(r => r.first_name === 'Paul'));
+await like(J, P, 'pass');
+assert.ok(!(await as('authenticated', J, `select first_name from public.likes_received()`)).rows.some(r => r.first_name === 'Paul'));
+assert.ok(!(await as('authenticated', J, `select first_name from public.member_cards(array['${P}']::uuid[])`)).rows.length);
+assert.ok(!(await as('authenticated', P, `select first_name from public.member_cards(array['${J}']::uuid[])`)).rows.length);
+await fails('pass cannot become like', () => like(J, P), /passes are final|not available/);
+await fails('passed target cannot like back', () => like(P, J), /not available/);
+check('passes are final, remove likes, hide both profiles and block later likes');
+
 // Likes received and my matches.
 const F = '10000000-0000-4000-8000-000000000006';
 await db.exec(`insert into auth.users (id) values ('${F}')`);
@@ -157,6 +187,15 @@ await like(J, F);
 assert.equal((await as('authenticated', J, `select * from public.likes_received()`)).rows.length, 0);
 assert.deepEqual((await as('authenticated', J, `select other_first_name from public.my_matches()`)).rows.map(r => r.other_first_name), ['Felix']);
 check('likes_received lists unanswered likes; my_matches lists only open matches with the other card');
+
+// Typing rows store only presence, never message drafts, and only match members can use them.
+const mJF = (await as('authenticated', J, `select match_id from public.my_matches() where other_first_name = 'Felix'`)).rows[0].match_id;
+await as('authenticated', J, `insert into public.match_typing (match_id, member_id) values ('${mJF}', '${J}')`);
+assert.equal((await as('authenticated', F, `select member_id from public.match_typing where match_id = '${mJF}'`)).rows[0].member_id, J);
+await fails('outsider typing', () => as('authenticated', C, `insert into public.match_typing (match_id, member_id) values ('${mJF}', '${C}')`), /row-level security/);
+await as('authenticated', J, `delete from public.match_typing where match_id = '${mJF}' and member_id = '${J}'`);
+assert.equal((await as('authenticated', F, `select * from public.match_typing where match_id = '${mJF}'`)).rows.length, 0);
+check('typing indicators are private to active match members and clear without storing drafts');
 
 // The paste-able live check passes here too and rolls itself back.
 const live = await db.exec(await readFile('supabase/tests/matching_live_check.sql', 'utf8'));

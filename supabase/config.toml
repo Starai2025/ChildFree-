@@ -32,3 +32,7 @@ verify_jwt = false
 # Date planner: the member is verified inside the function (supabase.auth.getUser), like admin-review.
 [functions.date-planner]
 verify_jwt = false
+
+# Location update: authenticated inside the function; exact coordinates are discarded.
+[functions.update-location]
+verify_jwt = false

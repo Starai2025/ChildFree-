@@ -4,9 +4,12 @@ import { profilePatch, startAccount, startGoogle, saveDraftToServer, submitProfi
 const SUPABASE_URL = "https://btnrophnyfuwnqzwiooh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const TYPING_VISIBLE_MS = 6000;
+const TYPING_THROTTLE_MS = 2000;
 
 const app = document.querySelector("#app");
 const urlParams = new URLSearchParams(window.location.search);
+let typingStopTimer = null;
 
 if (urlParams.get("resetDraft") === "1") {
   localStorage.removeItem("noSeedsPublicDraft");
@@ -81,6 +84,9 @@ const state = {
   plannerOpen: false,
   chatChannel: null,
   chatChannelMatch: null,
+  typing: [],
+  typingUpdatedAt: 0,
+  typingExpiryTimer: null,
   loadingArea: "",
   saving: false,
   message: "",
@@ -186,6 +192,7 @@ function missingFields() {
 }
 
 async function init() {
+  startTypingExpiryTimer();
   const urlAuthError = authErrorFromUrl();
   if (urlAuthError) state.error = urlAuthError;
   const { data } = await supabase.auth.getSession();
@@ -484,6 +491,10 @@ async function saveProfile(form, { submit = false, advance = false } = {}) {
   state.message = "";
   renderApp();
   const payload = formToProfile(form);
+  if (!submit && state.profile.status === "approved" && PROFILE_STEPS[state.profileStep]?.[0] === "location") {
+    await updateLocationFromForm(form, { advance });
+    return;
+  }
   if (submit) {
     const missing = missingFieldsForPayload(payload);
     if (missing.length) {
@@ -505,6 +516,94 @@ async function saveProfile(form, { submit = false, advance = false } = {}) {
     if (submit && !state.error) state.tab = "status";
   }
   renderApp();
+}
+
+function locationPayloadFromForm(form) {
+  const data = new FormData(form);
+  return {
+    city: String(data.get("city") || "").trim(),
+    zip: String(data.get("zip") || "").replace(/\D/g, "").slice(0, 5),
+    age_min: Number(data.get("age_min") || state.profile?.age_min || state.publicProfile?.age_min || 25),
+    age_max: Number(data.get("age_max") || state.profile?.age_max || state.publicProfile?.age_max || 70),
+    travelDistance: String(data.get("travelDistance") || state.profile?.basics?.travelDistance || state.publicProfile?.basics?.travelDistance || "").trim(),
+    willingToFly: String(data.get("willingToFly") || state.profile?.basics?.willingToFly || state.publicProfile?.basics?.willingToFly || "").trim(),
+  };
+}
+
+async function updateLocationArea(body, { publicFlow = false, advance = false } = {}) {
+  if (!state.user) {
+    state.error = "Sign in first, or type your city and ZIP manually.";
+    publicFlow ? renderAuth() : renderApp();
+    return;
+  }
+  state.saving = true;
+  state.error = "";
+  state.message = "";
+  publicFlow ? renderAuth() : renderApp();
+  const { data, error } = await supabase.functions.invoke("update-location", { body });
+  state.saving = false;
+  if (error) {
+    let detail = "";
+    try { detail = (await error.context?.json())?.error || ""; } catch { /* keep fallback */ }
+    state.error = detail || "We could not update your dating area. Type your city and ZIP instead.";
+  } else {
+    const patch = {
+      city: data.city,
+      zip: data.zip,
+      age_min: data.age_min || body.age_min || state.profile?.age_min || state.publicProfile?.age_min,
+      age_max: data.age_max || body.age_max || state.profile?.age_max || state.publicProfile?.age_max,
+      basics: { ...((state.profile || state.publicProfile)?.basics || {}), ...(data.basics || {}) },
+    };
+    if (state.profile) state.profile = { ...state.profile, ...patch };
+    state.publicProfile = { ...(state.publicProfile || emptyPublicProfile()), ...patch };
+    savePublicDraft();
+    state.cards = null;
+    state.likes = null;
+    state.matches = null;
+    state.message = "Dating area updated. Members only see your general city.";
+    if (advance) state.profileStep = Math.min(PROFILE_STEPS.length - 1, state.profileStep + 1);
+  }
+  publicFlow ? renderAuth() : renderApp();
+}
+
+async function updateLocationFromForm(form, options = {}) {
+  await updateLocationArea(locationPayloadFromForm(form), options);
+}
+
+function useCurrentArea({ publicFlow = false } = {}) {
+  if (!navigator.geolocation) {
+    state.error = "This device does not support location permission. Type your city and ZIP instead.";
+    publicFlow ? renderAuth() : renderApp();
+    return;
+  }
+  if (!state.user) {
+    state.error = "Sign in first, or type your city and ZIP manually.";
+    publicFlow ? renderAuth() : renderApp();
+    return;
+  }
+  state.saving = true;
+  state.error = "";
+  state.message = "Asking for one-time permission. We save only your general area.";
+  publicFlow ? renderAuth() : renderApp();
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const form = document.querySelector("#intake-form, #profile-form");
+      const base = form ? locationPayloadFromForm(form) : {};
+      void updateLocationArea({
+        ...base,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        city: "",
+        zip: "",
+      }, { publicFlow });
+    },
+    () => {
+      state.saving = false;
+      state.error = "Location permission was not completed. Type your city and ZIP instead.";
+      publicFlow ? renderAuth() : renderApp();
+    },
+    { enableHighAccuracy: false, maximumAge: 0, timeout: 12000 }
+  );
 }
 
 function missingFieldsForPayload(p) {
@@ -736,10 +835,67 @@ async function loadMessages(match) {
   } else {
     state.messages = data || [];
   }
+  await loadTyping(match);
   await loadPlan(match);
   state.loadingArea = "";
   watchChat(match);
   renderApp();
+}
+
+async function loadTyping(match) {
+  if (!match) return;
+  const since = new Date(Date.now() - TYPING_VISIBLE_MS * 2).toISOString();
+  const { data } = await supabase
+    .from("match_typing")
+    .select("member_id, updated_at")
+    .eq("match_id", match.match_id)
+    .gte("updated_at", since);
+  if (state.selectedMatch?.match_id === match.match_id) state.typing = data || [];
+}
+
+function otherIsTyping() {
+  const now = Date.now();
+  return (state.typing || []).some((row) =>
+    row.member_id !== state.user?.id && now - new Date(row.updated_at).getTime() < TYPING_VISIBLE_MS
+  );
+}
+
+function renderTypingBubble(match) {
+  if (!otherIsTyping()) return "";
+  return `
+    <div class="ns-typing" aria-live="polite">
+      <span></span><span></span><span></span>
+      <em>${escapeHtml(match.other_first_name || "Your match")} is typing...</em>
+    </div>
+  `;
+}
+
+async function markTyping() {
+  const match = state.selectedMatch;
+  if (!match || !state.user || state.plannerOpen) return;
+  const now = Date.now();
+  if (now - state.typingUpdatedAt < TYPING_THROTTLE_MS) return;
+  state.typingUpdatedAt = now;
+  await supabase.from("match_typing").upsert({
+    match_id: match.match_id,
+    member_id: state.user.id,
+    updated_at: new Date().toISOString(),
+  });
+}
+
+async function clearTyping(match = state.selectedMatch) {
+  if (!match || !state.user) return;
+  state.typingUpdatedAt = 0;
+  state.typing = (state.typing || []).filter((row) => row.member_id !== state.user.id);
+  await supabase.from("match_typing").delete().eq("match_id", match.match_id).eq("member_id", state.user.id);
+}
+
+function startTypingExpiryTimer() {
+  if (state.typingExpiryTimer) clearInterval(state.typingExpiryTimer);
+  state.typingExpiryTimer = setInterval(() => {
+    const hasOtherTypingRows = (state.typing || []).some((row) => row.member_id !== state.user?.id);
+    if (state.tab === "chat" && state.selectedMatch && hasOtherTypingRows) rerenderChat();
+  }, 2000);
 }
 
 // The match's date plan with its options and who picked each one.
@@ -764,6 +920,11 @@ function watchChat(match) {
   stopWatchingChat();
   state.chatChannelMatch = match.match_id;
   const planEvent = () => { if (state.selectedMatch?.match_id === match.match_id) void refreshPlan(match); };
+  const typingEvent = () => {
+    if (state.selectedMatch?.match_id === match.match_id) {
+      void loadTyping(match).then(rerenderChat);
+    }
+  };
   state.chatChannel = supabase
     .channel(`match-${match.match_id}`)
     .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${match.match_id}` }, ({ new: message }) => {
@@ -772,6 +933,7 @@ function watchChat(match) {
       state.matches = null;
       rerenderChat();
     })
+    .on("postgres_changes", { event: "*", schema: "public", table: "match_typing", filter: `match_id=eq.${match.match_id}` }, typingEvent)
     .on("postgres_changes", { event: "*", schema: "public", table: "date_plans", filter: `match_id=eq.${match.match_id}` }, planEvent)
     .on("postgres_changes", { event: "*", schema: "public", table: "date_plan_options" }, planEvent)
     .on("postgres_changes", { event: "*", schema: "public", table: "date_plan_picks" }, planEvent)
@@ -779,9 +941,13 @@ function watchChat(match) {
 }
 
 function stopWatchingChat() {
+  if (typingStopTimer) clearTimeout(typingStopTimer);
+  typingStopTimer = null;
+  void clearTyping();
   if (state.chatChannel) void supabase.removeChannel(state.chatChannel);
   state.chatChannel = null;
   state.chatChannelMatch = null;
+  state.typing = [];
 }
 
 // Redraw the chat without losing what the member is typing.
@@ -959,6 +1125,7 @@ async function sendMessage(form) {
   if (!body || !state.selectedMatch) return;
   state.saving = true;
   state.error = "";
+  await clearTyping();
   renderApp();
   const { error } = await supabase.from("messages").insert({
     match_id: state.selectedMatch.match_id,
@@ -973,6 +1140,7 @@ async function sendMessage(form) {
 
 async function closeMatch(reason = "unmatched") {
   if (!state.selectedMatch) return;
+  await clearTyping();
   state.saving = true;
   state.error = "";
   renderApp();
@@ -993,6 +1161,7 @@ async function closeMatch(reason = "unmatched") {
 
 async function blockMember() {
   if (!state.selectedMatch) return;
+  await clearTyping();
   state.saving = true;
   state.error = "";
   renderApp();
@@ -1075,6 +1244,7 @@ function renderAuth() {
   };
   interestBoxes.forEach((box) => box.addEventListener("change", capInterests));
   capInterests();
+  document.querySelector("[data-use-current-location]")?.addEventListener("click", () => useCurrentArea({ publicFlow: true }));
   document.querySelector("#account-google")?.addEventListener("click", async () => {
     // Keep anything already typed (first name, birthday) so it is there when Google sends them back.
     state.publicProfile = formToPublicProfile(document.querySelector("#intake-form"));
@@ -1248,6 +1418,10 @@ function renderLocationAgeStep(p) {
       <h1>Location & Age</h1>
       <p class="account-tagline">Where you are and who you want to meet.</p>
       ${notice()}
+      <div class="ns-location-privacy">
+        <strong>Your privacy stays protected.</strong>
+        <span>Members only see your city. We never show live or exact location.</span>
+      </div>
       <div class="ns-row-city">
         <div class="field account-field">
           <label for="city">City</label>
@@ -1278,6 +1452,7 @@ function renderLocationAgeStep(p) {
           ${["Yes", "Maybe", "No"].map((item) => choiceRadio("willingToFly", item, p.basics?.willingToFly)).join("")}
         </div>
       </div>
+      <button class="ns-btn-quiet ns-location-button" type="button" data-use-current-location ${state.saving ? "disabled" : ""}>Use my current area once</button>
       <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
     </form>
   `;
@@ -1670,6 +1845,10 @@ function renderProfileStep(key, p) {
   }
   if (key === "location") {
     return `
+      <div class="ns-location-privacy is-light">
+        <strong>Dating area only.</strong>
+        <span>Members see your city, not your ZIP or exact location. Use permission once, or type it yourself.</span>
+      </div>
       <div class="grid-2">
         ${field("city", "City", p.city || "", "text", "Atlanta")}
         ${field("zip", "ZIP code", p.zip || "", "text", "30308")}
@@ -1678,6 +1857,11 @@ function renderProfileStep(key, p) {
         ${field("age_min", "Min age", p.age_min || 25, "number")}
         ${field("age_max", "Max age", p.age_max || 70, "number")}
       </div>
+      <div class="grid-2">
+        ${select("travelDistance", "Travel distance", p.basics?.travelDistance, ["25 mi", "50 mi", "100 mi", "Anywhere"])}
+        ${select("willingToFly", "Willing to fly", p.basics?.willingToFly, ["Yes", "Maybe", "No"])}
+      </div>
+      <button class="btn secondary ns-location-inline" type="button" data-use-current-location ${state.saving ? "disabled" : ""}>Use current area once</button>
     `;
   }
   if (key === "intention") {
@@ -2031,6 +2215,7 @@ function renderChat() {
               <h2>You matched with ${name}</h2>
               <p>Say hello. A question about their profile is a great way to start.</p>
             </div>`}
+        ${renderTypingBubble(match)}
         ${renderPlanCard(match)}
       </div>`}
       ${state.plannerOpen && state.plan ? "" : `<form id="message-form" class="ns-composer">
@@ -2280,6 +2465,7 @@ function bindAppEvents() {
   document.querySelector("#photo")?.addEventListener("change", (event) => {
     uploadPhoto(event.currentTarget.files?.[0]);
   });
+  document.querySelector("[data-use-current-location]")?.addEventListener("click", () => useCurrentArea());
   document.querySelectorAll("[data-remove-photo]").forEach((button) => {
     button.addEventListener("click", () => {
       const photo = state.photos.find((item) => item.id === button.dataset.removePhoto);
@@ -2316,6 +2502,9 @@ function bindAppEvents() {
   composer?.addEventListener("input", () => {
     composer.style.height = "auto";
     composer.style.height = `${Math.min(composer.scrollHeight, 120)}px`;
+    void markTyping();
+    if (typingStopTimer) clearTimeout(typingStopTimer);
+    typingStopTimer = setTimeout(() => { void clearTyping(); }, 4500);
   });
   composer?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
