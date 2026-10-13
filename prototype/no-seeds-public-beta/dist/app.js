@@ -1,4 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { startAccount, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, friendlyAuthError } from "./onboarding-sync.js";
 
 const SUPABASE_URL = "https://btnrophnyfuwnqzwiooh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw";
@@ -154,10 +155,14 @@ async function init() {
   const { data } = await supabase.auth.getSession();
   state.session = data.session;
   state.user = data.session?.user ?? null;
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabase.auth.onAuthStateChange((event, session) => {
+    const sameUser = (session?.user?.id ?? null) === (state.user?.id ?? null);
     state.session = session;
     state.user = session?.user ?? null;
-    load();
+    // Token refreshes and tab refocus keep the same person signed in: don't redraw and wipe what they're typing.
+    if (sameUser && event !== "USER_UPDATED") return;
+    // Supabase recommends leaving the auth callback before making more Supabase calls.
+    setTimeout(load, 0);
   });
   await load();
 }
@@ -172,7 +177,33 @@ async function load() {
     return;
   }
   await loadProfile();
+  // Members who have not submitted yet continue the onboarding steps where they left off.
+  if (state.profile && ["draft", "changes_requested"].includes(state.profile.status)) {
+    await resumeOnboarding();
+    renderAuth();
+    return;
+  }
   renderApp();
+}
+
+// Bring answers typed on this phone before sign-in onto the account, then reopen the right step.
+async function resumeOnboarding() {
+  const merged = mergeDrafts(state.profile, loadPublicDraft());
+  if (hasUnsavedAnswers(state.profile, merged)) {
+    const error = await saveDraftToServer(supabase, state.user.id, merged);
+    if (error) state.error = `Some answers from this phone could not be saved to your account yet: ${error.message}`;
+  }
+  state.publicProfile = { ...merged, email: state.user.email || merged.email || "" };
+  savePublicDraft();
+  state.publicGateOpen = true;
+  state.agreementOpen = false;
+  if (state.resumedFor !== state.user.id) {
+    state.publicStep = resumeStep(merged);
+    state.resumedFor = state.user.id;
+  }
+  if (state.profile.status === "changes_requested" && !state.error) {
+    state.message = `Changes requested: ${state.profile.review_note || "Please update your profile."}`;
+  }
 }
 
 async function loadProfile() {
@@ -424,50 +455,71 @@ function formToPublicProfile(form) {
   return { ...previous, ...payload };
 }
 
+// Every step saves on this phone at once, and to the member's own profile whenever they are signed in.
 async function savePublicApplication(form, { submit = false, advance = false } = {}) {
   state.error = "";
   state.message = "";
   state.publicProfile = formToPublicProfile(form);
   savePublicDraft();
-  if (!submit) {
-    if (advance) state.publicStep = Math.min(PROFILE_STEPS.length - 1, state.publicStep + 1);
+
+  if (submit) {
+    const missing = missingFieldsForPayload(state.publicProfile);
+    if (missing.length) {
+      state.error = `Before submitting, finish: ${missing.join(", ")}.`;
+      renderAuth();
+      return;
+    }
+    if (!state.user) {
+      state.error = `Open the sign-in link we emailed to ${state.publicProfile.email || "you"} to submit. Your answers are saved on this phone.`;
+      renderAuth();
+      return;
+    }
+    state.saving = true;
     renderAuth();
-    return;
-  }
-  const missing = missingFieldsForPayload(state.publicProfile);
-  if (!state.publicProfile.email) missing.unshift("email");
-  if (missing.length) {
-    state.error = `Before submitting, finish: ${missing.join(", ")}.`;
-    renderAuth();
-    return;
-  }
-  state.saving = true;
-  renderAuth();
-  const payload = {
-    email: state.publicProfile.email,
-    first_name: state.publicProfile.first_name || null,
-    city: state.publicProfile.city || null,
-    profile: {
-      ...state.publicProfile,
-      no_kids_clause: true,
-      source_url: window.location.href,
-      captured_at: new Date().toISOString(),
-      intake_mode: "full_public_application",
-    },
-    status: "new",
-  };
-  const { error } = await supabase.from("beta_applications").insert(payload);
-  state.saving = false;
-  if (error) {
-    state.error = error.message;
-  } else {
+    const error = await submitProfile(supabase, state.user.id, state.publicProfile);
+    state.saving = false;
+    if (error) {
+      state.error = error.message;
+      renderAuth();
+      return;
+    }
     localStorage.removeItem("noSeedsPublicDraft");
     localStorage.removeItem("freeMidnightPublicDraft");
     state.publicProfile = emptyPublicProfile();
     state.publicStep = 0;
     state.publicGateOpen = false;
-    state.message = "Your full No Seeds application is saved. You will not have to rebuild this profile from zero.";
+    state.tab = "status";
+    await load();
+    return;
   }
+
+  if (state.user) {
+    state.saving = true;
+    renderAuth();
+    const error = await saveDraftToServer(supabase, state.user.id, state.publicProfile);
+    state.saving = false;
+    if (error) {
+      state.error = `Saved on this phone, but not to your account yet: ${error.message}`;
+      renderAuth();
+      return;
+    }
+  } else if (state.publicStep === 0 && state.publicProfile.email && state.publicProfile.link_sent_to !== state.publicProfile.email) {
+    // "Create your account": the emailed link creates the account (with first name and birthday) and signs them in.
+    state.saving = true;
+    renderAuth();
+    const { error } = await startAccount(supabase, state.publicProfile, `${window.location.origin}/`);
+    state.saving = false;
+    if (error) {
+      state.error = friendlyAuthError(error);
+      renderAuth();
+      return;
+    }
+    state.publicProfile.link_sent_to = state.publicProfile.email;
+    savePublicDraft();
+    state.message = `We emailed a sign-in link to ${state.publicProfile.email}. Keep going: your answers are saved on this phone and move to your account when you open that link.`;
+  }
+
+  if (advance) state.publicStep = Math.min(PROFILE_STEPS.length - 1, state.publicStep + 1);
   renderAuth();
 }
 

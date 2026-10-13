@@ -23,7 +23,7 @@ await db.exec(`
   grant execute on function auth.uid() to anon, authenticated, service_role;
   grant select, insert, update, delete on storage.objects to authenticated, service_role;
 `);
-for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql'])
+for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql', '202610130001_signup_profile_basics.sql'])
   await db.exec(await readFile(`supabase/migrations/${file}`, 'utf8'));
 
 // Members: Jessica (woman, seeks men), Marcus and Chris (men, seek women), Devon (not yet approved), Erin (approved, later removed).
@@ -163,6 +163,15 @@ const live = await db.exec(await readFile('supabase/tests/matching_live_check.sq
 assert.ok(live.some(r => r.rows?.[0]?.result === 'ALL MATCHING CHECKS PASSED'));
 assert.equal((await db.query(`select count(*)::int as n from auth.users where email like 'qa-%'`)).rows[0].n, 0);
 check('supabase/tests/matching_live_check.sql passes and leaves no data behind');
+
+// Sign-up metadata: first name and date of birth land in the draft profile at account creation.
+await db.exec(`insert into auth.users (id, raw_user_meta_data) values
+  ('20000000-0000-4000-8000-000000000001', '{"first_name":"  Nia ","birth_date":"1992-03-04"}'),
+  ('20000000-0000-4000-8000-000000000002', '{"first_name":"","birth_date":"1992-13-45"}'),
+  ('20000000-0000-4000-8000-000000000003', null)`);
+const signedUp = (await db.query(`select first_name, birth_date::text as dob, status from public.profiles where id::text like '20000000-%' order by id`)).rows;
+assert.deepEqual(signedUp.map(r => [r.first_name, r.dob, r.status]), [['Nia', '1992-03-04', 'draft'], [null, null, 'draft'], [null, null, 'draft']]);
+check('sign-up saves first name and date of birth to the draft; bad values are skipped, never blocking sign-up');
 
 console.log(results.join('\n'));
 console.log(`\nALL ${results.length} CHECKS PASSED`);
