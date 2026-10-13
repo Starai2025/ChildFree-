@@ -1,7 +1,7 @@
 // Unit checks for prototype/no-seeds-public-beta/dist/onboarding-sync.js (no network, no browser).
 // Run: node tests/no-seeds-onboarding-sync.mjs
 import assert from 'node:assert/strict';
-import { profilePatch, mergeDrafts, hasUnsavedAnswers, resumeStep, startAccount, saveDraftToServer, submitProfile, friendlyAuthError } from '../prototype/no-seeds-public-beta/dist/onboarding-sync.js';
+import { profilePatch, mergeDrafts, hasUnsavedAnswers, resumeStep, startAccount, startGoogle, saveDraftToServer, submitProfile, friendlyAuthError } from '../prototype/no-seeds-public-beta/dist/onboarding-sync.js';
 
 let passed = 0;
 const check = async (name, fn) => {await fn(); passed++; console.log(`ok - ${name}`);};
@@ -93,6 +93,14 @@ await check('submitProfile asks for review and passes database errors back', asy
   assert.equal(ok.calls[0][2].status, 'submitted');
   const failing = fakeClient({error: {message: 'Profile is missing: two prompts'}});
   assert.equal((await submitProfile(failing, 'user-1', {})).message, 'Profile is missing: two prompts');
+});
+
+await check('startGoogle asks Google to sign in and return to the app', async () => {
+  const calls = [];
+  await startGoogle({auth: {signInWithOAuth: async (args) => {calls.push(args); return {error: null};}}}, 'http://127.0.0.1/');
+  assert.equal(calls[0].provider, 'google');
+  assert.equal(calls[0].options.redirectTo, 'http://127.0.0.1/');
+  assert.match(friendlyAuthError({message: 'Unsupported provider: provider is not enabled'}), /Google sign-in isn't switched on yet/);
 });
 
 await check('friendlyAuthError explains rate limits plainly', () => {

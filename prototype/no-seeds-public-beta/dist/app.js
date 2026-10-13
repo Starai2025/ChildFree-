@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { startAccount, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, friendlyAuthError } from "./onboarding-sync.js";
+import { startAccount, startGoogle, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, friendlyAuthError } from "./onboarding-sync.js";
 
 const SUPABASE_URL = "https://btnrophnyfuwnqzwiooh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw";
@@ -821,9 +821,18 @@ function renderAuth() {
       renderAuth();
     });
   });
-  document.querySelector("#account-google")?.addEventListener("click", () => {
-    state.error = "Google sign-up is coming. Use email for this beta.";
+  document.querySelector("#account-google")?.addEventListener("click", async () => {
+    // Keep anything already typed (first name, birthday) so it is there when Google sends them back.
+    state.publicProfile = formToPublicProfile(document.querySelector("#intake-form"));
+    savePublicDraft();
+    state.error = "";
     state.message = "";
+    state.saving = true;
+    renderAuth();
+    const { error } = await startGoogle(supabase, `${window.location.origin}/`);
+    if (!error) return; // the browser is on its way to Google
+    state.saving = false;
+    state.error = friendlyAuthError(error);
     renderAuth();
   });
   document.querySelector("#account-signin")?.addEventListener("click", () => {

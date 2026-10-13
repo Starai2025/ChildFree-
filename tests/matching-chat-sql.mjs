@@ -23,7 +23,7 @@ await db.exec(`
   grant execute on function auth.uid() to anon, authenticated, service_role;
   grant select, insert, update, delete on storage.objects to authenticated, service_role;
 `);
-for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql', '202610130001_signup_profile_basics.sql'])
+for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql', '202610130001_signup_profile_basics.sql', '202610130002_google_signup_name.sql'])
   await db.exec(await readFile(`supabase/migrations/${file}`, 'utf8'));
 
 // Members: Jessica (woman, seeks men), Marcus and Chris (men, seek women), Devon (not yet approved), Erin (approved, later removed).
@@ -172,6 +172,15 @@ await db.exec(`insert into auth.users (id, raw_user_meta_data) values
 const signedUp = (await db.query(`select first_name, birth_date::text as dob, status from public.profiles where id::text like '20000000-%' order by id`)).rows;
 assert.deepEqual(signedUp.map(r => [r.first_name, r.dob, r.status]), [['Nia', '1992-03-04', 'draft'], [null, null, 'draft'], [null, null, 'draft']]);
 check('sign-up saves first name and date of birth to the draft; bad values are skipped, never blocking sign-up');
+
+// Google sign-in: first name comes from Google's given name, else the first word of the full name.
+await db.exec(`insert into auth.users (id, raw_user_meta_data) values
+  ('30000000-0000-4000-8000-000000000001', '{"given_name":"Ashley","full_name":"Ashley Grant","email":"a@example.com"}'),
+  ('30000000-0000-4000-8000-000000000002', '{"full_name":"  Kevin Brooks ","picture":"https://x"}'),
+  ('30000000-0000-4000-8000-000000000003', '{"name":"Lauren"}')`);
+const google = (await db.query(`select first_name, birth_date from public.profiles where id::text like '30000000-%' order by id`)).rows;
+assert.deepEqual(google.map(r => [r.first_name, r.birth_date]), [['Ashley', null], ['Kevin', null], ['Lauren', null]]);
+check('Google sign-in saves the first name from the Google account');
 
 console.log(results.join('\n'));
 console.log(`\nALL ${results.length} CHECKS PASSED`);

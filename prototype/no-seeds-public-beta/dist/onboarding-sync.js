@@ -108,6 +108,15 @@ export function startAccount(supabase, { email, first_name, birth_date }, redire
   });
 }
 
+// Sign up or sign in with Google. The browser leaves for Google and comes back signed in;
+// answers already typed stay on the phone and move to the account on return.
+export function startGoogle(supabase, redirectTo = SITE_URL) {
+  return supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo, queryParams: { prompt: "select_account" } },
+  });
+}
+
 // Save the current draft to the signed-in member's own profile row.
 export async function saveDraftToServer(supabase, userId, draft) {
   const { error } = await supabase.from("profiles").update(profilePatch(draft)).eq("id", userId);
@@ -124,5 +133,6 @@ export function friendlyAuthError(error) {
   const message = String(error?.message || error || "");
   if (/rate limit/i.test(message)) return "Too many sign-in emails were sent in a short time. Wait a little, then tap Continue again. Your answers are saved on this phone.";
   if (/invalid.*email|email.*invalid/i.test(message)) return "That email address doesn't look right. Check it and try again.";
+  if (/provider is not enabled|unsupported provider/i.test(message)) return "Google sign-in isn't switched on yet. Use email for now. Your answers are saved on this phone.";
   return message || "Something went wrong sending your sign-in link. Your answers are saved on this phone.";
 }

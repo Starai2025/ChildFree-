@@ -13,7 +13,11 @@ const USER = {id: '11111111-2222-4333-8444-555555555555', email: 'nia@example.co
 // What the database holds for this person; the sign-up trigger fills first name and birthday.
 let row = null;
 const otpRequests = [];
+const googleRequests = [];
 const patches = [];
+const newRow = (first_name, birth_date) => ({id: USER.id, status: 'draft', first_name, birth_date, gender: null, seeking: [], age_min: 25, age_max: 60,
+  city: null, zip: null, relationship_goal: null, marriage_view: null, bio: null, prompts: [], basics: {}, interests: [], compatibility: {}, eligibility: {},
+  pledge_accepted_at: null, review_note: null, profile_photos: []});
 
 async function fakeSupabase(route) {
   const request = route.request();
@@ -23,11 +27,20 @@ async function fakeSupabase(route) {
   if (url.pathname === '/auth/v1/otp') {
     const body = request.postDataJSON();
     otpRequests.push(body);
-    row = {id: USER.id, status: 'draft', first_name: body.data.first_name, birth_date: body.data.birth_date, gender: null, seeking: [], age_min: 25, age_max: 60,
-      city: null, zip: null, relationship_goal: null, marriage_view: null, bio: null, prompts: [], basics: {}, interests: [], compatibility: {}, eligibility: {},
-      pledge_accepted_at: null, review_note: null, profile_photos: []};
+    row = newRow(body.data.first_name, body.data.birth_date);
     return json(200, {});
   }
+  // Google: the account is created with Google's first name (no birthday) and the browser returns signed in.
+  if (url.pathname === '/auth/v1/authorize') {
+    googleRequests.push(url);
+    row = newRow('Ashley', null);
+    const back = new URL(url.searchParams.get('redirect_to'));
+    const session = JSON.parse(fakeSession());
+    if (url.searchParams.get('code_challenge')) back.search = '?code=fake-code';
+    else back.hash = new URLSearchParams({access_token: session.access_token, refresh_token: session.refresh_token, expires_in: '3600', expires_at: String(session.expires_at), token_type: 'bearer'}).toString();
+    return route.fulfill({status: 302, headers: {location: back.href}});
+  }
+  if (url.pathname === '/auth/v1/token') return json(200, JSON.parse(fakeSession()));
   if (url.pathname === '/auth/v1/user') return json(200, USER);
   if (url.pathname === '/rest/v1/profiles' && request.method() === 'GET') return json(200, row ? [row] : []);
   if (url.pathname === '/rest/v1/profiles' && request.method() === 'PATCH') {
@@ -144,6 +157,26 @@ try {
     await page.waitForFunction(() => !document.querySelector('#intake-form'));
     assert.equal(patches.at(-1).status, 'submitted');
     assert.equal(row.status, 'submitted');
+  });
+
+  await check('Sign up with Google keeps the typed birthday, creates the account and continues at step 2', async () => {
+    const phone = await runtime.browser.newContext({viewport: {width: 390, height: 844}});
+    await phone.route(`${SUPABASE}/**`, fakeSupabase);
+    page = await phone.newPage();
+    page.on('pageerror', (error) => errors.push(error.message));
+    patches.length = 0;
+    await page.goto(server.url);
+    await page.click('#welcome-join');
+    await page.click('#open-public-application');
+    await page.fill('[name=birth_date]', '1994-07-21');
+    await page.click('#account-google');
+    await page.waitForSelector('text=STEP 2 OF 10');
+    assert.equal(googleRequests.length, 1);
+    assert.equal(googleRequests[0].searchParams.get('provider'), 'google');
+    assert.equal(new URL(googleRequests[0].searchParams.get('redirect_to')).origin, server.url);
+    assert.equal(row.first_name, 'Ashley', 'first name from Google');
+    assert.equal(row.birth_date, '1994-07-21', 'birthday typed before tapping Google is saved');
+    assert.ok(!page.url().includes('access_token'), 'tokens are cleared from the address bar');
   });
 
   assert.deepEqual(errors, [], 'no page errors');
