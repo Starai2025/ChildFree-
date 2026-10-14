@@ -84,6 +84,7 @@ const state = {
   viewingMatch: null,
   chatMenuOpen: false,
   plan: null,
+  editSection: null,
   plannerOpen: false,
   chatChannel: null,
   chatChannelMatch: null,
@@ -1942,7 +1943,7 @@ function renderApp() {
   }
   app.innerHTML = `
     <main class="screen">
-      ${["matches", "discover", "chat", "status"].includes(state.tab) ? "" : renderHero()}
+      ${["matches", "discover", "chat", "status", "profile"].includes(state.tab) ? "" : renderHero()}
       ${state.tab === "discover" ? renderDiscover() : ""}
       ${state.tab === "matches" ? renderMatches() : ""}
       ${state.tab === "chat" ? renderChat() : ""}
@@ -1980,27 +1981,136 @@ function statusLine() {
   return "Save your full dating profile. Submit when the required fields are complete.";
 }
 
+// My profile, in priority order: you, how complete you are, photos, your profile as members
+// see it (each part editable in place), then account items.
+const PEN = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function profileStrength(p) {
+  const prompts = (p.prompts || []).filter((x) => x?.answer).length;
+  const b = p.basics || {};
+  const checks = [
+    [state.photos.length >= 1, "photo", "Add your main photo"],
+    [Boolean(p.relationship_goal && p.city), "intention", "Add your relationship goal"],
+    [state.photos.length >= 3, "photo", state.photos.length ? `Add ${3 - state.photos.length} more photo${3 - state.photos.length === 1 ? "" : "s"}` : "Add your first photo"],
+    [prompts >= 2, "prompts", prompts ? "Answer your second prompt" : "Answer two prompts"],
+    [Boolean(p.bio), "story", "Write a short bio"],
+    [(p.interests || []).length >= 3, "story", "Pick at least 3 interests"],
+    [Boolean(b.faith || b.lifestylePace || b.spendingStyle), "intention", "Add your lifestyle"],
+    [Boolean(p.compatibility?.childfreeLife), "life", "Share what your childfree life makes room for"],
+  ];
+  const done = checks.filter(([ok]) => ok).length;
+  const next = checks.find(([ok]) => !ok);
+  return { percent: Math.round((done / checks.length) * 100), next };
+}
+
+function editButton(section, label) {
+  return `<button class="ns-mp-pen" type="button" data-edit-section="${section}" aria-label="Edit ${label}" ${state.editSection ? "disabled" : ""}>${PEN}</button>`;
+}
+
+function sectionEditor(key, title) {
+  const p = state.profile;
+  return `
+    <form id="profile-form" class="ns-step ns-mp-editor">
+      <h3>${title}</h3>
+      ${key === "prompts" ? `${renderProfileStep("prompt0", p)}${renderProfileStep("prompt1", p)}` : renderProfileStep(key, p)}
+      <div class="ns-mp-editor-actions">
+        <button class="ns-btn-quiet" type="button" data-edit-cancel>Cancel</button>
+        <button class="ns-btn-primary" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>${state.saving ? "Saving…" : "Save"}</button>
+      </div>
+    </form>`;
+}
+
 function renderProfileForm() {
   const p = state.profile;
-  state.profileStep = Math.max(0, Math.min(state.profileStep, PROFILE_STEPS.length - 1));
-  const [key, eyebrow, title, subtitle] = PROFILE_STEPS[state.profileStep];
-  const finalStep = state.profileStep === PROFILE_STEPS.length - 1;
-  return `
-    <form id="profile-form" class="panel">
-      <div class="step-kicker">${eyebrow}</div>
-      <h2>${title}</h2>
-      <p class="copy">${subtitle}</p>
-      ${renderStepDots()}
-      ${notice()}
-      ${renderProfileStep(key, p)}
+  const b = p.basics || {};
+  const live = p.status === "approved";
+  const age = p.birth_date ? ageFromBirthDate(p.birth_date) : "";
+  const strength = profileStrength(p);
+  const editing = state.editSection;
+  const main = state.photos[0]?.url;
+  const promptText = (id) => PROMPTS.find(([key]) => key === id)?.[1] || "";
+  const prompts = (p.prompts || []).filter((x) => x?.answer);
+  const pills = (items) => items.filter(([, v]) => v).map(([icon, v]) => `<li>${BASIC_ICONS[icon]}<span>${escapeHtml(v)}</span></li>`).join("");
+  const group = (key, title, items, empty) => editing === key ? sectionEditor(key, title) : `
+    <div class="ns-mp-group">
+      <div class="ns-mp-group-head"><h4>${title}</h4>${editButton(key, title)}</div>
+      ${items ? `<ul>${items}</ul>` : `<button class="ns-mp-empty" type="button" data-edit-section="${key}">+ ${empty}</button>`}
+    </div>`;
+  const slots = Array.from({ length: 6 }, (_, index) => state.photos[index]);
 
-      <div class="btn-row">
-        ${state.profileStep > 0 ? `<button class="btn secondary" type="button" data-step-back ${state.saving ? "disabled" : ""}>Back</button>` : ""}
-        <button class="btn secondary" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save</button>
-        <button class="btn primary" type="submit" data-action="${finalStep ? "submit" : "next"}" ${state.saving ? "disabled" : ""}>${finalStep ? "Submit for review" : "Continue"}</button>
+  return `
+    <section class="ns-member-hero ns-mp-hero">
+      <div class="ns-member-top">${renderLockup()}</div>
+      <div class="ns-mp-me">
+        <span class="ns-mp-avatar">${main ? `<img src="${main}" alt="" />` : escapeHtml((p.first_name || "?").charAt(0))}</span>
+        <div>
+          <h1>${escapeHtml(p.first_name || "My profile")}${age ? `<span>, ${age}</span>` : ""}</h1>
+          <p class="ns-mp-state ${live ? "is-live" : ""}"><i></i>${live ? "Live · members can see you" : p.status === "submitted" ? "In review" : escapeHtml(statusLine())}</p>
+        </div>
       </div>
-      <p class="copy">${finalStep ? `Missing: ${missingFields().length ? escapeHtml(missingFields().join(", ")) : "Ready to submit."}` : "Your answers save when you continue."}</p>
-    </form>
+    </section>
+
+    <section class="ns-member-sheet ns-mp">
+      ${notice()}
+
+      ${strength.percent < 100 ? `
+        <div class="ns-mp-strength">
+          <div class="ns-mp-strength-top"><b>Profile strength</b><span>${strength.percent}%</span></div>
+          <div class="ns-mp-bar"><span style="width:${strength.percent}%"></span></div>
+          <p>Complete profiles get more likes. Next: ${escapeHtml(strength.next[2])}.</p>
+          ${strength.next[1] === "photo"
+            ? `<label class="ns-mp-next" for="photo">${escapeHtml(strength.next[2])}</label>`
+            : `<button class="ns-mp-next" type="button" data-edit-section="${strength.next[1]}" ${editing ? "disabled" : ""}>${escapeHtml(strength.next[2])}</button>`}
+        </div>` : ""}
+
+      <div class="ns-section-head"><h2>Photos</h2><span class="ns-mp-count">${state.photos.length}/6</span></div>
+      <div class="ns-mp-photos">
+        ${slots.map((photo, index) => photo
+          ? `<figure class="${index === 0 ? "is-main" : ""}">${photo.url ? `<img src="${photo.url}" alt="Your photo ${index + 1}" />` : ""}${index === 0 ? `<em>Main</em>` : ""}
+              <button type="button" data-remove-photo="${photo.id}" aria-label="Remove photo ${index + 1}" ${state.saving ? "disabled" : ""}>×</button></figure>`
+          : `<label class="ns-mp-add ${index === 0 ? "is-main" : ""}" for="photo" aria-label="Add a photo"><span>+</span>${index === 0 ? `<small>Add your main photo</small>` : ""}</label>`).join("")}
+      </div>
+      <input id="photo" class="ns-mp-file" type="file" accept="image/jpeg,image/png,image/webp" ${state.saving || state.photos.length >= 6 ? "disabled" : ""} />
+
+      <div class="ns-section-head ns-mp-head"><h2>Your profile</h2><button type="button" class="ns-mp-link" data-preview-self>Preview</button></div>
+
+      ${editing === "story" ? sectionEditor("story", "Bio & interests") : `
+        <article class="ns-mp-card">
+          <div class="ns-mp-group-head"><h4>About me</h4>${editButton("story", "bio and interests")}</div>
+          ${p.bio ? `<p class="ns-mp-bio">${escapeHtml(p.bio)}</p>` : `<button class="ns-mp-empty" type="button" data-edit-section="story">+ Write a short bio</button>`}
+          ${(p.interests || []).length ? `<div class="ns-pv-interests">${p.interests.map((i) => `<span>${escapeHtml(i)}</span>`).join("")}</div>` : ""}
+        </article>`}
+
+      ${editing === "prompts" ? sectionEditor("prompts", "Prompts") : [0, 1].map((i) => prompts[i] ? `
+        <article class="ns-pv-prompt ns-mp-prompt">
+          <div class="ns-mp-group-head"><p>${escapeHtml(promptText(prompts[i].id))}</p>${editButton("prompts", "prompts")}</div>
+          <h3>${escapeHtml(prompts[i].answer)}</h3>
+        </article>` : `<button class="ns-mp-empty ns-mp-empty-card" type="button" data-edit-section="prompts" ${editing ? "disabled" : ""}>+ Answer a prompt</button>`).join("")}
+
+      <article class="ns-mp-card ns-pv-basics">
+        <h2>The basics</h2>
+        ${group("identity", "Who you are", pills([["heart", p.gender], ["spark", p.seeking?.length ? `Looking for ${p.seeking.join(", ")}` : ""]]), "Add who you're looking for")}
+        ${group("location", "Location & travel", pills([["pin", [p.city, p.zip].filter(Boolean).join(" ")], ["clock", p.age_min && p.age_max ? `Ages ${p.age_min}–${p.age_max}` : ""], ["pin", b.travelDistance ? `Travel ${b.travelDistance}` : ""], ["plane", b.willingToFly ? `Fly: ${b.willingToFly}` : ""]]), "Add your location")}
+        ${group("intention", "Intentions & lifestyle", pills([["heart", p.relationship_goal], ["ring", p.marriage_view], ["spark", b.faith], ["clock", b.lifestylePace], ["coin", b.spendingStyle]]), "Add your intentions")}
+      </article>
+
+      ${editing === "life" ? sectionEditor("life", "Childfree life") : p.compatibility?.childfreeLife ? `
+        <article class="ns-pv-prompt ns-mp-prompt">
+          <div class="ns-mp-group-head"><p>My childfree life gives me room for…</p>${editButton("life", "childfree life")}</div>
+          <h3>${escapeHtml(p.compatibility.childfreeLife)}</h3>
+        </article>` : `<button class="ns-mp-empty ns-mp-empty-card" type="button" data-edit-section="life" ${editing ? "disabled" : ""}>+ Share what your childfree life makes room for</button>`}
+
+      <h2 class="ns-mp-account-title">Account</h2>
+      <div class="ns-mp-account">
+        <button type="button" data-preview-self><span>Preview as members see you</span><b>›</b></button>
+        <div><span>No Seeds Pledge</span><b class="ns-mp-locked">${p.pledge_accepted_at ? "Agreed · locked" : "Not agreed"}</b></div>
+        <a href="./terms.html" data-legal="terms"><span>Terms of Service</span><b>›</b></a>
+        <a href="./privacy.html" data-legal="privacy"><span>Privacy Policy</span><b>›</b></a>
+        <a href="./safety.html" data-legal="safety"><span>Safety</span><b>›</b></a>
+        <button type="button" id="signout" class="ns-mp-signout"><span>Sign out</span></button>
+      </div>
+      <p class="ns-mp-help">To change your pledge or delete your account, email thegiftedbystarr@gmail.com.</p>
+    </section>
   `;
 }
 
@@ -2300,7 +2410,9 @@ function renderMemberProfile(card) {
         `}
       </section>
       <footer class="ns-pv-actions">
-        ${match
+        ${card.isSelf
+          ? `<button class="ns-btn-primary" type="button" data-close-profile>Back to my profile</button>`
+          : match
           ? `<button class="ns-btn-primary" type="button" data-open-match="${match.match_id}">Message ${name}</button>`
           : fromLike
             ? `<button class="ns-round ns-round-pass ns-pv-pass" data-react="pass" data-target="${card.id}" type="button" aria-label="Pass" ${state.saving ? "disabled" : ""}><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
@@ -2648,12 +2760,38 @@ function bindAppEvents() {
     });
   });
   const form = document.querySelector("#profile-form");
-  form?.addEventListener("submit", (event) => {
+  form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const submitter = event.submitter;
     const action = submitter?.dataset?.action;
-    saveProfile(form, { submit: action === "submit", advance: action === "next" });
+    await saveProfile(form, { submit: action === "submit", advance: action === "next" });
+    if (state.editSection && !state.error) {
+      state.editSection = null;
+      renderApp();
+    }
   });
+  document.querySelectorAll("[data-edit-section]").forEach((button) => button.addEventListener("click", () => {
+    const key = button.dataset.editSection;
+    state.editSection = key;
+    // The location editor saves through update-location for approved members; it keys off profileStep.
+    state.profileStep = Math.max(0, PROFILE_STEPS.findIndex(([step]) => step === (key === "prompts" ? "prompt0" : key)));
+    state.error = "";
+    state.message = "";
+    renderApp();
+    document.querySelector("#profile-form")?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }));
+  document.querySelector("[data-edit-cancel]")?.addEventListener("click", () => {
+    state.editSection = null;
+    state.error = "";
+    renderApp();
+  });
+  document.querySelectorAll("[data-preview-self]").forEach((button) => button.addEventListener("click", () => {
+    const p = state.profile;
+    state.viewing = { ...p, age: p.birth_date ? ageFromBirthDate(p.birth_date) : null, photo_urls: state.photos.map((photo) => photo.url).filter(Boolean), isSelf: true };
+    state.viewingMatch = null;
+    renderApp();
+    window.scrollTo({ top: 0 });
+  }));
   document.querySelector("[data-step-back]")?.addEventListener("click", () => {
     state.profileStep = Math.max(0, state.profileStep - 1);
     state.error = "";
