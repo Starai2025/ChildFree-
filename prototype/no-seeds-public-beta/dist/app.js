@@ -58,7 +58,7 @@ const PROFILE_STEPS = [
   ["prompt1", "STEP 7 OF 10", "Add one more.", "This gives matches something real to respond to."],
   ["story", "STEP 8 OF 10", "Show your vibe.", "A short bio and a few interests are enough for beta."],
   ["life", "STEP 9 OF 10", "Describe the life you'd share.", "One question about the life your childfree choice makes room for."],
-  ["photos", "STEP 10 OF 10", "Preview and submit.", "Photos are optional for this beta, but your profile must be complete."],
+  ["photos", "STEP 10 OF 10", "Add your photos.", "Upload up to 6 pictures, then submit for review."],
 ];
 
 const state = {
@@ -718,21 +718,22 @@ async function reencodeImage(file) {
   return blob;
 }
 
-async function uploadPhoto(file) {
+async function uploadPhoto(file, { publicFlow = false } = {}) {
   if (!file || !state.user) return;
+  const redraw = () => publicFlow ? renderAuth() : renderApp();
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
     state.error = "Use a JPEG, PNG, or WebP photo.";
-    renderApp();
+    redraw();
     return;
   }
   if (state.photos.length >= 6) {
     state.error = "You can add up to 6 photos.";
-    renderApp();
+    redraw();
     return;
   }
   state.saving = true;
   state.error = "";
-  renderApp();
+  redraw();
   const position = Math.min(state.photos.length, 5);
   let prepared;
   try {
@@ -740,13 +741,13 @@ async function uploadPhoto(file) {
   } catch (error) {
     state.saving = false;
     state.error = error.message;
-    renderApp();
+    redraw();
     return;
   }
   if (prepared.size > 5 * 1024 * 1024) {
     state.saving = false;
     state.error = "Photos must be under 5 MB after processing.";
-    renderApp();
+    redraw();
     return;
   }
   const path = `${state.user.id}/${Date.now()}-${Math.random().toString(16).slice(2)}.jpg`;
@@ -764,19 +765,20 @@ async function uploadPhoto(file) {
   }
   state.saving = false;
   await loadProfile();
-  renderApp();
+  redraw();
 }
 
-async function removePhoto(photo) {
+async function removePhoto(photo, { publicFlow = false } = {}) {
+  const redraw = () => publicFlow ? renderAuth() : renderApp();
   state.saving = true;
   state.error = "";
-  renderApp();
+  redraw();
   await supabase.from("profile_photos").delete().eq("id", photo.id);
   await supabase.storage.from("profile-photos").remove([photo.storage_path]);
   state.saving = false;
   state.message = "Photo removed.";
   await loadProfile();
-  renderApp();
+  redraw();
 }
 
 async function loadDiscover({ force = false } = {}) {
@@ -1245,6 +1247,16 @@ function renderAuth() {
   interestBoxes.forEach((box) => box.addEventListener("change", capInterests));
   capInterests();
   document.querySelector("[data-use-current-location]")?.addEventListener("click", () => useCurrentArea({ publicFlow: true }));
+  document.querySelector("#photo")?.addEventListener("change", (event) => {
+    void uploadPhoto(event.currentTarget.files?.[0], { publicFlow: true });
+    event.currentTarget.value = "";
+  });
+  document.querySelectorAll("[data-remove-photo]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const photo = state.photos.find((item) => item.id === button.dataset.removePhoto);
+      if (photo) void removePhoto(photo, { publicFlow: true });
+    });
+  });
   document.querySelector("#account-google")?.addEventListener("click", async () => {
     // Keep anything already typed (first name, birthday) so it is there when Google sends them back.
     state.publicProfile = formToPublicProfile(document.querySelector("#intake-form"));
@@ -1594,12 +1606,35 @@ function renderReviewStep(p, missing) {
   const age = p.birth_date ? ageFromBirthDate(p.birth_date) : "";
   const initial = escapeHtml((p.first_name || "?").trim().charAt(0).toUpperCase());
   const details = [p.city, p.relationship_goal].filter(Boolean).join(" · ");
+  const signedIn = Boolean(state.user);
+  const photoCount = state.photos.length;
   return `
     <form id="intake-form" class="account-screen ns-step ns-review-step">
       ${renderStepTop()}
       <h1>${escapeHtml(title.replace(/[.]$/, ""))}</h1>
-      <p class="account-tagline">This is how members will see you once you're approved.</p>
+      <p class="account-tagline">Add up to 6 pictures. Your first photo becomes your profile cover.</p>
       ${notice()}
+      <section class="ns-photo-upload" aria-label="Profile photos">
+        <div class="ns-photo-upload-head">
+          <div>
+            <p>Profile photos</p>
+            <strong>${photoCount} of 6 added</strong>
+          </div>
+          <span>${signedIn ? "Private upload" : "Sign in required"}</span>
+        </div>
+        ${renderPhotos()}
+        ${signedIn ? `
+          <label class="ns-photo-add" for="photo">
+            <input id="photo" type="file" accept="image/jpeg,image/png,image/webp" ${state.saving || photoCount >= 6 ? "disabled" : ""} />
+            <span>${photoCount >= 6 ? "6 photos added" : "Add photo"}</span>
+          </label>
+          <p class="ns-photo-note">JPEG, PNG, or WebP. We re-save images before upload so exact photo data is stripped.</p>
+        ` : `
+          <p class="ns-review-note">Sign in with Google or your email link to upload private profile photos before submitting.</p>
+          <button class="ns-btn-google" type="button" id="account-google" ${state.saving ? "disabled" : ""}>${GOOGLE_G}<span>Continue with Google</span></button>
+          <p class="account-signin">Already have an account? <button type="button" id="account-signin">Sign in with email</button></p>
+        `}
+      </section>
       <article class="ns-preview">
         <div class="ns-preview-photo">${state.photos[0]?.url ? `<img src="${state.photos[0].url}" alt="" />` : `<span>${initial}</span>`}</div>
         <div class="ns-preview-body">
@@ -1612,7 +1647,6 @@ function renderReviewStep(p, missing) {
       ${missing.length
         ? `<p class="ns-review-missing"><strong>Before you submit, finish:</strong> ${escapeHtml(missing.join(", "))}.</p>`
         : `<p class="ns-review-ready">Everything's in. The founder reviews every profile personally before it goes live.</p>`}
-      <p class="ns-review-note">Photos are optional for this beta and open after sign-in, so private images stay protected.</p>
       <div class="ns-actions">
         <button class="ns-btn-primary" type="submit" data-action="submit" ${state.saving ? "disabled" : ""}>Submit for review</button>
         <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>

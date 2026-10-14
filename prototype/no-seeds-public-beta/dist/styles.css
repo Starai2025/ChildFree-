@@ -1511,6 +1511,89 @@ button {
   object-fit: cover;
 }
 
+.ns-photo-upload {
+  margin: 18px 0;
+  padding: 16px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(15, 92, 77, 0.08), rgba(217, 178, 95, 0.1)), #fffaf3;
+  border: 1px solid rgba(15, 92, 77, 0.18);
+  box-shadow: 0 14px 30px rgba(17, 17, 17, 0.08);
+}
+
+.ns-photo-upload-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.ns-photo-upload-head p {
+  margin: 0 0 3px;
+  color: var(--emerald);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ns-photo-upload-head strong {
+  display: block;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.ns-photo-upload-head span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(17, 17, 17, 0.06);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ns-photo-upload .photo-grid {
+  margin-bottom: 12px;
+}
+
+.ns-photo-upload .photo-slot {
+  min-height: 104px;
+  border-radius: 16px;
+  background: rgba(255, 250, 243, 0.86);
+}
+
+.ns-photo-add {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  border-radius: 999px;
+  background: var(--emerald);
+  color: #fffaf3;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.ns-photo-add input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ns-photo-add:has(input:disabled) {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+.ns-photo-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .match-row {
   width: 100%;
   border: 1px solid var(--line);
