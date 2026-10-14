@@ -4249,3 +4249,19 @@ body.ns-legal-open { overflow: hidden; }
 .ns-status-actions .ns-btn-quiet { color: var(--emerald); font-weight: 600; }
 .ns-status-legal { text-align: center; color: rgba(25, 21, 18, 0.5); margin-top: 14px; }
 .ns-status-legal a { color: rgba(25, 21, 18, 0.6); }
+
+/* Account entry: separate sign-in, setup summary and the step editor. */
+.ns-signin-screen .ns-lockup,
+.ns-setup-home .ns-lockup { margin: 0 auto 22px; color: var(--emerald); }
+.ns-signin-screen .ns-wordmark,
+.ns-setup-home .ns-wordmark { color: var(--emerald); }
+.ns-signin-screen .ns-lockup img,
+.ns-setup-home .ns-lockup img { width: 42px; }
+.ns-signin-screen .ns-btn-quiet { margin-top: 12px; }
+.ns-setup-label { margin: 0 0 10px; color: var(--emerald); font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.ns-setup-next { margin: 24px 0; padding: 20px; border: 1px solid rgba(15,92,77,0.2); border-radius: 18px; background: rgba(15,92,77,0.05); }
+.ns-setup-next span { display: block; margin-bottom: 7px; color: var(--emerald); font-size: 13px; font-weight: 600; }
+.ns-setup-next strong { display: block; font-family: var(--font-display); font-size: 24px; color: var(--ink); }
+.ns-setup-next p { margin: 10px 0 0; color: rgba(25,21,18,0.65); font-size: 14px; }
+.ns-setup-link { display: block; margin: 0 0 20px; padding: 6px 0; background: transparent; color: var(--emerald); font: inherit; font-size: 13px; text-decoration: underline; }
+.ns-setup-home .ns-actions { display: grid; gap: 12px; }

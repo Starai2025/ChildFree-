@@ -95,6 +95,21 @@ export function resumeStep(p = {}) {
   return filled(p.bio) ? 9 : 7;
 }
 
+// Authentication selects an account landing page; opening the editor is a separate action.
+export function accountLanding(status) {
+  if (status === "draft" || status === "changes_requested") return "setup";
+  if (status === "approved") return "discover";
+  return "status";
+}
+
+// Phone answers belong to one account, or to the matching email before sign-up.
+export function draftForAccount(draft = {}, user) {
+  if (!user?.id) return {};
+  if (draft._accountId) return draft._accountId === user.id ? draft : {};
+  const email = String(draft.email || "").trim().toLowerCase();
+  return !email || email === String(user.email || "").trim().toLowerCase() ? draft : {};
+}
+
 // Create the account (first time) or sign in (returning) with an emailed link.
 // first_name and birth_date travel as sign-up metadata so the draft profile has them immediately.
 export function startAccount(supabase, { email, first_name, birth_date }, redirectTo = SITE_URL) {

@@ -1,5 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import { profilePatch, startAccount, startGoogle, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, friendlyAuthError } from "./onboarding-sync.js";
+import { profilePatch, startAccount, startGoogle, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, accountLanding, draftForAccount, friendlyAuthError } from "./onboarding-sync.js";
 
 const SUPABASE_URL = "https://btnrophnyfuwnqzwiooh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw";
@@ -66,7 +66,10 @@ const state = {
   user: null,
   profile: null,
   publicProfile: loadPublicDraft(),
-  publicGateOpen: hasPublicDraft(),
+  publicGateOpen: false,
+  signInOpen: false,
+  setupOverview: false,
+  landingFor: null,
   agreementOpen: false,
   publicStep: 0,
   photos: [],
@@ -116,21 +119,23 @@ function emptyPublicProfile() {
   };
 }
 
-function loadPublicDraft() {
+function loadPublicDraft(user = null) {
   try {
-    return { ...emptyPublicProfile(), ...(JSON.parse(localStorage.getItem("noSeedsPublicDraft") || localStorage.getItem("freeMidnightPublicDraft") || "{}")) };
+    const own = user ? localStorage.getItem(`noSeedsAccountDraft:${user.id}`) : null;
+    const draft = JSON.parse(own || localStorage.getItem("noSeedsPublicDraft") || localStorage.getItem("freeMidnightPublicDraft") || "{}");
+    const visible = user ? draftForAccount(draft, user) : (draft._accountId ? {} : draft);
+    return { ...emptyPublicProfile(), ...visible };
   } catch {
     return emptyPublicProfile();
   }
 }
 
-function hasPublicDraft() {
-  const draft = loadPublicDraft();
-  return Boolean(draft.email || draft.first_name || draft.city || draft.birth_date);
-}
-
 function savePublicDraft() {
-  localStorage.setItem("noSeedsPublicDraft", JSON.stringify(state.publicProfile || emptyPublicProfile()));
+  const draft = { ...(state.publicProfile || emptyPublicProfile()) };
+  if (state.user) draft._accountId = state.user.id;
+  const saved = JSON.stringify(draft);
+  if (state.user) localStorage.setItem(`noSeedsAccountDraft:${state.user.id}`, saved);
+  localStorage.setItem("noSeedsPublicDraft", saved);
 }
 
 function escapeHtml(value = "") {
@@ -204,6 +209,24 @@ async function init() {
     state.user = session?.user ?? null;
     // Token refreshes and tab refocus keep the same person signed in: don't redraw and wipe what they're typing.
     if (sameUser && event !== "USER_UPDATED") return;
+    if (!sameUser) {
+      state.publicProfile = loadPublicDraft(state.user);
+      state.publicGateOpen = false;
+      state.signInOpen = false;
+      state.agreementOpen = false;
+      state.error = "";
+      state.message = "";
+      state.landingFor = null;
+      state.resumedFor = null;
+      state.setupOverview = false;
+      state.viewing = null;
+      state.viewingMatch = null;
+      state.selectedMatch = null;
+      state.plan = null;
+      state.plannerOpen = false;
+      state.chatMenuOpen = false;
+      state.cards = state.matches = state.likes = state.messages = null;
+    }
     // Supabase recommends leaving the auth callback before making more Supabase calls.
     setTimeout(load, 0);
   });
@@ -222,23 +245,28 @@ async function load() {
     return;
   }
   await loadProfile();
-  // Members who have not submitted yet continue the onboarding steps where they left off.
-  if (state.profile && ["draft", "changes_requested"].includes(state.profile.status)) {
+  const landing = accountLanding(state.profile?.status);
+  const landingKey = `${state.user.id}:${state.profile?.status}`;
+  const firstLanding = state.landingFor !== landingKey;
+  // Show the account's status first. Members choose when to reopen their saved editor.
+  if (state.profile && landing === "setup") {
     await resumeOnboarding();
+    if (firstLanding) state.setupOverview = true;
+    state.signInOpen = false;
+    state.landingFor = landingKey;
     renderAuth();
     return;
   }
-  // First screen after sign-in: approved members go to Discover, everyone else sees their status.
-  if (state.profile && state.landedFor !== state.user.id) {
-    state.tab = state.profile.status === "approved" ? "discover" : "status";
-    state.landedFor = state.user.id;
-  }
+  state.setupOverview = false;
+  state.signInOpen = false;
+  if (firstLanding) state.tab = landing;
+  state.landingFor = landingKey;
   renderApp();
 }
 
 // Bring answers typed on this phone before sign-in onto the account, then reopen the right step.
 async function resumeOnboarding() {
-  const merged = mergeDrafts(state.profile, loadPublicDraft());
+  const merged = mergeDrafts(state.profile, loadPublicDraft(state.user));
   if (hasUnsavedAnswers(state.profile, merged)) {
     const error = await saveDraftToServer(supabase, state.user.id, merged);
     if (error) state.error = `Some answers from this phone could not be saved to your account yet: ${error.message}`;
@@ -304,7 +332,7 @@ function googleNameFromUser() {
 }
 
 async function createMissingProfileDraft() {
-  const local = loadPublicDraft();
+  const local = loadPublicDraft(state.user);
   const draft = mergeDrafts({ first_name: googleNameFromUser() }, local);
   const { error } = await supabase.from("profiles").insert({ id: state.user.id, ...profilePatch(draft) });
   if (error && !/duplicate key|already exists/i.test(error.message || "")) return { data: null, error };
@@ -351,6 +379,7 @@ function requiresApproved() {
 }
 
 async function signIn(email) {
+  state.signInOpen = true;
   state.error = "";
   state.message = "";
   state.saving = true;
@@ -372,6 +401,10 @@ async function signIn(email) {
 }
 
 async function signOut() {
+  state.signInOpen = false;
+  state.publicGateOpen = false;
+  state.agreementOpen = false;
+  state.publicProfile = emptyPublicProfile();
   await supabase.auth.signOut();
 }
 
@@ -668,6 +701,7 @@ async function savePublicApplication(form, { submit = false, advance = false } =
     }
     localStorage.removeItem("noSeedsPublicDraft");
     localStorage.removeItem("freeMidnightPublicDraft");
+    localStorage.removeItem(`noSeedsAccountDraft:${state.user.id}`);
     state.publicProfile = emptyPublicProfile();
     state.publicStep = 0;
     state.publicGateOpen = false;
@@ -703,6 +737,11 @@ async function savePublicApplication(form, { submit = false, advance = false } =
   }
 
   if (advance) state.publicStep = Math.min(PROFILE_STEPS.length - 1, state.publicStep + 1);
+  else if (state.user) {
+    state.publicStep = resumeStep(state.publicProfile);
+    state.setupOverview = true;
+    state.message = "Your progress is saved. Continue whenever you're ready.";
+  }
   renderAuth();
 }
 
@@ -1226,6 +1265,14 @@ function ensureTabData() {
 }
 
 function renderAuth() {
+  if (state.user && state.setupOverview) {
+    renderSetupOverview();
+    return;
+  }
+  if (!state.user && state.signInOpen) {
+    renderSignIn();
+    return;
+  }
   if (!state.publicGateOpen && !state.message) {
     if (state.agreementOpen) renderAgreement();
     else renderWelcome();
@@ -1288,10 +1335,101 @@ function renderAuth() {
     renderAuth();
   });
   document.querySelector("#account-signin")?.addEventListener("click", () => {
-    const email = state.publicProfile?.email || window.prompt("Enter your email for a sign-in link:");
-    if (email) signIn(email);
+    state.publicProfile = formToPublicProfile(document.querySelector("#intake-form"));
+    savePublicDraft();
+    openSignIn();
+  });
+  document.querySelector("[data-setup-home]")?.addEventListener("click", () => {
+    void savePublicApplication(document.querySelector("#intake-form"));
   });
   setTimeout(() => window.scrollTo({ top: 0, left: 0 }), 0);
+}
+
+function openSignIn() {
+  state.signInOpen = true;
+  state.message = "";
+  state.error = "";
+  renderAuth();
+}
+
+function renderSignIn() {
+  app.innerHTML = `
+    <main class="screen auth-journey">
+      <form id="signin-form" class="account-screen ns-step ns-signin-screen">
+        ${renderLockup()}
+        <h1>Welcome back</h1>
+        <p class="account-tagline">Sign in to return to your No Seeds account.</p>
+        ${notice()}
+        <button class="ns-btn-google" type="button" id="signin-google" ${state.saving ? "disabled" : ""}>${GOOGLE_G}<span>Continue with Google</span></button>
+        <div class="account-divider"><span></span><em>or use email</em><span></span></div>
+        <div class="field account-field">
+          <label for="signin-email">Email</label>
+          <input id="signin-email" name="email" type="email" autocomplete="email" required value="${escapeHtml(state.publicProfile.email || "")}" ${state.saving ? "readonly" : ""} />
+        </div>
+        <button class="ns-btn-primary" type="submit" ${state.saving ? "disabled" : ""}>${state.saving ? "Sending…" : "Email me a sign-in link"}</button>
+        <button class="ns-btn-quiet" type="button" id="signin-back" ${state.saving ? "disabled" : ""}>Back to welcome</button>
+      </form>
+    </main>`;
+  const keepEmail = () => {
+    state.publicProfile.email = document.querySelector("#signin-email").value.trim().toLowerCase();
+  };
+  document.querySelector("#signin-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    keepEmail();
+    void signIn(state.publicProfile.email);
+  });
+  document.querySelector("#signin-google").addEventListener("click", async () => {
+    keepEmail();
+    state.saving = true;
+    state.error = "";
+    state.message = "";
+    renderAuth();
+    const { error } = await startGoogle(supabase, `${window.location.origin}/`);
+    if (!error) return;
+    state.saving = false;
+    state.error = friendlyAuthError(error);
+    renderAuth();
+  });
+  document.querySelector("#signin-back").addEventListener("click", () => {
+    state.signInOpen = false;
+    state.publicGateOpen = false;
+    state.agreementOpen = false;
+    state.message = "";
+    state.error = "";
+    renderAuth();
+  });
+}
+
+function renderSetupOverview() {
+  const changesRequested = state.profile.status === "changes_requested";
+  const reviewReady = state.publicStep === 9 && state.photos.length > 0;
+  const next = reviewReady ? "Review and submit" : PROFILE_STEPS[state.publicStep][2].replace(/[.]$/, "");
+  app.innerHTML = `
+    <main class="screen auth-journey">
+      <section class="account-screen ns-step ns-setup-home">
+        ${renderLockup()}
+        <p class="ns-setup-label">${changesRequested ? "Updates requested" : "Profile setup"}</p>
+        <h1>${changesRequested ? "Update your profile" : "Finish your profile"}</h1>
+        <p class="account-tagline">Your answers are saved. Finish setup and submit your profile for founder review before Discover and messaging open.</p>
+        ${notice()}
+        <div class="ns-setup-next"><span>Next up</span><strong>${escapeHtml(next)}</strong><p>${state.photos.length} of 6 photos added</p></div>
+        <div class="ns-actions">
+          <button class="ns-btn-primary" type="button" id="continue-setup">${reviewReady ? "Review and submit" : "Continue setup"}</button>
+          <button class="ns-btn-quiet" type="button" id="review-answers">Review my answers</button>
+          <button class="ns-btn-quiet" type="button" id="setup-signout">Sign out</button>
+        </div>
+      </section>
+    </main>`;
+  document.querySelector("#continue-setup").addEventListener("click", () => {
+    state.setupOverview = false;
+    renderAuth();
+  });
+  document.querySelector("#review-answers").addEventListener("click", () => {
+    state.setupOverview = false;
+    state.publicStep = 0;
+    renderAuth();
+  });
+  document.querySelector("#setup-signout").addEventListener("click", signOut);
 }
 
 // The one No Seeds logo on a screen: emblem plus live-text wordmark, sharp on every phone.
@@ -1326,11 +1464,7 @@ function renderWelcome() {
     renderAuth();
   });
   document.querySelector("#welcome-signin")?.addEventListener("click", () => {
-    state.publicGateOpen = true;
-    state.agreementOpen = false;
-    state.message = "";
-    state.error = "";
-    renderAuth();
+    openSignIn();
   });
 }
 
@@ -1360,11 +1494,7 @@ function renderAgreement() {
     renderAuth();
   });
   document.querySelector("#show-signin")?.addEventListener("click", () => {
-    state.publicGateOpen = true;
-    state.agreementOpen = false;
-    state.message = "";
-    state.error = "";
-    renderAuth();
+    openSignIn();
   });
 }
 
@@ -1736,6 +1866,7 @@ function renderStepTop() {
       <span class="ns-step-count">${step} of ${PROFILE_STEPS.length}</span>
     </header>
     <div class="ns-progress" aria-hidden="true"><span style="width:${(step / PROFILE_STEPS.length) * 100}%"></span></div>
+    ${state.user ? `<button class="ns-setup-link" type="button" data-setup-home ${state.saving ? "disabled" : ""}>Back to profile setup</button>` : ""}
   `;
 }
 
@@ -1746,7 +1877,7 @@ function renderAccountStep(p) {
   return `
     <form id="intake-form" class="account-screen ns-step">
       ${renderStepTop()}
-      <h1>Create your account</h1>
+      <h1>${signedIn ? "Your account details" : "Create your account"}</h1>
       <p class="account-tagline">Black singles. No kids. Not now. Not ever.</p>
       ${notice()}
       ${signedIn ? "" : `

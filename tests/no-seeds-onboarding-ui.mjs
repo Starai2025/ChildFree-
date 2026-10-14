@@ -107,6 +107,8 @@ try {
   await check('opening the emailed link moves phone answers to the account and continues at step 3', async () => {
     await page.evaluate(([key, value]) => localStorage.setItem(key, value), [STORAGE_KEY, fakeSession()]);
     await page.reload();
+    await page.waitForSelector('#continue-setup');
+    await page.click('#continue-setup');
     await page.waitForSelector('text=3 of 10');
     assert.equal(patches.length, 1);
     assert.equal(row.first_name, 'Nia', 'first name saved at sign-up');
@@ -144,6 +146,8 @@ try {
     page = await otherPhone.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(server.url);
+    await page.waitForSelector('#continue-setup');
+    await page.click('#continue-setup');
     await page.waitForSelector('text=5 of 10');
     await page.click('[data-public-back]');
     await page.waitForSelector('text=4 of 10');
@@ -157,11 +161,37 @@ try {
     row = {...row, eligibility: {black: true, noChildren: true, neverChildren: true, noStepParent: true, honest: true, respect: true},
       pledge_accepted_at: '2026-10-13T00:00:00Z', bio: 'Hi.', prompts: [{id: 'ordinary_sunday', answer: 'Market.'}, {id: 'green_flag', answer: 'Follow-through.'}]};
     await page.reload();
+    await page.waitForSelector('#continue-setup');
+    await page.click('#continue-setup');
     await page.waitForSelector('text=Submit for review');
     await page.click('button[data-action=submit]');
     await page.waitForFunction(() => !document.querySelector('#intake-form'));
     assert.equal(patches.at(-1).status, 'submitted');
     assert.equal(row.status, 'submitted');
+    await page.reload();
+    await page.waitForSelector('.ns-status-steps');
+    assert.match(await page.textContent('h1'), /You're in review/);
+    assert.equal(await page.locator('#intake-form').count(), 0);
+    row = {...row, status: 'approved'};
+    await page.reload();
+    await page.waitForSelector('.tab.active[data-tab=discover]');
+  });
+
+  await check('returning sign-in opens its own screen without sending an email or deleting a draft', async () => {
+    const phone = await runtime.browser.newContext({viewport: {width: 390, height: 844}});
+    await phone.route(`${SUPABASE}/**`, fakeSupabase);
+    const returning = await phone.newPage();
+    await returning.goto(server.url);
+    await returning.evaluate(() => localStorage.setItem('noSeedsPublicDraft', JSON.stringify({first_name: 'Nia', email: 'nia@example.com', city: 'Atlanta'})));
+    await returning.reload();
+    const before = otpRequests.length;
+    await returning.click('#welcome-signin');
+    await returning.waitForSelector('text=Welcome back');
+    assert.equal(otpRequests.length, before, 'opening sign-in never sends an email');
+    await returning.click('#signin-back');
+    await returning.waitForSelector('#welcome-join');
+    assert.equal(JSON.parse(await returning.evaluate(() => localStorage.getItem('noSeedsPublicDraft'))).city, 'Atlanta');
+    await phone.close();
   });
 
   await check('Sign up with Google keeps the typed birthday, creates the account and continues at step 2', async () => {
@@ -175,6 +205,8 @@ try {
     await page.click('#open-public-application');
     await page.fill('[name=birth_date]', '1994-07-21');
     await page.click('#account-google');
+    await page.waitForSelector('#continue-setup');
+    await page.click('#continue-setup');
     await page.waitForSelector('text=2 of 10');
     assert.equal(googleRequests.length, 1);
     assert.equal(googleRequests[0].searchParams.get('provider'), 'google');
