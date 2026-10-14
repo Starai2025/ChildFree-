@@ -719,7 +719,7 @@ async function reencodeImage(file) {
 }
 
 async function uploadPhoto(file, { publicFlow = false } = {}) {
-  if (!file || !state.user) return;
+  if (!file || !state.user || state.saving) return;
   const redraw = () => publicFlow ? renderAuth() : renderApp();
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
     state.error = "Use a JPEG, PNG, or WebP photo.";
@@ -733,52 +733,63 @@ async function uploadPhoto(file, { publicFlow = false } = {}) {
   }
   state.saving = true;
   state.error = "";
+  state.message = "";
   redraw();
-  const position = Math.min(state.photos.length, 5);
-  let prepared;
+  const position = [0, 1, 2, 3, 4, 5].find((slot) => !state.photos.some((photo) => photo.position === slot));
   try {
-    prepared = await reencodeImage(file);
-  } catch (error) {
-    state.saving = false;
-    state.error = error.message;
-    redraw();
-    return;
-  }
-  if (prepared.size > 5 * 1024 * 1024) {
-    state.saving = false;
-    state.error = "Photos must be under 5 MB after processing.";
-    redraw();
-    return;
-  }
-  const path = `${state.user.id}/${Date.now()}-${Math.random().toString(16).slice(2)}.jpg`;
-  const { error: uploadError } = await supabase.storage.from("profile-photos").upload(path, prepared, { upsert: false, contentType: "image/jpeg" });
-  if (uploadError) {
-    state.error = uploadError.message;
-  } else {
+    const prepared = await reencodeImage(file);
+    if (prepared.size > 5 * 1024 * 1024) throw new Error("Photos must be under 5 MB after processing.");
+    const path = `${state.user.id}/${Date.now()}-${Math.random().toString(16).slice(2)}.jpg`;
+    const { error: uploadError } = await supabase.storage.from("profile-photos").upload(path, prepared, { upsert: false, contentType: "image/jpeg" });
+    if (uploadError) throw uploadError;
     const { error: rowError } = await supabase.from("profile_photos").insert({
       profile_id: state.user.id,
       storage_path: path,
       position,
     });
-    if (rowError) state.error = rowError.message;
-    else state.message = "Photo added.";
+    if (rowError) {
+      try {
+        const { error: cleanupError } = await supabase.storage.from("profile-photos").remove([path]);
+        if (cleanupError) throw cleanupError;
+      } catch {
+        throw new Error("Your photo could not be added to your profile, and its stored file could not be deleted. Please contact support.");
+      }
+      throw rowError;
+    }
+    state.message = "Photo added.";
+    await loadProfile();
+  } catch (error) {
+    state.error = error.message || "We couldn't upload that photo. Please try again.";
+  } finally {
+    state.saving = false;
+    redraw();
   }
-  state.saving = false;
-  await loadProfile();
-  redraw();
 }
 
 async function removePhoto(photo, { publicFlow = false } = {}) {
+  if (!state.user || state.saving) return;
   const redraw = () => publicFlow ? renderAuth() : renderApp();
   state.saving = true;
   state.error = "";
+  state.message = "";
   redraw();
-  await supabase.from("profile_photos").delete().eq("id", photo.id);
-  await supabase.storage.from("profile-photos").remove([photo.storage_path]);
-  state.saving = false;
-  state.message = "Photo removed.";
-  await loadProfile();
-  redraw();
+  try {
+    const { error: rowError } = await supabase.from("profile_photos").delete().eq("id", photo.id);
+    if (rowError) throw rowError;
+    try {
+      const { error: storageError } = await supabase.storage.from("profile-photos").remove([photo.storage_path]);
+      if (storageError) throw storageError;
+      state.message = "Photo removed.";
+    } catch {
+      state.error = "Your photo was removed from your profile, but its stored file could not be deleted. Please contact support.";
+    }
+    await loadProfile();
+  } catch (error) {
+    state.error = error.message || "We couldn't remove that photo. Please try again.";
+  } finally {
+    state.saving = false;
+    redraw();
+  }
 }
 
 async function loadDiscover({ force = false } = {}) {
