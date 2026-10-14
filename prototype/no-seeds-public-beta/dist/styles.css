@@ -3895,3 +3895,116 @@ button {
 .ns-plan-empty { margin: 0; font-size: 14px; color: rgba(25, 21, 18, 0.6); }
 .ns-planner > .ns-plan-safety { margin: 22px 0 14px; font-size: 13px; line-height: 1.5; color: rgba(25, 21, 18, 0.6); }
 .ns-planner > .ns-plan-card.is-confirmed { margin-bottom: 8px; }
+
+/* ---------- Legal pages (Privacy, Terms, Safety) and links to them ---------- */
+.ns-legal-body {
+  background: #f4ede3;
+}
+
+.ns-legal {
+  width: min(100%, 720px);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #fbf7f1 0%, #f4ede3 100%);
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+
+.ns-legal-hero {
+  position: relative;
+  overflow: hidden;
+  padding: calc(16px + env(safe-area-inset-top)) 24px 48px;
+  color: var(--ivory);
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(217, 178, 95, 0.28), transparent 55%),
+    linear-gradient(160deg, #13604f 0%, #0b4337 55%, #072d25 100%);
+}
+
+.ns-legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold-soft);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ns-legal-back img { width: 26px; height: auto; }
+
+.ns-legal-hero h1 {
+  margin: 26px 0 6px;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #f3d58f;
+}
+
+.ns-legal-hero p { margin: 0; font-size: 14px; color: rgba(246, 240, 232, 0.75); }
+
+.ns-legal-sheet {
+  position: relative;
+  margin-top: -24px;
+  padding: 26px 24px calc(40px + env(safe-area-inset-bottom));
+  border-radius: 26px 26px 0 0;
+  background: linear-gradient(180deg, #fbf7f1 0%, #f4ede3 100%);
+  box-shadow: 0 -10px 30px rgba(4, 24, 20, 0.2);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.ns-legal-sheet h2 {
+  margin: 28px 0 8px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--emerald);
+}
+
+.ns-legal-sheet p { margin: 0 0 12px; color: rgba(25, 21, 18, 0.86); }
+.ns-legal-sheet ul,
+.ns-legal-sheet ol { margin: 0 0 12px; padding-left: 22px; color: rgba(25, 21, 18, 0.86); }
+.ns-legal-sheet li { margin-bottom: 6px; }
+.ns-legal-sheet a { color: var(--emerald); font-weight: 600; }
+
+.ns-legal-lead { font-size: 17px; color: var(--ink) !important; }
+
+.ns-legal-notice {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(138, 51, 36, 0.3);
+  background: rgba(138, 51, 36, 0.07);
+  color: #6e2116 !important;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.ns-legal-nav {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(25, 21, 18, 0.12);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Links from the app */
+.ns-legal-links {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: rgba(246, 240, 232, 0.6);
+}
+
+.ns-legal-links a { color: rgba(246, 240, 232, 0.75); text-decoration: underline; text-underline-offset: 3px; }
+
+.ns-consent {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  color: rgba(25, 21, 18, 0.6);
+}
+
+.ns-consent a { color: var(--emerald); font-weight: 600; }

@@ -1299,6 +1299,7 @@ function renderWelcome() {
         <p class="ns-welcome-sub">Black love. Childfree by choice.</p>
         <button class="ns-btn-primary" type="button" id="welcome-join">Join No Seeds</button>
         <p class="ns-welcome-signin">Already a member? <button type="button" id="welcome-signin">Sign in</button></p>
+        <p class="ns-legal-links"><a href="./terms.html">Terms</a> · <a href="./privacy.html">Privacy</a> · <a href="./safety.html">Safety</a></p>
       </section>
     </main>
   `;
@@ -1524,7 +1525,7 @@ function renderNoKidsClauseStep(p) {
       <div class="clause-stack">
         <section class="pledge-group" aria-label="Who this is for">
           <p>Who this is for</p>
-          ${clauseChoice("black", "I identify as Black, including multiracial Black.", p)}
+          ${clauseChoice("black", "I'm joining a community built for Black singles, and I'll honor what it stands for.", p)}
           ${clauseChoice("noChildren", "I do not have children of any age.", p)}
           ${clauseChoice("neverChildren", "I never want biological, adopted, or step children.", p)}
         </section>
@@ -1746,6 +1747,7 @@ function renderAccountStep(p) {
         <input id="birth_date" name="birth_date" type="date" required value="${escapeHtml(p.birth_date || "")}" />
       </div>
       <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+      <p class="ns-consent">By continuing, you agree to our <a href="./terms.html" target="_blank" rel="noopener">Terms</a> and <a href="./privacy.html" target="_blank" rel="noopener">Privacy Policy</a>, and confirm you're 18 or older.</p>
       ${signedIn ? "" : `<p class="account-signin">Already a member? <button type="button" id="account-signin">Sign in</button></p>`}
     </form>
   `;
@@ -1909,7 +1911,7 @@ function renderProfileStep(key, p) {
   }
   if (key === "clauseA") {
     return `<div class="checks">
-      ${clauseCheck("black", "I identify as Black, including multiracial Black.", p)}
+      ${clauseCheck("black", "I'm joining a community built for Black singles, and I'll honor what it stands for.", p)}
       ${clauseCheck("noChildren", "I have no biological, adopted, step, or dependent children.", p)}
       ${clauseCheck("neverChildren", "I never want children, not now and not someday.", p)}
       ${clauseCheck("noStepParent", "I am not looking for a parent or step-parent role.", p)}
