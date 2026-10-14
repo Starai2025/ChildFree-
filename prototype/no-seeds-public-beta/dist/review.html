@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0b4337" />
+    <title>Review · No Seeds</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Lora:wght@500;600&display=swap" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="ns-legal-body">
+    <main class="ns-review" id="review"></main>
+    <script type="module">
+      // Founder review. Everything goes through the admin-review Edge Function, which checks the
+      // passcode on the server. The passcode is kept only in this tab (sessionStorage) and never in code.
+      const FUNCTION_URL = "https://btnrophnyfuwnqzwiooh.supabase.co/functions/v1/admin-review";
+      const KEY = "noSeedsReviewPasscode";
+      const root = document.querySelector("#review");
+      const state = { passcode: read(), tab: "applicants", profiles: [], reports: [], photos: {}, busy: "", note: {}, open: {}, error: "", toast: "" };
+
+      const PLEDGE = {
+        black: "Joining a community built for Black singles",
+        noChildren: "No children of any age",
+        neverChildren: "Never wants biological, adopted or step-children",
+        noStepParent: "Not looking for a parent or step-parent role",
+        honest: "Will be honest about history and childfree choice",
+        respect: "Won't pressure anyone to change their choice",
+      };
+
+      function read() { try { return sessionStorage.getItem(KEY) || ""; } catch { return ""; } }
+      function save(v) { try { v ? sessionStorage.setItem(KEY, v) : sessionStorage.removeItem(KEY); } catch { /* private mode */ } }
+      const esc = (v = "") => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+      const age = (dob) => { if (!dob) return ""; const d = new Date(`${dob}T00:00:00`), n = new Date(); let a = n.getFullYear() - d.getFullYear(); if (n < new Date(n.getFullYear(), d.getMonth(), d.getDate())) a--; return a; };
+      const when = (ts) => ts ? new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+
+      async function call(action, extra = {}) {
+        const res = await fetch(FUNCTION_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-admin-passcode": state.passcode },
+          body: JSON.stringify({ action, ...extra }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) { state.passcode = ""; save(""); throw new Error("That passcode didn't work."); }
+        if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
+        return data;
+      }
+
+      async function load() {
+        state.busy = "load"; state.error = ""; render();
+        try {
+          const [q, r] = await Promise.all([call("queue"), call("reports")]);
+          state.profiles = q.profiles || [];
+          state.reports = r.reports || [];
+        } catch (e) { state.error = e.message; }
+        state.busy = ""; render();
+      }
+
+      function toast(text) { state.toast = text; render(); setTimeout(() => { if (state.toast === text) { state.toast = ""; render(); } }, 3000); }
+
+      async function decide(id, decision) {
+        const note = (state.note[id] || "").trim();
+        if (decision === "changes_requested" && !note) { state.open[id] = "changes"; state.error = "Write what they should change."; return render(); }
+        state.busy = id; state.error = ""; render();
+        try {
+          await call("decide", { profile_id: id, decision, note: note || null });
+          const person = state.profiles.find((p) => p.id === id);
+          state.profiles = state.profiles.filter((p) => p.id !== id);
+          toast(`${person?.first_name || "Member"} ${decision === "approved" ? "approved" : decision === "removed" ? "declined" : "asked for changes"}.`);
+        } catch (e) { state.error = e.message; }
+        state.busy = ""; render();
+      }
+
+      async function removePhoto(photoId, ownerId) {
+        if (!confirm("Remove this photo permanently? This can't be undone.")) return;
+        state.busy = photoId; render();
+        try {
+          await call("remove_photo", { photo_id: photoId });
+          state.profiles.forEach((p) => { p.profile_photos = (p.profile_photos || []).filter((ph) => ph.id !== photoId); });
+          if (state.photos[ownerId]) state.photos[ownerId] = state.photos[ownerId].filter((ph) => ph.id !== photoId);
+          toast("Photo removed.");
+        } catch (e) { state.error = e.message; }
+        state.busy = ""; render();
+      }
+
+      async function showPhotos(profileId) {
+        state.busy = `photos-${profileId}`; render();
+        try { state.photos[profileId] = (await call("member_photos", { profile_id: profileId })).photos || []; }
+        catch (e) { state.error = e.message; }
+        state.busy = ""; render();
+      }
+
+      async function resolve(id, status) {
+        state.busy = id; render();
+        try {
+          await call("resolve_report", { report_id: id, status, note: (state.note[id] || "").trim() || null });
+          state.reports = state.reports.filter((r) => r.id !== id);
+          toast(status === "actioned" ? "Report closed: action taken." : "Report closed: reviewed.");
+        } catch (e) { state.error = e.message; }
+        state.busy = ""; render();
+      }
+
+      function photoStrip(photos, ownerId) {
+        if (!photos?.length) return `<p class="ns-rv-muted">No photos uploaded.</p>`;
+        return `<div class="ns-rv-photos">${photos.map((ph) => `
+          <figure>${ph.url ? `<img src="${esc(ph.url)}" alt="" loading="lazy" />` : `<span>Photo unavailable</span>`}
+            <button type="button" data-remove-photo="${esc(ph.id)}" data-owner="${esc(ownerId)}" ${state.busy === ph.id ? "disabled" : ""}>Remove</button>
+          </figure>`).join("")}</div>`;
+      }
+
+      function applicant(p) {
+        const b = p.basics || {};
+        const rows = [
+          ["Looking for", (p.seeking || []).join(", ")],
+          ["Ages", p.age_min && p.age_max ? `${p.age_min}–${p.age_max}` : ""],
+          ["City / ZIP", [p.city, p.zip].filter(Boolean).join(" · ")],
+          ["Travel", [b.travelDistance, b.willingToFly ? `fly: ${b.willingToFly}` : ""].filter(Boolean).join(" · ")],
+          ["Goal", p.relationship_goal], ["Marriage", p.marriage_view],
+          ["Faith", b.faith], ["Pace", b.lifestylePace], ["Spending", b.spendingStyle],
+          ["Interests", (p.interests || []).join(", ")],
+        ].filter(([, v]) => v);
+        const prompts = (p.prompts || []).filter((x) => x?.answer);
+        const pledge = Object.entries(PLEDGE).map(([k, label]) => `<li class="${p.eligibility?.[k] ? "is-yes" : "is-no"}">${p.eligibility?.[k] ? "✓" : "✗"} ${esc(label)}</li>`).join("")
+          + `<li class="${p.pledge_accepted_at ? "is-yes" : "is-no"}">${p.pledge_accepted_at ? "✓" : "✗"} Agreed to the Community Pledge</li>`;
+        const open = state.open[p.id];
+        const busy = state.busy === p.id;
+        return `
+          <article class="ns-rv-card">
+            ${photoStrip(p.profile_photos, p.id)}
+            <div class="ns-rv-body">
+              <h2>${esc(p.first_name || "No name")}${age(p.birth_date) ? `<span>, ${age(p.birth_date)}</span>` : ""}</h2>
+              <p class="ns-rv-muted">${esc([p.gender, p.city].filter(Boolean).join(" · "))} · submitted ${esc(when(p.submitted_at))}</p>
+              ${p.review_note ? `<p class="ns-rv-history">Your earlier note: “${esc(p.review_note)}”</p>` : ""}
+              <dl class="ns-rv-facts">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+              ${p.bio ? `<p class="ns-rv-bio">${esc(p.bio)}</p>` : ""}
+              ${prompts.map((x) => `<p class="ns-rv-prompt"><b>${esc(x.id.replaceAll("_", " "))}</b> ${esc(x.answer)}</p>`).join("")}
+              ${p.compatibility?.childfreeLife ? `<p class="ns-rv-prompt"><b>childfree life</b> ${esc(p.compatibility.childfreeLife)}</p>` : ""}
+              <ul class="ns-rv-pledge">${pledge}</ul>
+              ${open ? `
+                <label class="ns-rv-note">${open === "changes" ? "What should they change? They'll see this." : "Reason for declining (for your records)"}
+                  <textarea data-note="${esc(p.id)}" rows="3">${esc(state.note[p.id] || "")}</textarea>
+                </label>
+                <div class="ns-rv-actions">
+                  <button type="button" class="is-quiet" data-cancel="${esc(p.id)}">Cancel</button>
+                  <button type="button" class="${open === "changes" ? "is-primary" : "is-danger"}" data-confirm="${esc(p.id)}" ${busy ? "disabled" : ""}>${open === "changes" ? "Send request" : "Decline"}</button>
+                </div>` : `
+                <div class="ns-rv-actions">
+                  <button type="button" class="is-danger" data-open="${esc(p.id)}" data-kind="decline" ${busy ? "disabled" : ""}>Decline</button>
+                  <button type="button" class="is-quiet" data-open="${esc(p.id)}" data-kind="changes" ${busy ? "disabled" : ""}>Ask for changes</button>
+                  <button type="button" class="is-primary" data-approve="${esc(p.id)}" ${busy ? "disabled" : ""}>${busy ? "Saving…" : "Approve"}</button>
+                </div>`}
+            </div>
+          </article>`;
+      }
+
+      function report(r) {
+        const busy = state.busy === r.id;
+        const photos = state.photos[r.reported?.id];
+        return `
+          <article class="ns-rv-card ns-rv-report">
+            <div class="ns-rv-body">
+              <p class="ns-rv-muted">${esc(when(r.created_at))}</p>
+              <h2>${esc(r.reported?.first_name || "Member")} <span>reported by ${esc(r.reporter?.first_name || "a member")}</span></h2>
+              <p><b>Reason:</b> ${esc(r.reason)}</p>
+              ${r.details ? `<p class="ns-rv-bio">${esc(r.details)}</p>` : ""}
+              <p class="ns-rv-muted">Account status: ${esc(r.reported?.status || "unknown")}</p>
+              ${photos ? photoStrip(photos, r.reported.id) : `<button type="button" class="ns-rv-link" data-photos="${esc(r.reported?.id)}" ${state.busy === `photos-${r.reported?.id}` ? "disabled" : ""}>Show their photos</button>`}
+              <label class="ns-rv-note">Note (optional)<textarea data-note="${esc(r.id)}" rows="2">${esc(state.note[r.id] || "")}</textarea></label>
+              <div class="ns-rv-actions">
+                <button type="button" class="is-quiet" data-resolve="${esc(r.id)}" data-status="reviewed" ${busy ? "disabled" : ""}>Reviewed</button>
+                <button type="button" class="is-primary" data-resolve="${esc(r.id)}" data-status="actioned" ${busy ? "disabled" : ""}>Action taken</button>
+              </div>
+            </div>
+          </article>`;
+      }
+
+      function render() {
+        if (!state.passcode) {
+          root.innerHTML = `
+            <section class="ns-rv-hero"><p class="ns-rv-brand"><img src="./assets/no-seeds-emblem.png" alt="" /> No Seeds</p><h1>Review</h1><p>Founder access only.</p></section>
+            <form class="ns-rv-sheet ns-rv-login" id="login">
+              ${state.error ? `<p class="ns-rv-error">${esc(state.error)}</p>` : ""}
+              <label for="passcode">Admin passcode</label>
+              <input id="passcode" type="password" autocomplete="current-password" required />
+              <button type="submit" class="ns-btn-primary">Unlock</button>
+              <p class="ns-rv-muted">Remembered only until you close this tab.</p>
+            </form>`;
+          root.querySelector("#login").addEventListener("submit", (e) => {
+            e.preventDefault();
+            state.passcode = root.querySelector("#passcode").value.trim();
+            save(state.passcode);
+            load();
+          });
+          return;
+        }
+        const list = state.tab === "applicants" ? state.profiles : state.reports;
+        root.innerHTML = `
+          <section class="ns-rv-hero">
+            <div class="ns-rv-top"><p class="ns-rv-brand"><img src="./assets/no-seeds-emblem.png" alt="" /> No Seeds</p>
+              <div><button type="button" id="refresh">Refresh</button><button type="button" id="lock">Lock</button></div></div>
+            <h1>Review</h1>
+            <p>${state.busy === "load" ? "Loading…" : `${state.profiles.length} waiting · ${state.reports.length} open ${state.reports.length === 1 ? "report" : "reports"}`}</p>
+            <nav class="ns-rv-tabs">
+              <button type="button" data-tab="applicants" class="${state.tab === "applicants" ? "is-active" : ""}">Applicants <i>${state.profiles.length}</i></button>
+              <button type="button" data-tab="reports" class="${state.tab === "reports" ? "is-active" : ""}">Reports <i>${state.reports.length}</i></button>
+            </nav>
+          </section>
+          <section class="ns-rv-sheet">
+            ${state.error ? `<p class="ns-rv-error">${esc(state.error)}</p>` : ""}
+            ${state.busy === "load" ? "" : list.length ? list.map(state.tab === "applicants" ? applicant : report).join("")
+              : `<div class="ns-empty"><h2>${state.tab === "applicants" ? "No one waiting" : "No open reports"}</h2><p>${state.tab === "applicants" ? "New applicants appear here when they submit." : "Member reports appear here."}</p></div>`}
+          </section>
+          ${state.toast ? `<p class="ns-rv-toast" role="status">${esc(state.toast)}</p>` : ""}`;
+        bind();
+      }
+
+      function bind() {
+        root.querySelector("#refresh")?.addEventListener("click", load);
+        root.querySelector("#lock")?.addEventListener("click", () => { state.passcode = ""; save(""); render(); });
+        root.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => { state.tab = b.dataset.tab; state.error = ""; render(); }));
+        root.querySelectorAll("[data-approve]").forEach((b) => b.addEventListener("click", () => decide(b.dataset.approve, "approved")));
+        root.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => { state.open[b.dataset.open] = b.dataset.kind; state.error = ""; render(); }));
+        root.querySelectorAll("[data-cancel]").forEach((b) => b.addEventListener("click", () => { delete state.open[b.dataset.cancel]; render(); }));
+        root.querySelectorAll("[data-confirm]").forEach((b) => b.addEventListener("click", () => decide(b.dataset.confirm, state.open[b.dataset.confirm] === "changes" ? "changes_requested" : "removed")));
+        root.querySelectorAll("[data-note]").forEach((t) => t.addEventListener("input", () => { state.note[t.dataset.note] = t.value; }));
+        root.querySelectorAll("[data-remove-photo]").forEach((b) => b.addEventListener("click", () => removePhoto(b.dataset.removePhoto, b.dataset.owner)));
+        root.querySelectorAll("[data-photos]").forEach((b) => b.addEventListener("click", () => showPhotos(b.dataset.photos)));
+        root.querySelectorAll("[data-resolve]").forEach((b) => b.addEventListener("click", () => resolve(b.dataset.resolve, b.dataset.status)));
+      }
+
+      state.passcode ? load() : render();
+    </script>
+  </body>
+</html>

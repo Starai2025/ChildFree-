@@ -4085,3 +4085,110 @@ body.ns-legal-open { overflow: hidden; }
 .ns-legal-content a { color: var(--emerald); font-weight: 600; }
 .ns-legal-content .ns-legal-lead { font-size: 16px; color: var(--ink); }
 .ns-legal-date { font-size: 13px; color: rgba(25, 21, 18, 0.5) !important; }
+
+/* ---------- Founder review page ---------- */
+.ns-review {
+  width: min(100%, 720px);
+  min-height: 100vh;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #fbf7f1 0%, #f4ede3 100%);
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+
+.ns-rv-hero {
+  padding: calc(14px + env(safe-area-inset-top)) 20px 44px;
+  color: var(--ivory);
+  background:
+    radial-gradient(120% 90% at 85% -10%, rgba(217, 178, 95, 0.28), transparent 55%),
+    linear-gradient(160deg, #13604f 0%, #0b4337 55%, #072d25 100%);
+}
+
+.ns-rv-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ns-rv-top button { margin-left: 6px; padding: 7px 12px; border-radius: 999px; background: rgba(246, 240, 232, 0.12); color: var(--ivory); font-size: 13px; font-weight: 600; }
+.ns-rv-brand { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--gold-soft); }
+.ns-rv-brand img { width: 24px; }
+.ns-rv-hero h1 { margin: 20px 0 4px; font-family: var(--font-display); font-size: 34px; font-weight: 600; color: #f3d58f; }
+.ns-rv-hero > p { margin: 0; font-size: 15px; color: rgba(246, 240, 232, 0.78); }
+
+.ns-rv-tabs { display: flex; gap: 8px; margin-top: 16px; }
+.ns-rv-tabs button { padding: 8px 14px; border-radius: 999px; background: rgba(246, 240, 232, 0.1); color: rgba(246, 240, 232, 0.8); font-size: 14px; font-weight: 600; }
+.ns-rv-tabs button.is-active { background: #fffaf3; color: var(--emerald); }
+.ns-rv-tabs i { font-style: normal; margin-left: 4px; opacity: 0.7; }
+
+.ns-rv-sheet {
+  position: relative;
+  margin-top: -24px;
+  padding: 20px 16px 40px;
+  border-radius: 26px 26px 0 0;
+  background: linear-gradient(180deg, #fbf7f1 0%, #f4ede3 100%);
+  box-shadow: 0 -10px 30px rgba(4, 24, 20, 0.2);
+  display: grid;
+  gap: 16px;
+}
+
+.ns-rv-login { gap: 10px; padding: 26px 22px 40px; }
+.ns-rv-login label { font-size: 14px; font-weight: 500; }
+.ns-rv-login input { min-height: 52px; padding: 0 16px; border-radius: 14px; border: 1px solid rgba(25, 21, 18, 0.16); background: #fffdf9; font-size: 17px; }
+
+.ns-rv-card {
+  overflow: hidden;
+  border-radius: 20px;
+  background: #fffdf9;
+  box-shadow: 0 1px 2px rgba(25, 21, 18, 0.05), 0 10px 26px rgba(25, 21, 18, 0.07);
+}
+
+.ns-rv-photos { display: flex; gap: 8px; padding: 12px; overflow-x: auto; background: #f4ede3; }
+.ns-rv-photos figure { position: relative; flex: 0 0 140px; margin: 0; aspect-ratio: 4 / 5; border-radius: 14px; overflow: hidden; background: #e8e0d4; }
+.ns-rv-photos img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ns-rv-photos figure > span { display: grid; place-items: center; height: 100%; font-size: 12px; color: rgba(25, 21, 18, 0.5); }
+.ns-rv-photos button { position: absolute; left: 8px; bottom: 8px; padding: 5px 10px; border-radius: 999px; background: rgba(110, 33, 22, 0.88); color: #fff; font-size: 12px; font-weight: 600; }
+.ns-rv-report .ns-rv-photos { margin: 4px -16px 10px; }
+
+.ns-rv-body { padding: 16px; display: grid; gap: 10px; }
+.ns-rv-body h2 { margin: 0; font-family: var(--font-display); font-size: 24px; font-weight: 600; }
+.ns-rv-body h2 span { font-weight: 500; color: rgba(25, 21, 18, 0.55); font-size: 18px; }
+.ns-rv-body p { margin: 0; }
+.ns-rv-muted { font-size: 13px; color: rgba(25, 21, 18, 0.55); }
+.ns-rv-history { padding: 10px 12px; border-radius: 12px; background: rgba(217, 178, 95, 0.14); font-size: 14px; }
+.ns-rv-bio { font-size: 15px; line-height: 1.5; }
+.ns-rv-prompt { font-size: 14px; line-height: 1.5; }
+.ns-rv-prompt b { display: block; font-size: 12px; text-transform: capitalize; color: var(--emerald); }
+
+.ns-rv-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin: 0; }
+.ns-rv-facts dt { font-size: 12px; color: rgba(25, 21, 18, 0.5); }
+.ns-rv-facts dd { margin: 0; font-size: 14px; font-weight: 500; }
+
+.ns-rv-pledge { margin: 0; padding: 10px 12px; list-style: none; border-radius: 12px; background: #f4ede3; font-size: 13px; line-height: 1.7; }
+.ns-rv-pledge .is-yes { color: var(--emerald); }
+.ns-rv-pledge .is-no { color: #a3391f; font-weight: 600; }
+
+.ns-rv-note { display: grid; gap: 6px; font-size: 13px; font-weight: 500; }
+.ns-rv-note textarea { padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(25, 21, 18, 0.16); background: #fffdf9; font: inherit; font-size: 15px; font-weight: 400; resize: vertical; }
+
+.ns-rv-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 4px; }
+.ns-rv-actions button { min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 600; }
+.ns-rv-actions .is-primary { background: var(--emerald); color: #fffaf3; }
+.ns-rv-actions .is-quiet { background: rgba(25, 21, 18, 0.06); color: var(--ink); }
+.ns-rv-actions .is-danger { background: rgba(163, 57, 31, 0.1); color: #a3391f; }
+.ns-rv-actions button:disabled { opacity: 0.5; }
+
+.ns-rv-link { justify-self: start; padding: 0; background: transparent; color: var(--emerald); font-weight: 600; text-decoration: underline; }
+.ns-rv-error { margin: 0; padding: 12px 14px; border-radius: 12px; background: rgba(138, 51, 36, 0.08); color: #6e2116; font-size: 14px; }
+
+.ns-rv-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: #0b4337;
+  color: #fffaf3;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(5, 9, 11, 0.25);
+}
+
+.ns-rv-card > .ns-rv-muted { padding: 14px 16px 0; }

@@ -5,6 +5,8 @@
 // POST { "action": "decide", "profile_id": "...", "decision": "approved" | "changes_requested" | "removed", "note": "..." }
 // POST { "action": "reports" }                                       -> open safety reports (after migration 0003)
 // POST { "action": "resolve_report", "report_id": "...", "status": "reviewed" | "actioned", "note": "..." }
+// POST { "action": "member_photos", "profile_id": "..." }              -> one member's photos (signed URLs)
+// POST { "action": "remove_photo", "photo_id": "..." }                 -> deletes the file and its record (TAKE IT DOWN Act removals)
 // Header: x-admin-passcode: <ADMIN_PASSCODE>
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
@@ -49,7 +51,7 @@ Deno.serve(async (req) => {
   if (body.action === "queue") {
     const { data: profiles, error } = await admin
       .from("profiles")
-      .select("*, profile_photos(storage_path, position)")
+      .select("*, profile_photos(id, storage_path, position)")
       .eq("status", "submitted")
       .order("submitted_at", { ascending: true })
       .limit(50);
@@ -66,7 +68,7 @@ Deno.serve(async (req) => {
         ...p,
         profile_photos: p.profile_photos
           .sort((x: { position: number }, y: { position: number }) => x.position - y.position)
-          .map((ph: { storage_path: string; position: number }) => ({ position: ph.position, url: urls.get(ph.storage_path) ?? null })),
+          .map((ph: { id: string; storage_path: string; position: number }) => ({ id: ph.id, position: ph.position, url: urls.get(ph.storage_path) ?? null })),
       })),
     }, origin);
   }
@@ -101,6 +103,28 @@ Deno.serve(async (req) => {
       .update({ status, resolved_at: new Date().toISOString(), resolution_note: typeof note === "string" ? note.trim().slice(0, 1000) : null })
       .eq("id", report_id);
     if (error) return reply(409, { error: error.message }, origin);
+    return reply(200, { ok: true }, origin);
+  }
+
+  if (body.action === "member_photos") {
+    if (!body.profile_id || !UUID.test(body.profile_id)) return reply(400, { error: "profile_id must be a UUID." }, origin);
+    const { data: photos, error } = await admin.from("profile_photos").select("id, storage_path, position").eq("profile_id", body.profile_id).order("position");
+    if (error) return reply(500, { error: error.message }, origin);
+    const signed = photos.length ? (await admin.storage.from("profile-photos").createSignedUrls(photos.map((ph) => ph.storage_path), 3600)).data ?? [] : [];
+    const urls = new Map(signed.map((s) => [s.path, s.signedUrl]));
+    return reply(200, { photos: photos.map((ph) => ({ id: ph.id, position: ph.position, url: urls.get(ph.storage_path) ?? null })) }, origin);
+  }
+
+  if (body.action === "remove_photo") {
+    const { photo_id } = body as { photo_id?: string };
+    if (!photo_id || !UUID.test(photo_id)) return reply(400, { error: "photo_id must be a UUID." }, origin);
+    const { data: photo, error: findError } = await admin.from("profile_photos").select("id, storage_path").eq("id", photo_id).maybeSingle();
+    if (findError) return reply(500, { error: findError.message }, origin);
+    if (!photo) return reply(404, { error: "That photo is already gone." }, origin);
+    const { error: storageError } = await admin.storage.from("profile-photos").remove([photo.storage_path]);
+    if (storageError) return reply(500, { error: storageError.message }, origin);
+    const { error: rowError } = await admin.from("profile_photos").delete().eq("id", photo.id);
+    if (rowError) return reply(500, { error: rowError.message }, origin);
     return reply(200, { ok: true }, origin);
   }
 
