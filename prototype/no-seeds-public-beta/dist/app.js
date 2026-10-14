@@ -228,6 +228,11 @@ async function load() {
     renderAuth();
     return;
   }
+  // First screen after sign-in: approved members go to Discover, everyone else sees their status.
+  if (state.profile && state.landedFor !== state.user.id) {
+    state.tab = state.profile.status === "approved" ? "discover" : "status";
+    state.landedFor = state.user.id;
+  }
   renderApp();
 }
 
@@ -1806,7 +1811,7 @@ function renderApp() {
   }
   app.innerHTML = `
     <main class="screen">
-      ${["matches", "discover", "chat"].includes(state.tab) ? "" : renderHero()}
+      ${["matches", "discover", "chat", "status"].includes(state.tab) ? "" : renderHero()}
       ${state.tab === "discover" ? renderDiscover() : ""}
       ${state.tab === "matches" ? renderMatches() : ""}
       ${state.tab === "chat" ? renderChat() : ""}
@@ -1838,7 +1843,7 @@ function renderHero() {
 function statusLine() {
   const p = state.profile;
   if (p.status === "submitted") return "Submitted for founder review. You can still view your profile.";
-  if (p.status === "approved") return "Approved. Discover, matches, and chat are live when the matching SQL is installed.";
+  if (p.status === "approved") return "You're approved. Discover, Matches and Chat are open.";
   if (p.status === "changes_requested") return `Changes requested: ${p.review_note || "Please update your profile."}`;
   if (p.status === "removed") return "This profile has been removed.";
   return "Save your full dating profile. Submit when the required fields are complete.";
@@ -2432,20 +2437,43 @@ function renderMessage(message) {
 
 function renderStatus() {
   const p = state.profile;
+  const photo = state.photos[0]?.url;
+  const age = p.birth_date ? ageFromBirthDate(p.birth_date) : "";
+  const copy = {
+    submitted: ["You're in review", "The founder reviews every profile personally. You'll be able to meet members as soon as you're approved."],
+    approved: ["You're approved", "Welcome to No Seeds. Discover, Matches and Chat are open."],
+    changes_requested: ["Almost there", "The founder asked for a few changes before your profile goes live."],
+    removed: ["Profile not approved", "Your profile isn't active on No Seeds. Questions? Email thegiftedbystarr@gmail.com."],
+  }[p.status] || ["Your profile", "Finish your profile and submit it for review."];
+  const stage = { submitted: 1, changes_requested: 1, approved: 2 }[p.status] ?? 0;
+  const steps = ["Submitted", "Founder review", "Live"];
   return `
-    <section class="panel">
-      <h2>Review status</h2>
-      <div class="status ${p.status === "changes_requested" ? "error" : "gold"}">${escapeHtml(statusLine())}</div>
-      <div class="profile-card" style="margin-top:14px">
-        <div class="profile-photo">${state.photos[0]?.url ? `<img src="${state.photos[0].url}" alt="Your profile preview" />` : "Preview"}</div>
-        <div class="body">
-          <strong>${escapeHtml(p.first_name || "Your profile")}${p.birth_date ? `, ${ageFromBirthDate(p.birth_date)}` : ""}</strong>
-          <p class="copy">${escapeHtml([p.city, p.relationship_goal].filter(Boolean).join(" · "))}</p>
-          <div class="chips"><span class="chip">Clause Clear</span><span class="chip">No step-parent role</span></div>
-          <p>${escapeHtml(p.bio || "Your bio will show here.")}</p>
+    <section class="ns-member-hero">
+      <div class="ns-member-top ns-status-top">${renderLockup()}<button class="ns-status-signout" id="signout" type="button">Sign out</button></div>
+      <h1>${escapeHtml(copy[0])}</h1>
+      <p>${escapeHtml(copy[1])}</p>
+    </section>
+    <section class="ns-member-sheet">
+      ${notice()}
+      ${p.status === "removed" ? "" : `
+        <ol class="ns-status-steps">${steps.map((label, i) => `
+          <li class="${i < stage || (i === 2 && stage === 2) ? "is-done" : i === stage ? "is-now" : ""}"><span>${i < stage || (i === 2 && stage === 2) ? "✓" : i + 1}</span>${label}</li>`).join("")}
+        </ol>`}
+      ${p.status === "changes_requested" && p.review_note ? `<div class="ns-status-note"><b>From the founder</b><p>${escapeHtml(p.review_note)}</p></div>` : ""}
+      <article class="ns-preview">
+        <div class="ns-preview-photo">${photo ? `<img src="${photo}" alt="" />` : `<span>${escapeHtml((p.first_name || "?").charAt(0))}</span>`}</div>
+        <div class="ns-preview-body">
+          <h2>${escapeHtml(p.first_name || "Your profile")}${age ? `<span>, ${age}</span>` : ""}</h2>
+          ${[p.city, p.relationship_goal].filter(Boolean).length ? `<p class="ns-preview-meta">${escapeHtml([p.city, p.relationship_goal].filter(Boolean).join(" · "))}</p>` : ""}
+          <div class="ns-preview-tags"><span>No kids</span><span>No step-parent role</span>${(p.interests || []).slice(0, 3).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
+          ${p.bio ? `<p class="ns-preview-bio">${escapeHtml(p.bio)}</p>` : ""}
         </div>
+      </article>
+      <div class="ns-actions ns-status-actions">
+        ${p.status === "approved" ? `<button class="ns-btn-primary" type="button" data-tab="discover">Start discovering</button>` : ""}
+        ${p.status === "removed" ? "" : `<button class="${p.status === "approved" ? "ns-btn-quiet" : "ns-btn-primary"}" type="button" data-tab="profile">${p.status === "changes_requested" ? "Update my profile" : "View or edit my profile"}</button>`}
       </div>
-      <div class="btn-row"><button class="btn secondary" data-tab="profile">Edit profile</button></div>
+      <p class="ns-legal-links ns-status-legal"><a href="./terms.html" data-legal="terms">Terms</a> · <a href="./privacy.html" data-legal="privacy">Privacy</a> · <a href="./safety.html" data-legal="safety">Safety</a></p>
     </section>
   `;
 }

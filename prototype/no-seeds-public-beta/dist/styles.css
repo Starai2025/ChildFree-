@@ -4192,3 +4192,60 @@ body.ns-legal-open { overflow: hidden; }
 }
 
 .ns-rv-card > .ns-rv-muted { padding: 14px 16px 0; }
+
+/* ---------- Status screen ---------- */
+.ns-status-top { display: flex; align-items: center; justify-content: space-between; }
+.ns-status-signout { padding: 7px 14px; border-radius: 999px; background: rgba(246, 240, 232, 0.12); color: var(--ivory); font-family: var(--font-ui); font-size: 13px; font-weight: 600; }
+
+.ns-status-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 2px 0 18px;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  color: rgba(25, 21, 18, 0.45);
+}
+
+.ns-status-steps li { display: grid; justify-items: center; gap: 6px; position: relative; }
+.ns-status-steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: calc(50% + 20px);
+  right: calc(-50% + 20px);
+  height: 2px;
+  background: rgba(25, 21, 18, 0.12);
+}
+.ns-status-steps span {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(25, 21, 18, 0.08);
+  font-size: 14px;
+}
+.ns-status-steps .is-done { color: var(--emerald); }
+.ns-status-steps .is-done span { background: var(--emerald); color: #fffaf3; }
+.ns-status-steps .is-done::after { background: var(--emerald) !important; }
+.ns-status-steps .is-now { color: var(--ink); }
+.ns-status-steps .is-now span { background: #fffdf9; color: #b8892a; box-shadow: 0 0 0 2px var(--gold-soft); }
+
+.ns-status-note {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(217, 178, 95, 0.45);
+  background: rgba(217, 178, 95, 0.12);
+}
+.ns-status-note b { display: block; margin-bottom: 4px; font-size: 13px; color: #8a6418; }
+.ns-status-note p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--ink); }
+
+.ns-status-actions { margin-top: 18px; }
+.ns-status-actions .ns-btn-quiet { color: var(--emerald); font-weight: 600; }
+.ns-status-legal { text-align: center; color: rgba(25, 21, 18, 0.5); margin-top: 14px; }
+.ns-status-legal a { color: rgba(25, 21, 18, 0.6); }
