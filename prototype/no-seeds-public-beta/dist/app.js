@@ -1299,7 +1299,7 @@ function renderWelcome() {
         <p class="ns-welcome-sub">Black love. Childfree by choice.</p>
         <button class="ns-btn-primary" type="button" id="welcome-join">Join No Seeds</button>
         <p class="ns-welcome-signin">Already a member? <button type="button" id="welcome-signin">Sign in</button></p>
-        <p class="ns-legal-links"><a href="./terms.html">Terms</a> · <a href="./privacy.html">Privacy</a> · <a href="./safety.html">Safety</a></p>
+        <p class="ns-legal-links"><a href="./terms.html" data-legal="terms">Terms</a> · <a href="./privacy.html" data-legal="privacy">Privacy</a> · <a href="./safety.html" data-legal="safety">Safety</a></p>
       </section>
     </main>
   `;
@@ -1747,7 +1747,7 @@ function renderAccountStep(p) {
         <input id="birth_date" name="birth_date" type="date" required value="${escapeHtml(p.birth_date || "")}" />
       </div>
       <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
-      <p class="ns-consent">By continuing, you agree to our <a href="./terms.html" target="_blank" rel="noopener">Terms</a> and <a href="./privacy.html" target="_blank" rel="noopener">Privacy Policy</a>, and confirm you're 18 or older.</p>
+      <p class="ns-consent">By continuing, you agree to our <a href="./terms.html" data-legal="terms">Terms</a> and <a href="./privacy.html" data-legal="privacy">Privacy Policy</a>, and confirm you're 18 or older.</p>
       ${signedIn ? "" : `<p class="account-signin">Already a member? <button type="button" id="account-signin">Sign in</button></p>`}
     </form>
   `;
@@ -2601,5 +2601,58 @@ function bindAppEvents() {
     if (details !== null) reportMember("other", details);
   });
 }
+
+// Terms, Privacy and Safety open in a pop-up sheet over the app, so members never leave their screen.
+// The text lives in terms.html, privacy.html and safety.html (Google needs a public privacy address).
+const LEGAL_PAGES = { terms: "./terms.html", privacy: "./privacy.html", safety: "./safety.html" };
+
+async function openLegal(name) {
+  closeLegal();
+  const sheet = document.createElement("div");
+  sheet.className = "ns-legal-modal";
+  sheet.setAttribute("role", "dialog");
+  sheet.setAttribute("aria-modal", "true");
+  sheet.innerHTML = `
+    <div class="ns-legal-backdrop" data-legal-close></div>
+    <section class="ns-legal-panel">
+      <header><h2>Loading…</h2><button type="button" data-legal-close aria-label="Close">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button></header>
+      <div class="ns-legal-content"></div>
+    </section>`;
+  document.body.appendChild(sheet);
+  document.body.classList.add("ns-legal-open");
+  try {
+    const html = await fetch(LEGAL_PAGES[name], { cache: "no-cache" }).then((r) => r.text());
+    const page = new DOMParser().parseFromString(html, "text/html");
+    page.querySelector(".ns-legal-nav")?.remove();
+    sheet.querySelector("h2").textContent = page.querySelector(".ns-legal-hero h1")?.textContent || "No Seeds";
+    const updated = page.querySelector(".ns-legal-hero p")?.textContent || "";
+    sheet.querySelector(".ns-legal-content").innerHTML = `${updated ? `<p class="ns-legal-date">${escapeHtml(updated)}</p>` : ""}${page.querySelector(".ns-legal-sheet")?.innerHTML || ""}`;
+  } catch {
+    sheet.querySelector("h2").textContent = "Couldn't load this page";
+    sheet.querySelector(".ns-legal-content").innerHTML = `<p>Check your connection and try again.</p>`;
+  }
+  sheet.querySelector(".ns-legal-panel button")?.focus();
+}
+
+function closeLegal() {
+  document.querySelector(".ns-legal-modal")?.remove();
+  document.body.classList.remove("ns-legal-open");
+}
+
+document.addEventListener("click", (event) => {
+  const link = event.target.closest("a[data-legal], .ns-legal-content a[href$='.html']");
+  if (link) {
+    const name = link.dataset.legal || Object.keys(LEGAL_PAGES).find((key) => link.getAttribute("href").endsWith(`${key}.html`));
+    if (name) {
+      event.preventDefault();
+      openLegal(name);
+      return;
+    }
+  }
+  if (event.target.closest("[data-legal-close]")) closeLegal();
+});
+document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeLegal(); });
 
 init();
