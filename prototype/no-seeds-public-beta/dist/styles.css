@@ -3390,14 +3390,14 @@ button {
 .ns-disc-hero { padding-bottom: 44px; }
 
 .ns-disc-sheet {
-  padding: 16px 16px calc(150px + env(safe-area-inset-bottom));
+  padding: 16px 16px calc(190px + env(safe-area-inset-bottom));
 }
 
 .ns-disc-cover {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 5 / 6;
   padding: 0;
   overflow: hidden;
   border-radius: 24px;
@@ -3448,16 +3448,23 @@ button {
   background: transparent;
 }
 
+/* The buttons sit on an ivory fade so text scrolls away beneath them instead of being covered. */
 .ns-disc-actions {
   position: fixed;
   z-index: 19;
   left: 50%;
-  bottom: calc(78px + env(safe-area-inset-bottom));
+  bottom: calc(62px + env(safe-area-inset-bottom));
+  width: min(100vw, 430px);
   transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 22px;
+  padding: 34px 0 14px;
+  background: linear-gradient(180deg, rgba(246, 240, 232, 0) 0%, rgba(246, 240, 232, 0.94) 42%, #f6f0e8 100%);
+  pointer-events: none;
 }
+.ns-disc-actions .ns-round { pointer-events: auto; }
 
 .ns-disc-pass {
   width: 60px;
