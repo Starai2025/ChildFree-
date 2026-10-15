@@ -1266,6 +1266,8 @@ function ensureTabData() {
 }
 
 function renderAuth() {
+  authVisible = true;
+  queueMicrotask(syncBackHistory);
   if (state.user && state.setupOverview) {
     renderSetupOverview();
     return;
@@ -1289,12 +1291,7 @@ function renderAuth() {
     const action = event.submitter?.dataset?.action;
     savePublicApplication(event.currentTarget, { submit: action === "submit", advance: action === "next" });
   });
-  document.querySelector("[data-public-back]")?.addEventListener("click", () => {
-    state.publicStep = Math.max(0, state.publicStep - 1);
-    state.error = "";
-    state.message = "";
-    renderAuth();
-  });
+  document.querySelector("[data-public-back]")?.addEventListener("click", onboardingBack);
   document.querySelectorAll("[data-public-jump-step]").forEach((button) => {
     button.addEventListener("click", () => {
       state.publicStep = Number(button.dataset.publicJumpStep || 0);
@@ -1345,6 +1342,35 @@ function renderAuth() {
   });
   setTimeout(() => window.scrollTo({ top: 0, left: 0 }), 0);
 }
+
+// Sign-up screens in order: Welcome → Let's be clear → steps 1-10 (signed in: setup summary → steps).
+// Returns false on the first screen, where the phone's back should leave the site as normal.
+function onboardingBack() {
+  if (state.saving) return true;
+  const inSteps = state.user ? !state.setupOverview : (state.publicGateOpen || Boolean(state.message));
+  state.error = "";
+  state.message = "";
+  if (!state.user && state.signInOpen) state.signInOpen = false;
+  else if (inSteps && state.publicStep > 0) state.publicStep -= 1;
+  else if (inSteps && state.user) state.setupOverview = true;
+  else if (inSteps) { state.publicGateOpen = false; state.agreementOpen = true; }
+  else if (!state.user && state.agreementOpen) state.agreementOpen = false;
+  else return false;
+  renderAuth();
+  window.scrollTo(0, 0);
+  return true;
+}
+
+// Keep one history entry above the first screen so the phone's back gesture steps back inside sign-up.
+let authVisible = false;
+function syncBackHistory() {
+  if (!authVisible) return;
+  const atStart = state.user ? state.setupOverview : !(state.signInOpen || state.agreementOpen || state.publicGateOpen || state.message);
+  if (!atStart && !history.state?.nsBack) history.pushState({ ...(history.state || {}), nsBack: true }, "");
+}
+window.addEventListener("popstate", () => {
+  if (authVisible) onboardingBack();
+});
 
 function openSignIn() {
   state.signInOpen = true;
@@ -1473,6 +1499,7 @@ function renderAgreement() {
   app.innerHTML = `
     <main class="screen gate-screen">
       <section class="gate-hero">
+        <button class="ns-back ns-gate-back" type="button" data-gate-back>${BACK_ICON}<span>Back</span></button>
         ${renderLockup()}
         <h1>Let's be clear…</h1>
         <p class="gate-line">Black. Single.<br>Absolutely No Seeds.</p>
@@ -1497,6 +1524,7 @@ function renderAgreement() {
   document.querySelector("#show-signin")?.addEventListener("click", () => {
     openSignIn();
   });
+  document.querySelector("[data-gate-back]")?.addEventListener("click", onboardingBack);
 }
 
 function renderPublicApplication() {
@@ -1855,11 +1883,11 @@ function renderStoryApplicationStep(p) {
 }
 
 // Shared top of every application step: back, the one small logo, step count, progress.
+const BACK_ICON = `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 function renderStepTop() {
   const step = state.publicStep + 1;
-  const back = state.publicStep > 0
-    ? `<button class="ns-back" type="button" data-public-back aria-label="Back" ${state.saving ? "disabled" : ""}><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`
-    : `<span class="ns-back-space"></span>`;
+  const back = `<button class="ns-back" type="button" data-public-back ${state.saving ? "disabled" : ""}>${BACK_ICON}<span>Back</span></button>`;
   return `
     <header class="ns-step-top">
       ${back}
@@ -1931,6 +1959,7 @@ function renderPublicProfileStep(key, p) {
 }
 
 function renderApp() {
+  authVisible = false;
   if (!state.profile) {
     app.innerHTML = `<main class="screen"><section class="hero"><h1>Profile loading issue</h1><p>${escapeHtml(state.error || "Try signing out and back in.")}</p><button class="btn primary" id="signout">Sign out</button></section></main>`;
     document.querySelector("#signout")?.addEventListener("click", signOut);
@@ -2575,6 +2604,10 @@ function planOptions(kind) {
     : options.sort((a, b) => (a.created_by ? 1 : 0) - (b.created_by ? 1 : 0) || new Date(a.created_at) - new Date(b.created_at));
 }
 
+// Google Maps Platform attribution: required wherever Google place data is shown without a Google map.
+const fromGoogle = (option) => option && option.kind !== "time" && !option.created_by && Boolean(option.maps_url || option.rating != null);
+const googleCredit = () => `<p class="ns-gmaps-credit" translate="no" aria-label="Google Maps">Google Maps</p>`;
+
 function renderPlanCard(match) {
   const plan = state.plan;
   const name = escapeHtml(match.other_first_name || "your match");
@@ -2588,6 +2621,7 @@ function renderPlanCard(match) {
         <p class="ns-plan-when">${escapeHtml(time?.label || "")}</p>
         ${place?.detail ? `<p class="ns-plan-where">${escapeHtml(place.detail)}</p>` : ""}
         ${place?.maps_url ? `<a class="ns-plan-link" href="${escapeHtml(place.maps_url)}" target="_blank" rel="noopener noreferrer">Open in Maps</a>` : ""}
+        ${fromGoogle(place) ? googleCredit() : ""}
         <p class="ns-plan-safety">Meet in public, get there on your own, and tell a friend where you'll be.</p>
       </article>`;
   }
@@ -2648,6 +2682,7 @@ function renderPlanner(match) {
             </button>
             <div class="ns-plan-foot">${who(o)}${o.maps_url ? `<a href="${escapeHtml(o.maps_url)}" target="_blank" rel="noopener noreferrer">Map</a>` : ""}</div>
           </div>`).join("") || `<p class="ns-plan-empty">No suggestions yet. Add a spot you'd both enjoy.</p>`}
+        ${places.some(fromGoogle) ? googleCredit() : ""}
       </div>
       ${open ? `
         <form class="ns-plan-custom" data-custom="place">

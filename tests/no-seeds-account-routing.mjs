@@ -31,7 +31,7 @@ function harness(status = 'draft') {
     },
     querySelectorAll() {return [];},
   };
-  const context = vm.createContext({state, document, app: {innerHTML: ''}, supabase: {auth: {
+  const context = vm.createContext({state, document, app: {innerHTML: ''}, queueMicrotask, history: {state: null, pushState() {}}, supabase: {auth: {
     getSession: async () => ({data: {session: state.user ? {user: state.user} : null}}),
     onAuthStateChange: listener => {authListener = listener;},
   }}, accountLanding, resumeStep, mergeDrafts, hasUnsavedAnswers,
@@ -44,7 +44,7 @@ function harness(status = 'draft') {
     renderWelcome: () => {context.app.innerHTML = 'welcome'; calls.push('welcome');}, renderAgreement: () => {},
     renderLockup: () => '<div>No Seeds</div>', notice: () => state.error || state.message,
     escapeHtml: value => String(value).replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
-    GOOGLE_G: '', setTimeout: fn => pending.push(fn), startTypingExpiryTimer: () => {}, window: {location: {origin: 'https://example.test'}, scrollTo() {}},
+    GOOGLE_G: '', setTimeout: fn => pending.push(fn), startTypingExpiryTimer: () => {}, window: {location: {origin: 'https://example.test'}, scrollTo() {}, addEventListener() {}},
     signIn: async email => calls.push(`email:${email}`), startGoogle: async () => ({error: null}), friendlyAuthError: e => e.message,
     signOut: async () => calls.push('signout'), formToPublicProfile: () => state.publicProfile,
   });
