@@ -1,5 +1,13 @@
 # Build status
 
+## Current public web beta — October 15, 2026
+
+The active member app is `prototype/no-seeds-public-beta/dist`, hosted at https://noseedsdatingsite.com (Render backup https://no-seeds-dating.onrender.com). Render auto-publishes `handoff/free-midnight-claude` on every push, without a build or environment variables. Do not deploy to ChatGPT Sites or change main. Always pull with rebase and run the routing, onboarding, photo and SQL suites before pushing. Claude owns member screen layout/styles; Codex owns the assigned backend slice.
+
+The founder's handoff baseline `4130e35` includes sign-in routing, review/status/legal screens, My Profile and Discover fixes. Claude's subsequent `66ac3bd` and `83bcf30` add signup Back navigation, Google Maps credit and signup styling. Backend migrations 202610150001–004 are applied live and recorded in migration history. The advisor has zero errors and one remaining warning for Pro-only leaked-password protection. Private API schema exclusion was verified with PGRST106. See [October 15 delivery evidence](docs/NO_SEEDS_BACKEND_DELIVERY_20261015.md), [planner rollout](docs/NO_SEEDS_GOOGLE_PLACES.md) and [SMTP setup](docs/NO_SEEDS_SMTP_SETUP.md) for the remaining provider and member-session verification.
+
+## Earlier native/demo checkpoint (historical)
+
 Current scope: user-authorized MVP1 synthetic demo, October 7, 2026. Original onboarding baseline is committed as `7eb64dd` in `Starai2025/ChildFree-` main. The ZIP's historical review evidence remains in the earlier verification documents; it is not evidence of current hosted/native behavior.
 
 ## Current implementation

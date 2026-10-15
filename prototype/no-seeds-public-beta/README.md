@@ -1,18 +1,11 @@
-# No Seeds Public Beta UI Snapshot
+# No Seeds public web beta
 
-This folder preserves the current mobile-first No Seeds Dating public beta screens before the work is folded into the main app structure.
+This directory contains the live member app, including account setup, photos, review status, legal/safety pages, discovery, matching, chat, date planning and My Profile.
 
-It includes the approved/active screen direction for:
+As of October 15, 2026, the primary site is https://noseedsdatingsite.com and the backup is https://no-seeds-dating.onrender.com. Render auto-publishes `dist` from `handoff/free-midnight-claude` on each push. Its publish directory, relative to the repository root, is `prototype/no-seeds-public-beta/dist`. Leave the build command empty; there are no Render environment variables. Supabase uses public connection values in the app and enforces access through RLS and server functions.
 
-- Welcome screen with No Seeds logo, tagline, and couple image
-- Agreement screen without "Sovereignty Check"
-- Account creation with first name, email, password, and date of birth
-- Gender and looking-for step
-- Location and age range step
-- Relationship intentions step
-- Merged No Seeds pledge step for Black singles with no children
-- Prompt answer screens using the cream card design
+Do not deploy to ChatGPT Sites. Any retained `.openai` hosting metadata is historical and is not used by Render. Serve `dist` over HTTP for local preview.
 
-To preview locally, serve or open `dist/index.html`.
+Before each push, run `git pull --rebase`, account-routing, onboarding-sync, photo-upload and all public-beta SQL suites in `tests/`, plus focused tests for the change. Never force push or change main. Every push goes live; coordinate changes accordingly. Claude owns `dist/app.js` and `dist/styles.css`; keep necessary backend integration edits small and describe them in the commit.
 
-This is a snapshot of the working UI as of 2026-10-13. It is not the live published deployment.
+See [account routing](../../docs/NO_SEEDS_ACCOUNT_ENTRY.md), [backend](../../docs/PUBLIC_BETA_BACKEND.md), [SMTP setup](../../docs/NO_SEEDS_SMTP_SETUP.md) and [Google Places rollout](../../docs/NO_SEEDS_GOOGLE_PLACES.md). Service-role keys and the admin passcode must never enter frontend files.

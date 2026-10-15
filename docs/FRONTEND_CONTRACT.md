@@ -9,9 +9,11 @@ For the member app (Codex). Everything below uses **supabase-js v2 with the publ
 
     SUPABASE_URL      = https://btnrophnyfuwnqzwiooh.supabase.co
     SUPABASE_ANON_KEY = sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw
-    SITE_URL          = https://free-midnight-beta.thegiftedbystarr.chatgpt.site
+    SITE_URL          = https://noseedsdatingsite.com
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+Render publishes `prototype/no-seeds-public-beta/dist` from `handoff/free-midnight-claude` on push, without a build command or environment variables. Use the current page origin for auth redirects; SITE_URL is the production fallback. The Render backup is https://no-seeds-dating.onrender.com. ChatGPT Sites is retired. See [email setup](NO_SEEDS_SMTP_SETUP.md) and [planner storage/display](NO_SEEDS_GOOGLE_PLACES.md).
 
 ## Sign in and return later
 
@@ -148,12 +150,14 @@ There's no birth date, ZIP, eligibility answers or review data. Candidates are a
 | Message a closed or blocked match | new row violates row-level security policy | "This conversation has ended." |
 | Edit a removed profile | `this profile has been removed` | Removed notice |
 
-## Migrations (paste into the Supabase SQL Editor, in order, once each)
+## Applied migration baseline
+
+These baseline migrations are already applied on the live project. Do not paste them again. Check `supabase_migrations.schema_migrations` and [current delivery evidence](NO_SEEDS_BACKEND_DELIVERY_20261015.md) before applying any new migration.
 
 | File | Status on the live project |
 |---|---|
 | `supabase/migrations/202610120001_public_beta_profiles.sql` | Applied (with the `search_path` fix) |
-| `supabase/migrations/202610120002_matching_and_chat.sql` | **Paste next** |
-| `supabase/migrations/202610120003_reports_and_member_views.sql` | **Paste after 0002** |
+| `supabase/migrations/202610120002_matching_and_chat.sql` | Applied |
+| `supabase/migrations/202610120003_reports_and_member_views.sql` | Applied |
 
-Then paste `supabase/tests/matching_live_check.sql`. It should end with `ALL MATCHING CHECKS PASSED`, and it rolls back so no data remains.
+The isolated regression suite runs `supabase/tests/matching_live_check.sql`, expects `ALL MATCHING CHECKS PASSED`, and rolls back its synthetic fixtures. Live provider/member checks are listed separately in the delivery evidence.

@@ -2,7 +2,7 @@
 // app.js calls these so every onboarding step is saved on the phone immediately and on the
 // member's own `profiles` row whenever they are signed in. Public key only; RLS does the rest.
 
-export const SITE_URL = "https://free-midnight-beta.thegiftedbystarr.chatgpt.site";
+export const SITE_URL = "https://noseedsdatingsite.com";
 
 const ELIGIBILITY_KEYS = ["black", "noChildren", "neverChildren", "noStepParent", "honest", "respect"];
 const SCALARS = ["first_name", "birth_date", "gender", "city", "zip", "relationship_goal", "marriage_view", "bio", "pledge_accepted_at"];

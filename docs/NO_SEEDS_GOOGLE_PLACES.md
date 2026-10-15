@@ -15,7 +15,7 @@ Member-entered places and time suggestions retain their existing text. Plan/opti
 
 No screen structure or styles were changed. `loadPlan` is the only member-screen logic change. The hydrated option shape retains `label`, `detail`, `maps_url`, `rating`, picks and IDs, and adds `attributions` for fresh Google results.
 
-Claude must display the required provider attribution alongside those results and any returned third-party attributions. Current Google guidance calls for **Google Maps** attribution for new implementations, using the official logo where possible; check the linked policy rather than inventing a logo or assuming a generic credit covers every result. Keep user-entered custom options visually distinguishable from Google results. Check the existing Terms/Privacy links also satisfy Google's end-user notice requirements. These UI/legal acceptance checks remain separate from the backend storage change.
+Claude added the Google Maps credit in `66ac3bd`. Verify its placement alongside live results and render any returned third-party attributions. Current Google guidance calls for **Google Maps** attribution for new implementations, using the official logo where possible; check the linked policy rather than inventing a logo or assuming a generic credit covers every result. Keep user-entered custom options visually distinguishable from Google results. Check the existing Terms/Privacy links also satisfy Google's end-user notice requirements. These UI/legal acceptance checks remain separate from the backend storage change.
 
 ## Separate location-cache follow-up
 

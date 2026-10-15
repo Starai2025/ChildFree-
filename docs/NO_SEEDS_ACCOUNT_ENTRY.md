@@ -25,12 +25,6 @@ October 14, 2026.
 
 ## Publication
 
-The existing Site identity and audience must remain unchanged:
-
-- Project: `appgprj_6acce774ded8819189a7b680b1253bbd`
-- URL: https://free-midnight-beta.thegiftedbystarr.chatgpt.site/
-- Static files: `prototype/no-seeds-public-beta/dist`
-
-The selected Site was still version 12 when inspected. Automatic approval rejected the official Sites helper's hidden stdin operation because this session disables sandbox approvals. This source change is not a completed live deployment. Use an environment that permits the official source helper, synchronize the tested files to the existing Sites source repository, and save/deploy the exact matching archive with its returned source commit.
+Updated October 15, 2026: hosting moved to Render at https://noseedsdatingsite.com, with https://no-seeds-dating.onrender.com as backup. Render automatically publishes `prototype/no-seeds-public-beta/dist` from `handoff/free-midnight-claude` on each push. There is no build step and no environment configuration on Render. Do not publish to ChatGPT Sites. The founder's current baseline `4130e35` includes the sign-in routing fix `66f7528` and Claude's later member screens.
 
 After deployment, verify real email/Google sign-in, a returning draft with and without photos, Continue setup, saved-answer review, submission/status, and approved-member Discover. No real profile should be approved solely for this routing test.

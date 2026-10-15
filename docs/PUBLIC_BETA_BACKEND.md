@@ -1,6 +1,10 @@
 # Public web beta backend (Supabase)
 
-Applicants sign in by email, save a full profile, upload optional photos, submit for founder review, and come back later to the same profile. There is no messaging, no app-store build and no verification claims.
+Applicants sign in by email or Google, save a profile, upload optional photos and submit for founder review. Approved members use discovery, mutual matches, text chat and date planning. This is the public web beta; native/store release gates remain separate.
+
+Current hosting (October 15, 2026): https://noseedsdatingsite.com on Render, with https://no-seeds-dating.onrender.com as backup. Render serves the committed `prototype/no-seeds-public-beta/dist` directory from `handoff/free-midnight-claude`, with no build or environment variables. Supabase functions and migrations deploy separately. Do not publish to ChatGPT Sites.
+
+Backend follow-ups and evidence: [October 15 delivery](NO_SEEDS_BACKEND_DELIVERY_20261015.md), [SMTP and GoDaddy setup](NO_SEEDS_SMTP_SETUP.md), [Google Places storage/display](NO_SEEDS_GOOGLE_PLACES.md). The unused legacy `beta_applications` intake is closed to browser inserts by migration 202610150001. Migration 002 removes browser EXECUTE on public trigger functions; 003 preserves member RPC contracts with private guarded implementations; 004 restricts Google suggestions to place IDs and app-authored fields. All four are applied live and recorded. Keep `app_private` outside exposed API schemas. The Free plan's leaked-password-protection warning requires an owner-approved Pro upgrade; do not dismiss it as fixed.
 
 | Part | Path |
 |---|---|
