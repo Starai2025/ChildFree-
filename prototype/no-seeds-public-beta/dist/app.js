@@ -1391,22 +1391,30 @@ function openSignIn() {
   renderAuth();
 }
 
+const CTA_ARROW = `<svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 function renderSignIn() {
   app.innerHTML = `
     <main class="screen auth-journey">
-      <form id="signin-form" class="account-screen ns-step ns-signin-screen">
-        ${renderLockup()}
-        <h1>Welcome back</h1>
-        <p class="account-tagline">Sign in to return to your No Seeds account.</p>
-        ${notice()}
-        <button class="ns-btn-google" type="button" id="signin-google" ${state.saving ? "disabled" : ""}>${GOOGLE_G}<span>Continue with Google</span></button>
-        <div class="account-divider"><span></span><em>or use email</em><span></span></div>
-        <div class="field account-field">
-          <label for="signin-email">Email</label>
-          <input id="signin-email" name="email" type="email" autocomplete="email" required value="${escapeHtml(state.publicProfile.email || "")}" ${state.saving ? "readonly" : ""} />
-        </div>
-        <button class="ns-btn-primary" type="submit" ${state.saving ? "disabled" : ""}>${state.saving ? "Sending…" : "Email me a sign-in link"}</button>
-        <button class="ns-btn-quiet" type="button" id="signin-back" ${state.saving ? "disabled" : ""}>Back to welcome</button>
+      <form id="signin-form" class="ns-rt">
+        <section class="ns-rt-hero">
+          <button class="ns-back ns-rt-back" type="button" id="signin-back" ${state.saving ? "disabled" : ""}>${BACK_ICON}<span>Back</span></button>
+          ${renderLockup()}
+          <h1>Welcome <em>back</em></h1>
+          <p>Sign in to pick up where you left off.</p>
+        </section>
+        <section class="ns-rt-sheet">
+          ${notice()}
+          <button class="ns-btn-google" type="button" id="signin-google" ${state.saving ? "disabled" : ""}>${GOOGLE_G}<span>Continue with Google</span></button>
+          <div class="account-divider"><span></span><em>or use email</em><span></span></div>
+          <div class="field account-field">
+            <label for="signin-email">Email</label>
+            <input id="signin-email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" value="${escapeHtml(state.publicProfile.email || "")}" ${state.saving ? "readonly" : ""} />
+          </div>
+          <button class="ns-btn-primary" type="submit" ${state.saving ? "disabled" : ""}><span>${state.saving ? "Sending…" : "Email me a sign-in link"}</span>${state.saving ? "" : CTA_ARROW}</button>
+          <p class="ns-rt-note"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>No password needed. We'll email you a secure link.</p>
+          <p class="ns-rt-switch">New to No Seeds? <button type="button" id="signin-join">Join now</button></p>
+        </section>
       </form>
     </main>`;
   const keepEmail = () => {
@@ -1437,26 +1445,62 @@ function renderSignIn() {
     state.error = "";
     renderAuth();
   });
+  document.querySelector("#signin-join").addEventListener("click", () => {
+    keepEmail();
+    state.signInOpen = false;
+    state.publicGateOpen = false;
+    state.agreementOpen = true;
+    state.message = "";
+    state.error = "";
+    renderAuth();
+  });
 }
 
+// Short names for the setup checklist, in PROFILE_STEPS order.
+const SETUP_NAMES = ["Name & birthday", "Gender & who you're seeking", "Location & age range", "Intentions & lifestyle", "The No Seeds Pledge", "Your first prompt", "Your second prompt", "Bio & interests", "Your childfree life", "Photos"];
+
 function renderSetupOverview() {
-  const changesRequested = state.profile.status === "changes_requested";
+  const p = state.profile;
+  const changesRequested = p.status === "changes_requested";
   const reviewReady = state.publicStep === 9 && state.photos.length > 0;
-  const next = reviewReady ? "Review and submit" : PROFILE_STEPS[state.publicStep][2].replace(/[.]$/, "");
+  const done = reviewReady ? PROFILE_STEPS.length : state.publicStep;
+  const firstName = escapeHtml(p.first_name || "");
+  const tick = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   app.innerHTML = `
     <main class="screen auth-journey">
-      <section class="account-screen ns-step ns-setup-home">
-        ${renderLockup()}
-        <p class="ns-setup-label">${changesRequested ? "Updates requested" : "Profile setup"}</p>
-        <h1>${changesRequested ? "Update your profile" : "Finish your profile"}</h1>
-        <p class="account-tagline">Your answers are saved. Finish setup and submit your profile for founder review before Discover and messaging open.</p>
-        ${notice()}
-        <div class="ns-setup-next"><span>Next up</span><strong>${escapeHtml(next)}</strong><p>${state.photos.length} of 6 photos added</p></div>
-        <div class="ns-actions">
-          <button class="ns-btn-primary" type="button" id="continue-setup">${reviewReady ? "Review and submit" : "Continue setup"}</button>
-          <button class="ns-btn-quiet" type="button" id="review-answers">Review my answers</button>
-          <button class="ns-btn-quiet" type="button" id="setup-signout">Sign out</button>
-        </div>
+      <section class="ns-rt ns-setup-home">
+        <section class="ns-rt-hero">
+          ${renderLockup()}
+          <h1>${changesRequested ? "Update your profile" : "Finish your profile"}</h1>
+          <p>${firstName ? `Welcome back, ${firstName}. ` : ""}${changesRequested ? "The founder asked for a few changes. Update your answers and send your profile back." : "Your answers are saved. Finish the last few steps and the founder will review your profile."}</p>
+          <div class="ns-rt-progress" role="img" aria-label="${done} of ${PROFILE_STEPS.length} steps done">
+            <div class="ns-rt-progress-top"><span>${reviewReady ? "Ready for review" : `Next: ${escapeHtml(SETUP_NAMES[state.publicStep])}`}</span><b>${done} of ${PROFILE_STEPS.length}</b></div>
+            <div class="ns-rt-bar"><span style="width:${(done / PROFILE_STEPS.length) * 100}%"></span></div>
+          </div>
+          <button class="ns-btn-primary" type="button" id="continue-setup"><span>${reviewReady ? "Review and submit" : "Continue setup"}</span>${CTA_ARROW}</button>
+        </section>
+        <section class="ns-rt-sheet">
+          ${notice()}
+          ${changesRequested && p.review_note ? `
+            <div class="ns-rt-founder"><small>A note from the founder</small><p>${escapeHtml(p.review_note)}</p></div>` : ""}
+          <h2>Your profile</h2>
+          <ol class="ns-rt-steps">
+            ${SETUP_NAMES.map((label, index) => {
+              const isDone = index < done;
+              const isNext = index === state.publicStep && !reviewReady;
+              const meta = index === 9 ? `${state.photos.length} of 6 photos added` : isNext ? "Next" : "";
+              return `<li class="${isDone ? "is-done" : ""} ${isNext ? "is-next" : ""}">
+                <button type="button" data-setup-step="${index}" ${index <= state.publicStep ? "" : "disabled"}>
+                  <span class="ns-rt-dot" aria-hidden="true">${isDone ? tick : index + 1}</span>
+                  <span class="ns-rt-label">${escapeHtml(label)}</span>
+                  ${meta ? `<span class="ns-rt-meta">${meta}</span>` : ""}
+                </button>
+              </li>`;
+            }).join("")}
+          </ol>
+          <p class="ns-rt-hint">Tap a finished step to change it, or <button type="button" id="review-answers">review all answers</button>.</p>
+          <button class="ns-rt-signout" type="button" id="setup-signout">Sign out</button>
+        </section>
       </section>
     </main>`;
   document.querySelector("#continue-setup").addEventListener("click", () => {
@@ -1468,6 +1512,12 @@ function renderSetupOverview() {
     state.publicStep = 0;
     renderAuth();
   });
+  document.querySelectorAll("[data-setup-step]").forEach((button) => button.addEventListener("click", () => {
+    state.setupOverview = false;
+    state.publicStep = Number(button.dataset.setupStep);
+    renderAuth();
+    window.scrollTo(0, 0);
+  }));
   document.querySelector("#setup-signout").addEventListener("click", signOut);
 }
 

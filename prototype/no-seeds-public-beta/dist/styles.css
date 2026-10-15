@@ -4715,3 +4715,74 @@ body.ns-legal-open { overflow: hidden; }
 
 .ns-disc-pass { border: 1px solid rgba(15, 92, 77, 0.25); color: var(--emerald); }
 .ns-disc-like { box-shadow: 0 0 0 3px rgba(243, 213, 143, 0.9), 0 14px 30px rgba(194, 83, 47, 0.4); }
+
+/* ---------- Returning members: Welcome back and setup summary ---------- */
+.ns-rt { min-height: 100svh; display: flex; flex-direction: column; background: #f6f0e8; color: var(--ink); }
+.ns-rt-hero {
+  position: relative; display: grid; gap: 10px; padding: calc(18px + env(safe-area-inset-top)) 24px 58px; text-align: center;
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(243, 213, 143, 0.14), transparent 70%),
+    linear-gradient(180deg, #0c3029 0%, #0a2b24 60%, #082520 100%);
+  color: var(--ivory);
+}
+.ns-rt-hero .ns-lockup { justify-self: center; margin: 6px 0 18px; }
+.ns-rt-hero .ns-wordmark { color: #f3d58f; }
+.ns-rt-hero .ns-wordmark small { color: rgba(246, 240, 232, 0.6); }
+.ns-rt-back { position: absolute; top: calc(16px + env(safe-area-inset-top)); left: 18px; color: rgba(246, 240, 232, 0.88); }
+.ns-rt-hero h1 { margin: 0; font-family: var(--font-display); font-size: 38px; font-weight: 600; line-height: 1.08; color: #fbf4e8; }
+.ns-rt-hero h1 em { font-style: italic; font-weight: 500; color: #f3d58f; }
+.ns-rt-hero > p { margin: 0 auto; max-width: 320px; font-size: 15.5px; line-height: 1.5; color: rgba(246, 240, 232, 0.8); }
+.ns-rt-hero .ns-btn-primary { margin-top: 8px; }
+
+.ns-rt-sheet {
+  position: relative; flex: 1; display: grid; align-content: start; gap: 14px; margin-top: -30px; padding: 26px 22px calc(28px + env(safe-area-inset-bottom));
+  border-radius: 28px 28px 0 0; background: #f6f0e8;
+}
+.ns-rt-sheet .field input { border: 1px solid rgba(15, 92, 77, 0.42); border-radius: 10px; background: #fffdf9; }
+.ns-rt-sheet .field input:focus { border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(15, 92, 77, 0.12); }
+.ns-rt-sheet .field label { color: rgba(25, 21, 18, 0.8); }
+.ns-rt-sheet .ns-btn-google { border: 1px solid rgba(15, 92, 77, 0.55); background: transparent; box-shadow: none; color: var(--ink); }
+.ns-rt-sheet .account-divider { color: rgba(25, 21, 18, 0.55); }
+.ns-rt-sheet .account-divider span { height: 0; background: none; border-top: 1px dotted rgba(15, 92, 77, 0.45); }
+.ns-rt-note { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 2px 0 0; font-size: 13px; color: rgba(25, 21, 18, 0.58); }
+.ns-rt-note svg { color: #b8892a; }
+.ns-rt-switch { margin: 10px 0 0; text-align: center; font-size: 14.5px; color: rgba(25, 21, 18, 0.65); }
+.ns-rt-switch button, .ns-rt-hint button { padding: 0; background: none; color: var(--emerald); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Setup summary */
+.ns-setup-home .ns-rt-hero { padding-bottom: 54px; }
+.ns-rt-progress { margin-top: 10px; padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(243, 213, 143, 0.3); background: rgba(255, 255, 255, 0.04); text-align: left; }
+.ns-rt-progress-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 14px; }
+.ns-rt-progress-top span { font-weight: 600; color: #fbf4e8; }
+.ns-rt-progress-top b { font-weight: 600; color: #f3d58f; font-size: 13px; white-space: nowrap; }
+.ns-rt-bar { height: 5px; margin-top: 10px; overflow: hidden; border-radius: 999px; background: rgba(246, 240, 232, 0.14); }
+.ns-rt-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #b8892a, #f3d58f); }
+
+.ns-rt-sheet h2 { margin: 0 2px; font-family: var(--font-display); font-size: 21px; font-weight: 600; }
+.ns-rt-founder { display: grid; gap: 4px; padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(184, 137, 42, 0.45); background: rgba(243, 213, 143, 0.16); }
+.ns-rt-founder small { font-size: 12px; font-weight: 700; color: #8a6418; }
+.ns-rt-founder p { margin: 0; font-family: var(--font-display); font-size: 17px; line-height: 1.4; color: var(--ink); }
+
+.ns-rt-steps { margin: 0; padding: 0; list-style: none; overflow: hidden; border-radius: 18px; background: #fffdf9; box-shadow: 0 1px 2px rgba(25, 21, 18, 0.05), 0 10px 26px rgba(25, 21, 18, 0.06); }
+.ns-rt-steps li + li { border-top: 1px solid rgba(25, 21, 18, 0.06); }
+.ns-rt-steps button {
+  width: 100%; display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 12px; min-height: 50px; padding: 0 16px;
+  background: transparent; color: var(--ink); font: 500 15px var(--font-ui); text-align: left;
+}
+.ns-rt-steps button:disabled { opacity: 1; color: rgba(25, 21, 18, 0.42); cursor: default; }
+.ns-rt-dot {
+  width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%;
+  border: 1px solid rgba(25, 21, 18, 0.18); font-size: 11px; font-weight: 700; color: rgba(25, 21, 18, 0.45);
+}
+.ns-rt-steps .is-done .ns-rt-dot { border-color: var(--emerald); background: var(--emerald); color: #fbf4e8; }
+.ns-rt-steps .is-next { background: rgba(243, 213, 143, 0.14); }
+.ns-rt-steps .is-next .ns-rt-dot { border: 1.5px solid #b8892a; color: #8a6418; }
+.ns-rt-steps .is-next .ns-rt-label { font-weight: 700; }
+.ns-rt-meta { font-size: 12.5px; font-weight: 600; color: rgba(25, 21, 18, 0.5); }
+.ns-rt-steps .is-next .ns-rt-meta { padding: 3px 10px; border-radius: 999px; background: #b8892a; color: #fffaf0; }
+.ns-rt-hint { margin: 0 4px; font-size: 13px; color: rgba(25, 21, 18, 0.58); }
+.ns-rt-signout { justify-self: center; min-height: 44px; margin-top: 4px; padding: 0 18px; background: transparent; color: #a3391f; font: 600 15px var(--font-ui); }
+.ns-rt-sheet .account-divider { margin: 2px 0; }
+.ns-rt-sheet .field { margin: 0; }
+.ns-rt-sheet .field label { margin-bottom: 6px; font-size: 13.5px; font-weight: 500; letter-spacing: 0; text-transform: none; }
+body:has(.ns-rt), .auth-journey:has(.ns-rt) { background: #f6f0e8; }

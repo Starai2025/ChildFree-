@@ -44,7 +44,7 @@ function harness(status = 'draft') {
     renderWelcome: () => {context.app.innerHTML = 'welcome'; calls.push('welcome');}, renderAgreement: () => {},
     renderLockup: () => '<div>No Seeds</div>', notice: () => state.error || state.message,
     escapeHtml: value => String(value).replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
-    GOOGLE_G: '', setTimeout: fn => pending.push(fn), startTypingExpiryTimer: () => {}, window: {location: {origin: 'https://example.test'}, scrollTo() {}, addEventListener() {}},
+    GOOGLE_G: '', BACK_ICON: '', setTimeout: fn => pending.push(fn), startTypingExpiryTimer: () => {}, window: {location: {origin: 'https://example.test'}, scrollTo() {}, addEventListener() {}},
     signIn: async email => calls.push(`email:${email}`), startGoogle: async () => ({error: null}), friendlyAuthError: e => e.message,
     signOut: async () => calls.push('signout'), formToPublicProfile: () => state.publicProfile,
   });
@@ -82,7 +82,7 @@ await check('a completed draft lands on setup summary instead of the photo edito
 });
 await check('a draft with existing photos offers review rather than another photo upload', async () => {
   const h = harness(); h.state.photos = [{id: 'photo', position: 0}]; await h.load();
-  assert.match(h.html(), />Review and submit<\/button>/); assert.match(h.html(), /1 of 6 photos added/);
+  assert.match(h.html(), />Review and submit</); assert.match(h.html(), /1 of 6 photos added/);
 });
 await check('a new or partially finished account continues at its first missing step', async () => {
   for (const [changes, expected] of [[{birth_date: null}, 0], [{gender: null}, 1], [{city: null}, 2]]) {
@@ -115,7 +115,7 @@ await check('approval and revision transitions change the landing page in the sa
   h.state.profile.status = 'changes_requested'; await h.load(); assert.equal(h.state.setupOverview, true);
 });
 await check('opening sign-in sends no email; only submitting its form requests a link', async () => {
-  const h = harness(); h.state.user = null; h.openSignIn(); assert.match(h.html(), /Welcome back/);
+  const h = harness(); h.state.user = null; h.openSignIn(); assert.match(h.html(), /Welcome <em>back<\/em>/);
   assert.ok(!h.html().includes('Create your account')); assert.deepEqual(h.calls, []);
   await h.submit('#signin-form'); assert.deepEqual(h.calls, [`email:${profile.email}`]);
 });
