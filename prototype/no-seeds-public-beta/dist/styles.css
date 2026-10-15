@@ -4397,3 +4397,72 @@ body.ns-legal-open { overflow: hidden; }
 .ns-back:disabled { opacity: 0.5; }
 .ns-gate-back { position: absolute; z-index: 2; top: calc(14px + env(safe-area-inset-top)); left: 16px; margin: 0; color: var(--ivory); }
 .ns-gate-back:active { background: rgba(246, 240, 232, 0.1); }
+
+/* ---------- Sign-up refinement (founder-approved direction): emerald, gold hairlines, fine outlines ---------- */
+/* Back: a quiet text link, not a pill. */
+.ns-back {
+  height: 36px; padding: 0 8px 0 0; margin-left: -2px; border: 0; background: transparent; box-shadow: none;
+  font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--ink);
+}
+.ns-back svg { width: 18px; height: 18px; color: currentColor; }
+.ns-back:active { transform: none; background: transparent; box-shadow: none; opacity: 0.6; }
+.ns-gate-back { top: calc(18px + env(safe-area-inset-top)); left: 20px; border: 0; background: transparent; color: rgba(246, 240, 232, 0.88); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.ns-gate-back svg { color: currentColor; }
+.ns-gate-back:active { background: transparent; }
+
+/* Continue and I Agree: label centred, arrow at the right edge. */
+.ns-btn-primary:has(.ns-cta-arrow) { position: relative; display: flex; align-items: center; justify-content: center; }
+.ns-btn-primary .ns-cta-arrow { position: absolute; right: 22px; top: 50%; margin-top: -10px; opacity: 0.9; }
+
+/* Let's be clear: deep emerald, gold hairline cards, line icons. */
+.gate-screen {
+  background:
+    radial-gradient(90% 45% at 50% 0%, rgba(243, 213, 143, 0.12), transparent 70%),
+    radial-gradient(120% 60% at 50% 100%, rgba(19, 96, 79, 0.45), transparent 70%),
+    linear-gradient(180deg, #0c3029 0%, #082520 55%, #061d18 100%);
+}
+.gate-screen .gate-hero h1 { margin-top: 36px; text-align: center; color: #fbf4e8; font-size: 40px; }
+.gate-screen .gate-hero h1 em { font-style: italic; font-weight: 500; color: #f3d58f; }
+.gate-screen .gate-line { margin: 10px 0 26px; text-align: center; font-size: 19px; color: rgba(246, 240, 232, 0.92); }
+.gate-screen .pledge-list { gap: 10px; border-top: 0; }
+.gate-screen .pledge-item {
+  grid-template-columns: 24px 1fr; gap: 14px; align-items: center; padding: 15px 16px;
+  border: 1px solid rgba(243, 213, 143, 0.38); border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+}
+.gate-screen .pledge-item span { width: 24px; height: 24px; display: grid; place-items: center; background: transparent; color: #e3c27a; }
+.gate-screen .pledge-item p { font-family: var(--font-display); font-size: 16px; line-height: 1.35; color: #fbf4e8; }
+.gate-screen .gate-cta { margin-top: 30px; }
+
+/* Steps: emerald progress, fine emerald outlines. */
+.ns-progress { height: 3px; background: rgba(15, 92, 77, 0.12); }
+.ns-progress span { background: var(--emerald); }
+.ns-step .field input,
+.ns-step .field select,
+.ns-step .field textarea {
+  border: 1px solid rgba(15, 92, 77, 0.42); border-radius: 10px; background-color: #fffdf9; box-shadow: none;
+}
+.ns-step .field input:focus,
+.ns-step .field select:focus,
+.ns-step .field textarea:focus { border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(15, 92, 77, 0.12); }
+.ns-btn-google { border: 1px solid rgba(15, 92, 77, 0.55); background: transparent; box-shadow: none; color: var(--ink); }
+.ns-step .account-divider span { height: 0; background: none; border-top: 1px dotted rgba(15, 92, 77, 0.45); }
+
+/* Choices: selected fills emerald with gold text. */
+.ns-step .choice-card,
+.ns-chip span { border: 1px solid rgba(15, 92, 77, 0.3); background: #fffdf9; }
+.ns-step .choice-card:has(input:checked),
+.ns-chip input:checked + span { border-color: var(--emerald); background: var(--emerald); box-shadow: 0 6px 14px rgba(15, 92, 77, 0.22); }
+.ns-step .choice-card:has(input:checked) span,
+.ns-chip input:checked + span { color: #f3d58f; }
+
+/* Location: a slim dark privacy band with a lock. */
+.ns-location-privacy {
+  display: grid; grid-template-columns: 18px 1fr; column-gap: 10px; row-gap: 2px; align-items: center;
+  padding: 12px 14px; border: 0; border-radius: 12px;
+  background: linear-gradient(160deg, #13604f, #0a3a30); box-shadow: 0 8px 20px rgba(11, 67, 55, 0.18);
+}
+.ns-location-privacy svg { grid-row: span 2; color: #f3d58f; }
+.ns-location-privacy strong { font-size: 14px; font-weight: 600; color: #fbf4e8; }
+.ns-location-privacy span { font-size: 12.5px; line-height: 1.4; color: rgba(246, 240, 232, 0.72); }
+.ns-location-button { text-decoration: underline; text-underline-offset: 3px; color: var(--emerald) !important; font-weight: 500; }

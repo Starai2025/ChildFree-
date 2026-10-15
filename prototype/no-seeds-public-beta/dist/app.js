@@ -1501,15 +1501,15 @@ function renderAgreement() {
       <section class="gate-hero">
         <button class="ns-back ns-gate-back" type="button" data-gate-back>${BACK_ICON}<span>Back</span></button>
         ${renderLockup()}
-        <h1>Let's be clear…</h1>
+        <h1>Let's be <em>clear</em>…</h1>
         <p class="gate-line">Black. Single.<br>Absolutely No Seeds.</p>
         <ul class="pledge-list">
-          <li class="pledge-item"><span aria-hidden="true">✓</span><p>I do not have children of any age.</p></li>
-          <li class="pledge-item"><span aria-hidden="true">✓</span><p>I never want biological, adopted, or step children.</p></li>
-          <li class="pledge-item"><span aria-hidden="true">✓</span><p>I understand fence-sitters and parents are removed immediately.</p></li>
+          <li class="pledge-item"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><p>I do not have children of any age.</p></li>
+          <li class="pledge-item"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 20v-8M12 12c0-4 3-6.5 7-6.5 0 4-3 6.5-7 6.5zM12 14.5c0-3-2.4-5-5.5-5 0 3 2.4 5 5.5 5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><p>I never want biological, adopted, or step children.</p></li>
+          <li class="pledge-item"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span><p>I understand fence-sitters and parents are removed immediately.</p></li>
         </ul>
         ${notice()}
-        <button class="ns-btn-primary gate-cta" type="button" id="open-public-application">I Agree, Let's Go</button>
+        <button class="ns-btn-primary gate-cta" type="button" id="open-public-application"><span>I Agree, Let's Go</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <p class="ns-welcome-signin gate-signin">Already a member? <button type="button" id="show-signin">Sign in</button></p>
       </section>
     </main>
@@ -1583,7 +1583,7 @@ function renderGenderLookingForStep(p) {
           ${["Woman", "Man", "Non-binary"].map((item) => choiceCheck("seeking", item, p.seeking)).join("")}
         </div>
       </div>
-      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
     </form>
   `;
@@ -1607,6 +1607,7 @@ function renderLocationAgeStep(p) {
       <p class="account-tagline">Where you are and who you want to meet.</p>
       ${notice()}
       <div class="ns-location-privacy">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
         <strong>Your privacy stays protected.</strong>
         <span>Members only see your city. We never show live or exact location.</span>
       </div>
@@ -1641,7 +1642,7 @@ function renderLocationAgeStep(p) {
         </div>
       </div>
       <button class="ns-btn-quiet ns-location-button" type="button" data-use-current-location ${state.saving ? "disabled" : ""}>Use my current area once</button>
-      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </form>
   `;
 }
@@ -1673,7 +1674,7 @@ function renderRelationshipIntentionsStep(p) {
         ${intentSelect("lifestylePace", "Pace of life", p.basics?.lifestylePace, PACE_OPTIONS, false)}
       </div>
       ${intentSelect("spendingStyle", "Spending style", p.basics?.spendingStyle, SPENDING_OPTIONS, false)}
-      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </form>
   `;
 }
@@ -1756,7 +1757,7 @@ function renderPromptApplicationStep(index, p) {
         <textarea id="prompt_${index}_answer" name="prompt_${index}_answer" maxlength="500" placeholder="Answer in your own voice.">${escapeHtml(prompt.answer || "")}</textarea>
       </div>
       <div class="ns-actions">
-        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
       </div>
     </form>
@@ -1844,7 +1845,7 @@ function renderLifeStep(p) {
         <textarea id="childfreeLife" name="childfreeLife" maxlength="500" placeholder="Travel, business, rest, faith, fitness, art…">${escapeHtml(p.compatibility?.childfreeLife || "")}</textarea>
       </div>
       <div class="ns-actions">
-        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
       </div>
     </form>
@@ -1875,7 +1876,7 @@ function renderStoryApplicationStep(p) {
         </div>
       </div>
       <div class="ns-actions">
-        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+        <button class="ns-btn-primary" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
       </div>
     </form>
@@ -1922,7 +1923,7 @@ function renderAccountStep(p) {
         <label for="birth_date">Date of birth</label>
         <input id="birth_date" name="birth_date" type="date" required value="${escapeHtml(p.birth_date || "")}" />
       </div>
-      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>Continue</button>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <p class="ns-consent">By continuing, you agree to our <a href="./terms.html" data-legal="terms">Terms</a> and <a href="./privacy.html" data-legal="privacy">Privacy Policy</a>, and confirm you're 18 or older.</p>
       ${signedIn ? "" : `<p class="account-signin">Already a member? <button type="button" id="account-signin">Sign in</button></p>`}
     </form>
