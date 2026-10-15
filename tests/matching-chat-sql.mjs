@@ -23,8 +23,15 @@ await db.exec(`
   grant execute on function auth.uid() to anon, authenticated, service_role;
   grant select, insert, update, delete on storage.objects to authenticated, service_role;
 `);
-for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql', '202610130001_signup_profile_basics.sql', '202610130002_google_signup_name.sql', '202610130003_date_planner_and_live_chat.sql', '202610130004_chat_pass_location_privacy.sql'])
+for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql', '202610130001_signup_profile_basics.sql', '202610130002_google_signup_name.sql', '202610130003_date_planner_and_live_chat.sql', '202610130004_chat_pass_location_privacy.sql', '202610150002_restrict_trigger_function_execution.sql'])
   await db.exec(await readFile(`supabase/migrations/${file}`, 'utf8'));
+
+const exposedTriggers = await db.query(`select p.oid::regprocedure::text as name
+  from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public' and p.prorettype = 'pg_catalog.trigger'::regtype
+    and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))`);
+assert.deepEqual(exposedTriggers.rows, [], 'trigger functions have no direct browser EXECUTE access');
+assert.equal((await db.query("select has_function_privilege('authenticated', 'public.member_cards(uuid[],integer)', 'execute') as allowed")).rows[0].allowed, true);
 
 // Members: Jessica (woman, seeks men), Marcus and Chris (men, seek women), Devon (not yet approved), Erin (approved, later removed).
 const J = '10000000-0000-4000-8000-000000000001', M = '10000000-0000-4000-8000-000000000002',
