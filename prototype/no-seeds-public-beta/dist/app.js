@@ -1798,7 +1798,7 @@ function renderNoKidsClauseStep(p) {
           ${pledgeChoice(p)}
         </section>
       </div>
-      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}>I Agree</button>
+      <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>I agree to the pledge</span>${CTA_ARROW}</button>
     </form>
   `;
 }
@@ -1902,7 +1902,7 @@ function renderReviewStep(p, missing) {
         <div class="ns-preview-body">
           <h2>${escapeHtml(p.first_name || "Your name")}${age ? `<span>, ${age}</span>` : ""}</h2>
           ${details ? `<p class="ns-preview-meta">${escapeHtml(details)}</p>` : ""}
-          <div class="ns-preview-tags"><span>No kids</span><span>No step-parent role</span>${(p.interests || []).slice(0, 3).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
+          <div class="ns-preview-tags"><span class="is-promise">${TICK}No kids</span><span class="is-promise">${TICK}No step-parent role</span>${(p.interests || []).slice(0, 3).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
           ${p.bio ? `<p class="ns-preview-bio">${escapeHtml(p.bio)}</p>` : ""}
         </div>
       </article>
@@ -1910,7 +1910,7 @@ function renderReviewStep(p, missing) {
         ? `<p class="ns-review-missing"><strong>Before you submit, finish:</strong> ${escapeHtml(missing.join(", "))}.</p>`
         : `<p class="ns-review-ready">Everything's in. The founder reviews every profile personally before it goes live.</p>`}
       <div class="ns-actions">
-        <button class="ns-btn-primary" type="submit" data-action="submit" ${state.saving ? "disabled" : ""}>Submit for review</button>
+        <button class="ns-btn-primary" type="submit" data-action="submit" ${state.saving ? "disabled" : ""}><span>Submit for review</span>${CTA_ARROW}</button>
         <button class="ns-btn-quiet" type="submit" data-action="save" ${state.saving ? "disabled" : ""}>Save and finish later</button>
       </div>
     </form>
@@ -1981,7 +1981,6 @@ function renderStepTop() {
       <span class="ns-step-count">${step} of ${PROFILE_STEPS.length}</span>
     </header>
     <div class="ns-progress" aria-hidden="true"><span style="width:${(step / PROFILE_STEPS.length) * 100}%"></span></div>
-    ${state.user ? `<button class="ns-setup-link" type="button" data-setup-home ${state.saving ? "disabled" : ""}>Back to profile setup</button>` : ""}
   `;
 }
 
@@ -2356,7 +2355,7 @@ function clauseCheck(key, label, profile = state.profile) {
 
 function renderPhotos() {
   const slots = Array.from({ length: 6 }, (_, index) => state.photos.find((photo) => photo.position === index));
-  return `<div class="photo-grid">${slots.map((photo, index) => photo ? `<button class="photo-slot" type="button" data-remove-photo="${photo.id}" aria-label="Remove photo ${index + 1}"><img src="${photo.url}" alt="Profile photo ${index + 1}" /></button>` : `<div class="photo-slot">Photo ${index + 1}</div>`).join("")}</div>`;
+  return `<div class="photo-grid">${slots.map((photo, index) => photo ? `<button class="photo-slot" type="button" data-remove-photo="${photo.id}" aria-label="Remove photo ${index + 1}"><img src="${photo.url}" alt="Profile photo ${index + 1}" /></button>` : `<div class="photo-slot is-empty"><span aria-hidden="true">+</span>${index === 0 ? "<small>Cover</small>" : ""}</div>`).join("")}</div>`;
 }
 
 function renderDiscover() {
@@ -2931,7 +2930,7 @@ function renderStatus() {
         <div class="ns-preview-body">
           <h2>${escapeHtml(p.first_name || "Your profile")}${age ? `<span>, ${age}</span>` : ""}</h2>
           ${[p.city, p.relationship_goal].filter(Boolean).length ? `<p class="ns-preview-meta">${escapeHtml([p.city, p.relationship_goal].filter(Boolean).join(" · "))}</p>` : ""}
-          <div class="ns-preview-tags"><span>No kids</span><span>No step-parent role</span>${(p.interests || []).slice(0, 3).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
+          <div class="ns-preview-tags"><span class="is-promise">${TICK}No kids</span><span class="is-promise">${TICK}No step-parent role</span>${(p.interests || []).slice(0, 3).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>
           ${p.bio ? `<p class="ns-preview-bio">${escapeHtml(p.bio)}</p>` : ""}
         </div>
       </article>

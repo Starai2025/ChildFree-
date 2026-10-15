@@ -4786,3 +4786,54 @@ body.ns-legal-open { overflow: hidden; }
 .ns-rt-sheet .field { margin: 0; }
 .ns-rt-sheet .field label { margin-bottom: 6px; font-size: 13.5px; font-weight: 500; letter-spacing: 0; text-transform: none; }
 body:has(.ns-rt), .auth-journey:has(.ns-rt) { background: #f6f0e8; }
+
+/* ---------- Sign-up steps 4-10 polish ---------- */
+/* Ivory all the way down: no dark band under short steps. */
+body:has(.ns-step), .auth-journey:has(.ns-step) { background: #f3ece2; }
+
+/* Pledge: two framed groups, round emerald checks, the final agreement set apart. */
+.ns-pledge-step .clause-stack { display: grid; gap: 14px; }
+.ns-pledge-step .pledge-group {
+  display: grid; gap: 0; padding: 6px 16px 4px; border-radius: 18px;
+  border: 1px solid rgba(184, 137, 42, 0.32); background: #fffdf9; box-shadow: 0 1px 2px rgba(25, 21, 18, 0.04), 0 10px 24px rgba(25, 21, 18, 0.05);
+}
+.ns-pledge-step .pledge-group > p { margin: 10px 0 2px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8a6418 !important; }
+.ns-pledge-step .clause-card { padding: 13px 0; border-bottom: 1px solid rgba(25, 21, 18, 0.07); }
+.ns-pledge-step .pledge-group .clause-card:last-child { border-bottom: 0; }
+.ns-pledge-step .clause-card input {
+  width: 24px; height: 24px; flex: 0 0 24px; border-radius: 50%; border: 1.5px solid rgba(184, 137, 42, 0.6); background: #fff;
+}
+.ns-pledge-step .clause-card span { font-size: 15px; line-height: 1.45; }
+.ns-pledge-step .pledge-card {
+  margin: 6px -16px -4px; padding: 15px 16px; border-bottom: 0; border-radius: 0 0 17px 17px;
+  background: linear-gradient(160deg, #13604f, #0a3a30);
+}
+.ns-pledge-step .pledge-card span { color: #fbf4e8 !important; font-weight: 600; }
+.ns-pledge-step .pledge-card input { border-color: #f3d58f; background: transparent; }
+.ns-pledge-step .pledge-card input:checked {
+  border-color: #f3d58f;
+  background: #f3d58f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%230a3a30' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 15px no-repeat;
+}
+
+/* Photos: inviting empty slots, the first marked as the cover. */
+.ns-photo-upload { border: 1px solid rgba(184, 137, 42, 0.3); background: #fffdf9; }
+.ns-photo-upload .photo-slot.is-empty {
+  display: grid; place-items: center; align-content: center; gap: 4px;
+  border: 1.5px dashed rgba(184, 137, 42, 0.5); background: rgba(243, 213, 143, 0.08); color: #8a6418;
+}
+.ns-photo-upload .photo-slot.is-empty span {
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: #fffdf9;
+  box-shadow: 0 2px 6px rgba(25, 21, 18, 0.08); font-size: 19px; line-height: 1; color: #b8892a;
+}
+.ns-photo-upload .photo-slot.is-empty small { font-size: 11.5px; font-weight: 700; letter-spacing: 0.04em; }
+.ns-photo-upload .photo-slot.is-empty:first-child { border-color: rgba(15, 92, 77, 0.45); background: rgba(15, 92, 77, 0.05); color: var(--emerald); }
+
+/* Preview card: the same promise pills members see in Discover. */
+.ns-preview { border: 1px solid rgba(184, 137, 42, 0.28); }
+.ns-preview-tags span.is-promise {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid rgba(184, 137, 42, 0.45); background: rgba(243, 213, 143, 0.14); color: #6f4f12;
+}
+.ns-preview-tags span.is-promise svg { color: #b8892a; }
+.ns-preview-tags span:not(.is-promise) { border: 1px solid rgba(15, 92, 77, 0.22); background: transparent; }
+.ns-review-ready { border-color: rgba(184, 137, 42, 0.4); background: rgba(243, 213, 143, 0.16); color: #4a3510; }
