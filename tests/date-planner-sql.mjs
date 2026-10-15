@@ -24,7 +24,7 @@ await db.exec(`
 `);
 for (const file of ['202610120001_public_beta_profiles.sql', '202610120002_matching_and_chat.sql', '202610120003_reports_and_member_views.sql',
   '202610130001_signup_profile_basics.sql', '202610130002_google_signup_name.sql', '202610130003_date_planner_and_live_chat.sql',
-  '202610150002_restrict_trigger_function_execution.sql'])
+  '202610150002_restrict_trigger_function_execution.sql', '202610150003_private_member_rpc_implementations.sql'])
   await db.exec(await readFile(`supabase/migrations/${file}`, 'utf8'));
 
 const J = '10000000-0000-4000-8000-000000000001', M = '10000000-0000-4000-8000-000000000002', C = '10000000-0000-4000-8000-000000000003';
