@@ -4624,3 +4624,8 @@ body.ns-legal-open { overflow: hidden; }
 .ns-dp-foot p { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; font-size: 13px; color: rgba(25, 21, 18, 0.55); }
 .ns-dp-foot p i { width: 7px; height: 7px; border-radius: 50%; background: #3fae7f; box-shadow: 0 0 0 3px rgba(63, 174, 127, 0.18); }
 .ns-dp-foot .ns-dp-done { justify-self: stretch; border: 0; background: var(--emerald); color: #fbf4e8; min-height: 52px; box-shadow: 0 10px 22px rgba(15, 92, 77, 0.22); }
+.ns-dp-credit { align-items: center; justify-content: space-between; gap: 12px; }
+.ns-dp-credit .ns-gmaps-credit { margin-left: auto; }
+.ns-dp-sources { margin: 0; font-size: 12px; color: #5e5e5e; }
+.ns-dp-sources a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.ns-dp-hero .ns-dp-sources { color: rgba(255, 255, 255, 0.86); }

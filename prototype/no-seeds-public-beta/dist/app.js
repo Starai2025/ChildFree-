@@ -2618,6 +2618,16 @@ function planOptions(kind) {
 // Google Maps Platform attribution: required wherever Google place data is shown without a Google map.
 const fromGoogle = (option) => option && option.kind !== "time" && !option.created_by && Boolean(option.maps_url || option.rating != null);
 const googleCredit = () => `<p class="ns-gmaps-credit" translate="no" aria-label="Google Maps">Google Maps</p>`;
+// Some Google results also name third-party data providers; Google requires those to be shown too.
+const placeSources = (options) => {
+  const seen = new Map();
+  options.filter(fromGoogle).flatMap((o) => o.attributions || []).forEach((a) => {
+    const name = String(a?.provider || "").trim();
+    if (name && !seen.has(name)) seen.set(name, /^https:\/\//.test(a?.providerUri || "") ? a.providerUri : "");
+  });
+  if (!seen.size) return "";
+  return `<p class="ns-dp-sources">Data from ${[...seen].map(([name, uri]) => uri ? `<a href="${escapeHtml(uri)}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}</a>` : escapeHtml(name)).join(", ")}</p>`;
+};
 
 function renderPlanCard(match) {
   const plan = state.plan;
@@ -2699,7 +2709,7 @@ function renderPlanner(match) {
           <p class="ns-dp-when">${escapeHtml(confirmedTime?.label || "")}</p>
           ${confirmedPlace?.detail ? `<p class="ns-dp-mid">${pin}${escapeHtml(confirmedPlace.detail)}</p>` : ""}
           ${confirmedPlace?.maps_url ? `<a class="ns-dp-directions" href="${escapeHtml(confirmedPlace.maps_url)}" target="_blank" rel="noopener noreferrer">Get directions</a>` : ""}
-          ${fromGoogle(confirmedPlace) ? googleCredit() : ""}` : `
+          ${fromGoogle(confirmedPlace) ? googleCredit() + placeSources([confirmedPlace]) : ""}` : `
           <h2>A date with ${name}</h2>
           <p class="ns-dp-mid">${pin}${plan.midpoint_label ? `Halfway between you · ${escapeHtml(plan.midpoint_label)}` : "Somewhere easy for you both"}</p>
           <div class="ns-dp-tally">
@@ -2732,7 +2742,7 @@ function renderPlanner(match) {
                 <button type="submit" ${state.saving ? "disabled" : ""}>Add</button>
               </form>
             </details>` : ""}
-          ${places.some(fromGoogle) ? `<div class="ns-dp-credit">${googleCredit()}</div>` : ""}
+          ${places.some(fromGoogle) ? `<div class="ns-dp-credit">${placeSources(places)}${googleCredit()}</div>` : ""}
         </div>
       </section>
       <section class="ns-dp-section">
