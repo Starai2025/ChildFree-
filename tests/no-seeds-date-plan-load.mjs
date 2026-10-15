@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+const source = await readFile('prototype/no-seeds-public-beta/dist/app.js', 'utf8');
+const start = source.indexOf('async function loadPlan(');
+const code = source.slice(start, source.indexOf('async function refreshPlan(', start));
+const match = {match_id: 'match-a'};
+let finish;
+const state = {selectedMatch: match, plan: null, error: ''};
+const context = vm.createContext({state, supabase: {functions: {invoke(name, request) {
+  assert.equal(name, 'date-planner'); assert.deepEqual(JSON.parse(JSON.stringify(request.body)), {action: 'view', match_id: 'match-a'});
+  return new Promise(resolve => {finish = resolve});
+}}}});
+vm.runInContext(code, context);
+const plan = {id: 'plan', date_plan_options: [{id: 'option', label: 'Fresh provider name'}]};
+let pending = context.loadPlan(match); finish({data: {plan}, error: null}); await pending;
+assert.equal(state.plan, plan);
+pending = context.loadPlan(match); state.selectedMatch = {match_id: 'match-b'};
+finish({data: {plan: {id: 'old-match'}}, error: null}); await pending;
+assert.equal(state.plan, plan, 'late response for a previous match cannot replace current state');
+state.selectedMatch = match;
+pending = context.loadPlan(match); finish({data: null, error: {message: 'network'}}); await pending;
+assert.equal(state.plan, null, 'failed fresh hydration clears stale provider content');
+assert.match(state.error, /couldn't load your date plan/);
+console.log('PASS planner frontend: fresh Edge response, previous-match race isolation, errors clear stale content');

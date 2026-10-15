@@ -69,6 +69,16 @@ await db.exec(`insert into public.date_plan_options (plan_id, kind, label, detai
   ('${plan}', 'place', 'Garden Cafe', '2 Peach St', null, null, 4.4)`);
 await db.exec(`insert into public.date_plan_options (plan_id, kind, label, starts_at) values
   ('${plan}', 'time', 'Fri 7:00 PM', now() + interval '3 days'), ('${plan}', 'time', 'Sat 11:00 AM', now() + interval '4 days')`);
+const legacyPlaces = (await db.query(`select id, label from public.date_plan_options where kind = 'place'`)).rows;
+await db.exec(await readFile('supabase/migrations/202610150004_google_place_id_storage.sql', 'utf8'));
+assert.equal((await db.query('select midpoint_label from public.date_plans')).rows[0].midpoint_label, null);
+assert.equal((await db.query(`select count(*)::integer as n from public.date_plan_options where kind = 'place'
+  and label = 'Suggested place' and detail is null and maps_url is null and rating is null`)).rows[0].n, 2);
+for (const [i, p] of legacyPlaces.entries()) await db.exec(`update public.date_plan_options set place_id = 'synthetic-place-${i}' where id = '${p.id}'`);
+await fails('server stores Google content', () => db.exec(`insert into public.date_plan_options (plan_id, kind, label, place_id, detail)
+  values ('${plan}', 'place', 'Suggested place', 'synthetic-new', 'Cached address')`), /google_content_not_stored/);
+await fails('server stores midpoint name', () => db.exec(`update public.date_plans set midpoint_label = 'Cached neighborhood'`), /midpoint_not_stored/);
+check('migration removes legacy Google content while preserving option IDs; constraints prevent storing it again');
 await fails('second live plan', () => db.exec(`insert into public.date_plans (match_id) values ('${match}')`), /unique|duplicate/);
 check('only the server creates plans and suggestions; one live plan per match; the ZIP cache is private');
 
@@ -82,6 +92,7 @@ check('outsiders cannot see the plan or its options');
 await as('authenticated', M, `insert into public.date_plan_options (plan_id, kind, label, created_by) values ('${plan}', 'place', 'My favorite taco spot', '${M}')`);
 await fails('spoof creator', () => as('authenticated', M, `insert into public.date_plan_options (plan_id, kind, label, created_by) values ('${plan}', 'place', 'x', '${J}')`), /row-level security/);
 await fails('fake rating', () => as('authenticated', M, `insert into public.date_plan_options (plan_id, kind, label, created_by, rating) values ('${plan}', 'place', 'x', '${M}', 5)`), /row-level security/);
+await fails('member supplies Google ID', () => as('authenticated', M, `insert into public.date_plan_options (plan_id, kind, label, created_by, place_id) values ('${plan}', 'place', 'x', '${M}', 'spoofed-id')`), /row-level security|place_id_valid/);
 await fails('time without start', () => as('authenticated', M, `insert into public.date_plan_options (plan_id, kind, label, created_by) values ('${plan}', 'time', 'Someday', '${M}')`), /time_has_start/);
 await fails('outsider adds', () => as('authenticated', C, `insert into public.date_plan_options (plan_id, kind, label, created_by) values ('${plan}', 'place', 'x', '${C}')`), /row-level security/);
 for (let i = 0; i < 4; i++) await as('authenticated', M, `insert into public.date_plan_options (plan_id, kind, label, created_by) values ('${plan}', 'place', 'Spot ${i}', '${M}')`);
@@ -89,7 +100,7 @@ await fails('sixth custom', () => as('authenticated', M, `insert into public.dat
 check('either member can add their own place or time (up to 5), never as someone else and never with fake ratings');
 
 // Picks: for yourself only; confirmation when both pick the same place and time.
-const opt = async (label) => (await db.query(`select id from public.date_plan_options where label = '${label}'`)).rows[0].id;
+const opt = async (label) => legacyPlaces.find(p => p.label === label)?.id ?? (await db.query(`select id from public.date_plan_options where label = '${label}'`)).rows[0].id;
 const pick = (who, label) => opt(label).then((id) => as('authenticated', who, `insert into public.date_plan_picks (option_id, member_id) values ('${id}', '${who}')`));
 await fails('pick for other', async () => as('authenticated', J, `insert into public.date_plan_picks (option_id, member_id) values ('${await opt('Jazz Lounge')}', '${M}')`), /row-level security/);
 await pick(J, 'Jazz Lounge'); await pick(J, 'Sat 11:00 AM'); await pick(J, 'Fri 7:00 PM');
@@ -98,9 +109,9 @@ assert.equal((await db.query(`select status from public.date_plans`)).rows[0].st
 await pick(M, 'Fri 7:00 PM');
 assert.equal((await db.query(`select status from public.date_plans`)).rows[0].status, 'open', 'times agree but places do not');
 await pick(M, 'Jazz Lounge');
-const confirmed = (await db.query(`select p.status, pl.label as place, t.label as time from public.date_plans p
+const confirmed = (await db.query(`select p.status, pl.id as place, t.label as time from public.date_plans p
   join public.date_plan_options pl on pl.id = p.confirmed_place join public.date_plan_options t on t.id = p.confirmed_time`)).rows[0];
-assert.deepEqual([confirmed.status, confirmed.place, confirmed.time], ['confirmed', 'Jazz Lounge', 'Fri 7:00 PM']);
+assert.deepEqual([confirmed.status, confirmed.place, confirmed.time], ['confirmed', await opt('Jazz Lounge'), 'Fri 7:00 PM']);
 assert.equal((await as('authenticated', J, `select plan_id from public.date_plan_picks limit 1`)).rows[0].plan_id, plan);
 check('the plan confirms itself when both pick the same place and time (earliest shared time wins)');
 

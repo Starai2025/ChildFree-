@@ -958,13 +958,12 @@ function startTypingExpiryTimer() {
 
 // The match's date plan with its options and who picked each one.
 async function loadPlan(match) {
-  const { data } = await supabase
-    .from("date_plans")
-    .select("*, date_plan_options(*, date_plan_picks(member_id))")
-    .eq("match_id", match.match_id)
-    .neq("status", "cancelled")
-    .maybeSingle();
-  if (state.selectedMatch?.match_id === match.match_id) state.plan = data || null;
+  const { data, error } = await supabase.functions.invoke("date-planner", {
+    body: { action: "view", match_id: match.match_id },
+  });
+  if (state.selectedMatch?.match_id !== match.match_id) return;
+  state.plan = error ? null : (data?.plan || null);
+  if (error) state.error = "We couldn't load your date plan. Try again in a moment.";
 }
 
 async function refreshPlan(match) {

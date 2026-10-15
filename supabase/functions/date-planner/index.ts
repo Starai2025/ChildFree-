@@ -7,6 +7,7 @@
 // Members never receive each other's ZIP code or location. Without a Google key the plan still opens
 // with times, and members add their own places.
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+import { freshPlaceOptions, storedGoogleOption } from "./google-place-options.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
@@ -58,20 +59,17 @@ function cors(origin: string | null): Record<string, string> {
 }
 
 function reply(status: number, body: unknown, origin: string | null): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...cors(origin) } });
+  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...cors(origin) } });
 }
 
 // ---------- Halfway point ----------
 async function zipPoint(zip: string): Promise<{ lat: number; lng: number } | null> {
   if (!/^[0-9]{5}$/.test(zip ?? "")) return null;
-  const { data: cached } = await admin.from("zip_locations").select("lat, lng").eq("zip", zip).maybeSingle();
-  if (cached) return cached;
   if (!GOOGLE_KEY) return null;
   const url = `https://maps.googleapis.com/maps/api/geocode/json?components=${encodeURIComponent(`postal_code:${zip}|country:US`)}&key=${GOOGLE_KEY}`;
   const result = await fetch(url).then((r) => r.json()).catch(() => null);
   const point = result?.results?.[0]?.geometry?.location;
   if (!point) return null;
-  await admin.from("zip_locations").upsert({ zip, lat: point.lat, lng: point.lng, updated_at: new Date().toISOString() });
   return { lat: point.lat, lng: point.lng };
 }
 
@@ -196,7 +194,7 @@ function suggestTimes(timeZone: string, now = new Date()) {
 // ---------- Founder self-test ----------
 // POST { "zip_a": "30308", "zip_b": "30060", "interests": ["Live music"] }   Header: x-admin-passcode: <ADMIN_PASSCODE>
 // Runs the halfway point + Google places search for two ZIP codes and returns what members would be offered.
-// Writes nothing except the ZIP cache.
+// Does not persist Google responses.
 const passcode = Deno.env.get("ADMIN_PASSCODE") ?? "";
 function samePasscode(given: string): boolean {
   const a = new TextEncoder().encode(given), b = new TextEncoder().encode(passcode);
@@ -239,10 +237,20 @@ Deno.serve(async (req) => {
   const user = userData?.user;
   if (!user) return reply(401, { error: "Please sign in again." }, origin);
 
-  let body: { match_id?: string; time_zone?: string };
+  let body: { action?: string; match_id?: string; time_zone?: string };
   try { body = await req.json(); } catch { return reply(400, { error: "Send JSON." }, origin); }
   const matchId = body.match_id ?? "";
   if (!UUID.test(matchId)) return reply(400, { error: "match_id is required." }, origin);
+  if (body.action === "view") {
+    const { data: plan, error } = await member.from("date_plans")
+      .select("*, date_plan_options(*, date_plan_picks(member_id))")
+      .eq("match_id", matchId).neq("status", "cancelled").maybeSingle();
+    if (error) return reply(500, { error: "We couldn't load your date plan." }, origin);
+    if (!plan) return reply(200, { plan: null }, origin);
+    const options = await freshPlaceOptions(plan.date_plan_options ?? [], GOOGLE_KEY);
+    return reply(200, { plan: { ...plan, date_plan_options: options } }, origin);
+  }
+  if (body.action && body.action !== "create") return reply(400, { error: "Unknown planner action." }, origin);
   let timeZone = "America/New_York";
   try { if (body.time_zone) { new Intl.DateTimeFormat("en-US", { timeZone: body.time_zone }); timeZone = body.time_zone; } } catch { /* keep default */ }
 
@@ -261,14 +269,13 @@ Deno.serve(async (req) => {
 
   const [pointA, pointB] = await Promise.all([zipPoint(a?.zip), zipPoint(b?.zip)]);
   let places: Place[] = [];
-  let label: string | null = null;
   if (pointA && pointB) {
     const center = midpoint(pointA, pointB);
-    [places, label] = await Promise.all([suggestPlaces(center, distanceKm(pointA, pointB), shared), areaName(center)]);
+    places = await suggestPlaces(center, distanceKm(pointA, pointB), shared);
   }
 
   const { data: plan, error: planError } = await admin.from("date_plans")
-    .insert({ match_id: matchId, created_by: user.id, midpoint_label: label })
+    .insert({ match_id: matchId, created_by: user.id })
     .select("id").single();
   if (planError) {
     // Both people tapped at the same moment: return the plan the other request made.
@@ -277,7 +284,7 @@ Deno.serve(async (req) => {
     return reply(500, { error: planError.message }, origin);
   }
   const options = [
-    ...places.map((p) => ({ plan_id: plan.id, kind: "place", label: p.label, detail: p.detail || null, reason: p.reason, maps_url: p.maps_url, rating: p.rating })),
+    ...places.map((p) => storedGoogleOption(plan.id, p)),
     ...suggestTimes(timeZone).map((t) => ({ plan_id: plan.id, kind: "time", label: t.label, starts_at: t.starts_at })),
   ];
   const { error: optionsError } = await admin.from("date_plan_options").insert(options);
