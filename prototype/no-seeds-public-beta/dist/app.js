@@ -1166,12 +1166,14 @@ async function reactToProfile(targetId, kind) {
     state.error = error.message;
   } else {
     const matched = kind === "like" ? await findMatch(targetId) : null;
+    const liked = [...(state.cards || []), ...(state.likes || [])].find((card) => card.id === targetId) || state.viewing;
+    if (matched) state.matchMoment = { matchId: matched.id, card: liked };
     state.cards = (state.cards || []).filter((card) => card.id !== targetId);
     state.viewing = null;
     state.viewingMatch = null;
     state.likes = null;
     state.matches = null;
-    state.message = matched ? "It's a match. Say hello when you're ready." : (kind === "like" ? "Like sent." : "Passed.");
+    state.message = matched ? "" : (kind === "like" ? "Like sent." : "Passed.");
   }
   state.saving = false;
   renderApp();
@@ -1976,6 +1978,10 @@ function renderApp() {
     document.querySelector("#signout")?.addEventListener("click", signOut);
     return;
   }
+  if (state.matchMoment) {
+    renderMatchMoment();
+    return;
+  }
   if (state.viewing) {
     app.innerHTML = renderMemberProfile(state.viewing);
     bindAppEvents();
@@ -2307,7 +2313,7 @@ function renderDiscover() {
             ${photo ? `<img src="${photo}" alt="" />` : `<span class="ns-pv-initial">${escapeHtml((card.first_name || "?").charAt(0))}</span>`}
             <span class="ns-disc-name">
               <strong>${escapeHtml(card.first_name || "Member")}${card.age ? `<em>, ${card.age}</em>` : ""}</strong>
-              ${card.city ? `<small>${escapeHtml(card.city)}</small>` : ""}
+              ${card.city ? `<small><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.3" fill="currentColor"/></svg>${escapeHtml(card.city)}</small>` : ""}
             </span>
           </button>
           <div class="ns-pv-body ns-disc-body">${renderProfileSections(card)}</div>
@@ -2370,6 +2376,8 @@ const BASIC_ICONS = Object.fromEntries(Object.entries({
 }).map(([key, path]) => [key, `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`]));
 
 // Everything about a member below their cover photo; shared by Discover and the profile view.
+const TICK = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
 function renderProfileSections(card) {
   const photos = card.photo_urls || [];
   const promptText = (id) => PROMPTS.find(([key]) => key === id)?.[1] || "";
@@ -2390,7 +2398,7 @@ function renderProfileSections(card) {
   ].filter(([, value]) => value);
   const promptCard = (question, answer) => `<article class="ns-pv-prompt"><p>${escapeHtml(question)}</p><h3>${escapeHtml(answer)}</h3></article>`;
   const sections = [
-    `<div class="ns-pv-tags"><span>No kids</span><span>No step-parent role</span>${card.relationship_goal ? `<span>${escapeHtml(card.relationship_goal)}</span>` : ""}</div>${card.bio ? `<p class="ns-pv-bio">${escapeHtml(card.bio)}</p>` : ""}`,
+    `<div class="ns-pv-tags"><span>${TICK}No kids</span><span>${TICK}No step-parent role</span></div>${card.bio ? `<p class="ns-pv-bio">${escapeHtml(card.bio)}</p>` : ""}`,
     prompts[0] ? promptCard(promptText(prompts[0].id), prompts[0].answer) : "",
     details.length ? `<div class="ns-pv-basics"><h2>The basics</h2><ul>${details.map(([icon, value]) => `<li>${BASIC_ICONS[icon]}<span>${escapeHtml(value)}</span></li>`).join("")}</ul></div>` : "",
     prompts[1] ? promptCard(promptText(prompts[1].id), prompts[1].answer) : "",
@@ -2405,6 +2413,51 @@ function renderProfileSections(card) {
     if (index < sections.length - 1 && morePhotos.length) blocks.push(morePhotos.shift());
   });
   return blocks.concat(morePhotos).join("\n");
+}
+
+// The moment two members like each other: a full screen, then straight into the conversation.
+function renderMatchMoment() {
+  const { card } = state.matchMoment;
+  const name = escapeHtml(card?.first_name || "your match");
+  const face = (url, letter) => url ? `<img src="${url}" alt="" />` : `<span>${escapeHtml(letter || "?")}</span>`;
+  const opener = (card?.prompts || []).find((item) => item?.answer);
+  const openerQuestion = opener ? PROMPTS.find(([key]) => key === opener.id)?.[1] : "";
+  app.innerHTML = `
+    <main class="screen ns-mm" role="dialog" aria-modal="true" aria-labelledby="mm-title">
+      <div class="ns-mm-glow" aria-hidden="true"></div>
+      <div class="ns-mm-top">${renderLockup()}</div>
+      <div class="ns-mm-pair" aria-hidden="true">
+        <figure class="is-me">${face(state.photos[0]?.url, state.profile.first_name?.charAt(0))}</figure>
+        <span class="ns-mm-heart"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z" fill="currentColor"/></svg></span>
+        <figure class="is-them">${face(card?.photo_urls?.[0], card?.first_name?.charAt(0))}</figure>
+      </div>
+      <h1 id="mm-title">It's a <em>match</em></h1>
+      <p class="ns-mm-line">You and ${name} like each other.</p>
+      ${opener ? `
+        <div class="ns-mm-idea">
+          <small>${openerQuestion ? escapeHtml(openerQuestion) : `${name} shared`}</small>
+          <p>“${escapeHtml(opener.answer)}”</p>
+          <span>Ask ${name} about this for an easy first message.</span>
+        </div>` : ""}
+      <div class="ns-mm-actions">
+        <button class="ns-btn-primary" type="button" data-mm-chat><span>Send ${name} a message</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="ns-mm-later" type="button" data-mm-close>Keep browsing</button>
+      </div>
+    </main>
+  `;
+  window.scrollTo(0, 0);
+  document.querySelector("[data-mm-close]").addEventListener("click", () => {
+    state.matchMoment = null;
+    renderApp();
+  });
+  document.querySelector("[data-mm-chat]").addEventListener("click", async () => {
+    const { matchId } = state.matchMoment;
+    state.matchMoment = null;
+    state.tab = "matches";
+    await loadMatches({ force: true });
+    const match = (state.matches || []).find((item) => item.match_id === matchId);
+    if (match) loadMessages(match);
+  });
 }
 
 function renderMemberProfile(card) {
