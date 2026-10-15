@@ -1012,7 +1012,14 @@ function rerenderChat() {
   const box = document.querySelector(".ns-composer textarea, .ns-plan-custom input:focus");
   const draft = document.querySelector(".ns-composer textarea")?.value || "";
   const focused = document.activeElement === box;
+  const daysScroll = document.querySelector(".ns-dp-days")?.scrollLeft || 0;
+  const openAdds = [...document.querySelectorAll(".ns-dp-add")].map((d) => d.open);
+  const typed = [...document.querySelectorAll(".ns-dp [data-custom] input")].map((i) => [i.name, i.value]);
   renderApp();
+  const days = document.querySelector(".ns-dp-days");
+  if (days) days.scrollLeft = daysScroll;
+  document.querySelectorAll(".ns-dp-add").forEach((d, i) => { if (openAdds[i]) d.open = true; });
+  typed.forEach(([name, value]) => { const input = document.querySelector(`.ns-dp [data-custom] input[name="${name}"]`); if (input && value) input.value = value; });
   const again = document.querySelector(".ns-composer textarea");
   if (again) {
     again.value = draft;
@@ -1098,6 +1105,10 @@ async function addPlanOption(kind, form) {
     const label = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(at);
     row = { plan_id: plan.id, kind, label, starts_at: at.toISOString(), created_by: state.user.id };
   }
+  // The suggestion is on its way: clear and close the box before the screen redraws.
+  form.reset();
+  form.closest("details")?.removeAttribute("open");
+  if (kind === "time") state.planOtherTime = false;
   state.saving = true;
   state.error = "";
   rerenderChat();
@@ -2652,58 +2663,99 @@ function renderPlanCard(match) {
 function renderPlanner(match) {
   const plan = state.plan;
   const name = escapeHtml(match.other_first_name || "Match");
+  const initial = escapeHtml((match.other_first_name || "M").charAt(0));
   const open = plan.status === "open";
-  const who = (option) => {
-    const picks = option.date_plan_picks || [];
-    const me = picks.some((pk) => pk.member_id === state.user.id);
-    const them = picks.some((pk) => pk.member_id !== state.user.id);
-    return `<span class="ns-plan-who">${me ? `<i class="is-me">You</i>` : ""}${them ? `<i>${name}</i>` : ""}</span>`;
-  };
-  const mine = (option) => (option.date_plan_picks || []).some((pk) => pk.member_id === state.user.id);
+  const picks = (option) => option.date_plan_picks || [];
+  const mine = (option) => picks(option).some((pk) => pk.member_id === state.user.id);
+  const theirs = (option) => picks(option).some((pk) => pk.member_id !== state.user.id);
+  const whoLabel = (option) => [mine(option) ? "you picked this" : "", theirs(option) ? `${name} picked this` : ""].filter(Boolean).join(", ");
   const places = planOptions("place");
   const times = planOptions("time");
+  const tally = (test) => {
+    const p = places.filter(test).length, t = times.filter(test).length;
+    return p || t ? `${p} ${p === 1 ? "spot" : "spots"} · ${t} ${t === 1 ? "time" : "times"}` : "Not yet";
+  };
+  const tile = (o) => {
+    const at = o.starts_at ? new Date(o.starts_at) : null;
+    if (!at || Number.isNaN(at.getTime())) return `<strong class="ns-dp-num">${escapeHtml(o.label)}</strong>`;
+    return `<small>${at.toLocaleDateString([], { weekday: "short" })}</small><strong class="ns-dp-num">${at.getDate()}</strong><small>${at.toLocaleDateString([], { month: "short" })}</small><b>${at.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</b>`;
+  };
+  const bothTime = times.find((o) => mine(o) && theirs(o));
+  const bothPlace = places.find((o) => mine(o) && theirs(o));
+  const banner = bothTime || bothPlace ? `
+    <div class="ns-dp-match" role="status">
+      <span class="ns-dp-match-icons" aria-hidden="true"><i class="is-me">✓</i><i class="is-them">${initial}</i></span>
+      <p><strong>${bothTime && bothPlace ? "It's a match" : "You're halfway there"}</strong>${bothTime && bothPlace ? "Locking in your date…" : bothTime ? `You both chose ${escapeHtml(bothTime.label)}. Choose the same spot to lock it in.` : `You both like ${escapeHtml(bothPlace.label)}. Choose the same time to lock it in.`}</p>
+    </div>` : "";
+  const pin = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.3" fill="currentColor"/></svg>`;
+  const confirmedPlace = plan.date_plan_options?.find((o) => o.id === plan.confirmed_place);
+  const confirmedTime = plan.date_plan_options?.find((o) => o.id === plan.confirmed_time);
   return `
-    <div class="ns-planner">
+    <div class="ns-dp">
+      <section class="ns-dp-hero ${plan.status === "confirmed" ? "is-set" : ""}">
+        ${plan.status === "confirmed" ? `
+          <p class="ns-dp-set">It's a date</p>
+          <h2>${escapeHtml(confirmedPlace?.label || "Your spot")}</h2>
+          <p class="ns-dp-when">${escapeHtml(confirmedTime?.label || "")}</p>
+          ${confirmedPlace?.detail ? `<p class="ns-dp-mid">${pin}${escapeHtml(confirmedPlace.detail)}</p>` : ""}
+          ${confirmedPlace?.maps_url ? `<a class="ns-dp-directions" href="${escapeHtml(confirmedPlace.maps_url)}" target="_blank" rel="noopener noreferrer">Get directions</a>` : ""}
+          ${fromGoogle(confirmedPlace) ? googleCredit() : ""}` : `
+          <h2>A date with ${name}</h2>
+          <p class="ns-dp-mid">${pin}${plan.midpoint_label ? `Halfway between you · ${escapeHtml(plan.midpoint_label)}` : "Somewhere easy for you both"}</p>
+          <div class="ns-dp-tally">
+            <p><span><i class="is-me">✓</i>You</span><b>${tally(mine)}</b></p>
+            <p><span><i class="is-them">${initial}</i>${name}</span><b>${tally(theirs)}</b></p>
+          </div>`}
+      </section>
       ${notice()}
-      <h2>Plan your date</h2>
-      <p class="ns-planner-sub">${plan.midpoint_label ? `Halfway between you, near <strong>${escapeHtml(plan.midpoint_label)}</strong>.` : "Pick a public spot that's easy for you both to reach."} Tap everything that works for you. When you both pick the same place and time, it's set.</p>
-      ${plan.status === "confirmed" ? renderPlanCard(match) : ""}
-      <h3>Where</h3>
-      <div class="ns-plan-places">
-        ${places.map((o) => `
-          <div class="ns-plan-place ${mine(o) ? "is-picked" : ""}">
-            <button type="button" data-pick="${o.id}" ${open ? "" : "disabled"} aria-pressed="${mine(o)}">
-              <span class="ns-plan-check" aria-hidden="true"></span>
-              <span class="ns-plan-text">
-                <strong>${escapeHtml(o.label)}</strong>
-                <small>${[o.rating ? `★ ${o.rating}` : "", o.detail ? escapeHtml(o.detail) : (o.created_by ? `Suggested by ${o.created_by === state.user.id ? "you" : name}` : "")].filter(Boolean).join(" · ")}</small>
-                ${o.reason ? `<em>${escapeHtml(o.reason)}</em>` : ""}
-              </span>
-            </button>
-            <div class="ns-plan-foot">${who(o)}${o.maps_url ? `<a href="${escapeHtml(o.maps_url)}" target="_blank" rel="noopener noreferrer">Map</a>` : ""}</div>
-          </div>`).join("") || `<p class="ns-plan-empty">No suggestions yet. Add a spot you'd both enjoy.</p>`}
-        ${places.some(fromGoogle) ? googleCredit() : ""}
+      ${plan.status === "confirmed" ? "" : `${banner}
+      <section class="ns-dp-section">
+        <header><h3>Where</h3>${open ? `<p>Choose all that work</p>` : ""}</header>
+        <div class="ns-dp-list">
+          ${places.map((o) => `
+            <div class="ns-dp-row ${mine(o) ? "is-picked" : ""}">
+              <button type="button" data-pick="${o.id}" ${open ? "" : "disabled"} aria-pressed="${mine(o)}" aria-label="${escapeHtml(o.label)}${whoLabel(o) ? `, ${whoLabel(o)}` : ""}">
+                <span class="ns-dp-check" aria-hidden="true"></span>
+                <span class="ns-dp-main">
+                  <strong>${escapeHtml(o.label)}${theirs(o) ? ` <i class="is-them" aria-hidden="true">${initial}</i>` : ""}</strong>
+                  <small>${[o.rating ? `★ ${o.rating}` : "", o.detail ? escapeHtml(o.detail) : (o.created_by ? `Suggested by ${o.created_by === state.user.id ? "you" : name}` : "")].filter(Boolean).join(" · ")}</small>
+                  ${o.reason ? `<em>${escapeHtml(o.reason)}</em>` : ""}
+                </span>
+              </button>
+              ${o.maps_url ? `<a class="ns-dp-map" href="${escapeHtml(o.maps_url)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHtml(o.label)} in Google Maps">${pin}</a>` : ""}
+            </div>`).join("") || `<p class="ns-dp-empty">No spots yet. Suggest one you'd both enjoy.</p>`}
+          ${open ? `
+            <details class="ns-dp-add">
+              <summary><span aria-hidden="true">+</span>Suggest a place</summary>
+              <form data-custom="place">
+                <input name="label" maxlength="120" placeholder="Name of the place" aria-label="Suggest your own place" />
+                <button type="submit" ${state.saving ? "disabled" : ""}>Add</button>
+              </form>
+            </details>` : ""}
+          ${places.some(fromGoogle) ? `<div class="ns-dp-credit">${googleCredit()}</div>` : ""}
+        </div>
+      </section>
+      <section class="ns-dp-section">
+        <header><h3>When</h3>${open ? `<p>Swipe for more days</p>` : ""}</header>
+        <div class="ns-dp-days">
+          ${times.map((o) => `
+            <button type="button" class="ns-dp-day ${mine(o) ? "is-picked" : ""} ${mine(o) && theirs(o) ? "is-both" : ""}" data-pick="${o.id}" ${open ? "" : "disabled"} aria-pressed="${mine(o)}" aria-label="${escapeHtml(o.label)}${whoLabel(o) ? `, ${whoLabel(o)}` : ""}">
+              ${tile(o)}
+              <span class="ns-dp-who" aria-hidden="true">${mine(o) ? `<i class="is-me">✓</i>` : ""}${theirs(o) ? `<i class="is-them">${initial}</i>` : ""}</span>
+            </button>`).join("")}
+          ${open ? `<button type="button" class="ns-dp-day is-other" data-open-other-time aria-label="Suggest another day or time"><span class="ns-dp-plus">+</span><small>Other day<br>or time</small></button>` : ""}
+        </div>
+        ${open ? `
+          <form class="ns-dp-other" data-custom="time" ${state.planOtherTime ? "" : "hidden"}>
+            <input name="when" type="datetime-local" aria-label="Suggest your own day and time" />
+            <button type="submit" ${state.saving ? "disabled" : ""}>Add</button>
+          </form>` : ""}
+      </section>`}
+      <p class="ns-dp-safety"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Meet somewhere public, get there on your own, and tell a friend where you'll be.</p>
+      <div class="ns-dp-foot">
+        ${open ? `<p><i aria-hidden="true"></i>Saved · ${name} sees your picks live</p>` : ""}
+        <button class="ns-dp-done" type="button" data-planner-close>Back to chat</button>
       </div>
-      ${open ? `
-        <form class="ns-plan-custom" data-custom="place">
-          <input name="label" maxlength="120" placeholder="Suggest your own place" aria-label="Suggest your own place" />
-          <button type="submit" ${state.saving ? "disabled" : ""}>Add</button>
-        </form>` : ""}
-      <h3>When</h3>
-      <div class="ns-plan-times">
-        ${times.map((o) => `
-          <button type="button" class="ns-plan-time ${mine(o) ? "is-picked" : ""}" data-pick="${o.id}" ${open ? "" : "disabled"} aria-pressed="${mine(o)}">
-            <strong>${escapeHtml(o.label)}</strong>
-            ${who(o)}
-          </button>`).join("")}
-      </div>
-      ${open ? `
-        <form class="ns-plan-custom" data-custom="time">
-          <input name="when" type="datetime-local" aria-label="Suggest your own day and time" />
-          <button type="submit" ${state.saving ? "disabled" : ""}>Add</button>
-        </form>` : ""}
-      <p class="ns-plan-safety">Always meet somewhere public, get there on your own, and tell a friend where you'll be.</p>
-      <button class="ns-btn-primary ns-planner-done" type="button" data-planner-close>Back to chat</button>
     </div>
   `;
 }
@@ -2907,6 +2959,11 @@ function bindAppEvents() {
     rerenderChat();
   });
   document.querySelectorAll("[data-pick]").forEach((button) => button.addEventListener("click", () => togglePick(button.dataset.pick)));
+  document.querySelector("[data-open-other-time]")?.addEventListener("click", () => {
+    state.planOtherTime = !state.planOtherTime;
+    rerenderChat();
+    if (state.planOtherTime) document.querySelector('.ns-dp-other input')?.focus();
+  });
   document.querySelectorAll("[data-custom]").forEach((form) => form.addEventListener("submit", (event) => {
     event.preventDefault();
     addPlanOption(form.dataset.custom, form);
