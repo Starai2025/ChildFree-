@@ -9,7 +9,7 @@ Backend follow-ups and evidence: [October 15 delivery](NO_SEEDS_BACKEND_DELIVERY
 | Part | Path |
 |---|---|
 | SQL (tables, statuses, rules, row-level security, private bucket) | `supabase/migrations/202610120001_public_beta_profiles.sql` |
-| Founder review endpoint (service role + passcode, server-side only) | `supabase/functions/admin-review/index.ts` |
+| Founder review endpoint (verified founder JWT + live TOTP MFA) | `supabase/functions/admin-review/index.ts` |
 | Automated database checks | `tests/public-beta-sql.mjs` |
 
 This sits beside the earlier Expo onboarding schema (`private.*`, `api_*` functions); nothing is shared or renamed.
@@ -33,14 +33,13 @@ This sits beside the earlier Expo onboarding schema (`private.*`, `api_*` functi
 
 ## Environment variables
 
-**Only two values ever go into the frontend.** The service-role key bypasses every security rule above, and the admin passcode unlocks review. In a browser, anyone can read both with View Source, so they live only in Supabase's server-side secrets.
+**Only the project URL and publishable key go into the frontend.** The service-role key remains server-side. Shared admin passcodes are retired; review uses an explicitly provisioned founder Auth UUID plus a live TOTP AAL2 session. See [security rollout](NO_SEEDS_SECURITY_20261016.md).
 
 | Variable | Where it goes | Value |
 |---|---|---|
 | `SUPABASE_URL` | Frontend (public) and Edge Function (set automatically) | Project Settings → API → Project URL |
 | `SUPABASE_ANON_KEY` | Frontend (public) | Project Settings → API → `anon` / publishable key |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Edge Function only** (set automatically by Supabase) | Never in frontend code, `.env` files the site serves, or Git |
-| `ADMIN_PASSCODE` | **Edge Function secret only** | 24+ random characters, e.g. from a password manager |
 | `ALLOWED_ORIGINS` | Edge Function secret | Your site origin(s), comma-separated, e.g. `https://freemidnight.com` |
 
 Frontend `.env` (or the equivalent for your host):
@@ -48,7 +47,7 @@ Frontend `.env` (or the equivalent for your host):
     SUPABASE_URL=https://YOUR-PROJECT.supabase.co
     SUPABASE_ANON_KEY=YOUR-ANON-KEY
 
-The founder's review page asks for the passcode when it opens and sends it to the `admin-review` function in the `x-admin-passcode` header. The passcode is never stored in the site's code.
+The founder signs in at `/review.html` and verifies an authenticator code. The Edge function validates the bearer JWT and current Auth user; database functions check the founder allowlist, verified TOTP factor and live session on every action. No legacy-passcode fallback exists.
 
 ## Setup steps
 
@@ -62,20 +61,20 @@ The founder's review page asks for the passcode when it opens and sends it to th
 
        supabase login
        supabase link --project-ref YOUR-PROJECT-REF
-       supabase secrets set ADMIN_PASSCODE='paste-24+-random-characters' ALLOWED_ORIGINS='https://your-beta-site'
+       supabase secrets set ALLOWED_ORIGINS='https://noseedsdatingsite.com,https://www.noseedsdatingsite.com,https://no-seeds-dating.onrender.com'
        supabase functions deploy admin-review --no-verify-jwt
 
-   `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided to Edge Functions automatically. `--no-verify-jwt` is right here: the passcode, not a member login, authorises this endpoint.
+   `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are provided automatically. The gateway setting is disabled for compatibility with Supabase signing keys; the function itself verifies JWT signatures with `getClaims`, verifies the Auth user, and requires the database founder/MFA gate. Apply all web-beta migrations, including 202610160001, before granting founder access. Add the exact `/review.html` URLs to Auth redirect URLs if the founder wants direct OAuth/email return to review.
 5. **Uploading photos from the frontend:**
    - Re-encode each photo through a canvas before upload. This strips location (EXIF) data, which the beta promises.
    - Upload to `profile-photos` at `<user id>/<random name>.jpg`.
    - Insert a `profile_photos` row with that `storage_path` and a slot `position` from 0 to 5.
    - To show the applicant their own photos, call `createSignedUrl` on the path.
 6. **Founder review:**
-   - `POST https://YOUR-PROJECT.supabase.co/functions/v1/admin-review` with header `x-admin-passcode`:
+   - `POST https://YOUR-PROJECT.supabase.co/functions/v1/admin-review` with `Authorization: Bearer <founder AAL2 access token>`:
      - `{"action":"queue"}` returns submitted profiles, oldest first, with signed photo links.
      - `{"action":"decide","profile_id":"…","decision":"approved"|"changes_requested"|"removed","note":"…"}` records a decision. A note is required for `changes_requested`.
-   - Every decision is kept in `admin_reviews`.
+   - Every decision is kept in `admin_reviews` with `reviewer_id`; other founder actions are recorded privately. Add invitations in the review page before approving. No invitation emails are sent automatically.
 
 ## Frontend calls (supabase-js v2, anon key)
 
@@ -86,6 +85,7 @@ The founder's review page asks for the passcode when it opens and sends it to th
     // save a draft (any subset of fields)
     await supabase.from('profiles').update({ first_name, city, prompts }).eq('id', user.id)
     // submit for review (the database reports anything missing)
+    // First show explicit agreement checkboxes and call accept_agreements; never forge a pledge timestamp.
     const { error } = await supabase.from('profiles').update({ status: 'submitted' }).eq('id', user.id)
 
 ## Test checklist
@@ -113,7 +113,7 @@ These 8 checks cover:
 | 2 | Save profile | Fill in name, birthday, gender, who to meet, city, ZIP, goal, two prompts, eligibility, pledge; save; upload one photo | Row updated; `profile_photos` has 1 row; the file is in `profile-photos/<user id>/` |
 | 3 | Reload profile | Sign out, sign back in with the same email | The same profile and photo come back; nothing to re-enter |
 | 4 | Submit profile | Press Submit; then try submitting a second account with prompts missing | First: status `submitted` with `submitted_at` set. Second: error "profile is incomplete: at least two prompts" |
-| 5 | Admin review | Call `admin-review` with the passcode: `queue`, then `decide` → `changes_requested` with a note, then the applicant resubmits, then `approved` | Applicant sees the note while changes are requested; status ends `approved`; 2 rows in `admin_reviews`. A wrong passcode returns 401 |
+| 5 | Admin review | As the MFA-verified founder, invite the confirmed email and review a fully eligible applicant with recorded agreements | Named decisions are audited; uninvited approvals fail; legacy passcodes, ordinary members and AAL1 founders are refused |
 | 6 | Unauthorized user cannot read another profile | Signed in as applicant B, run `supabase.from('profiles').select('*').eq('id', '<A id>')`; signed out, run `supabase.from('profiles').select('*')`; as B, try `supabase.storage.from('profile-photos').download('<A id>/…')` | B gets `[]`; signed-out gets a permission error or `[]`; the photo download is refused |
 | 7 | No self-approval | As an applicant, run `update({ status: 'approved' })` | Error: "applicants cannot change status" |
 

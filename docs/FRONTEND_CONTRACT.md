@@ -2,7 +2,7 @@
 
 For the member app (Codex). Everything below uses **supabase-js v2 with the public key only**. The database enforces every rule, so the app never needs, and must never contain:
 - the service-role key
-- the admin passcode
+- shared admin credentials (review now uses the founder's own MFA-protected login)
 - calls to `admin-review`
 
 ## Connection (public values, safe in the browser)
@@ -33,7 +33,7 @@ Render publishes `prototype/no-seeds-public-beta/dist` from `handoff/free-midnig
 | `approved` | Discover, Matches, Chat, Profile |
 | `removed` | Account removed notice; no editing |
 
-Discover, Matches and Chat calls return nothing, or are refused, unless the member is `approved`. Gate the UI on status rather than relying on errors.
+Discover, Matches and Chat calls return nothing, or are refused, unless the member is approved, still invited, has a confirmed account email, is fully eligible and has recorded current agreements. Status alone cannot grant server access. See [security contract](NO_SEEDS_SECURITY_20261016.md).
 
 ## Profile (own row only)
 
@@ -59,7 +59,7 @@ Discover, Matches and Chat calls return nothing, or are refused, unless the memb
 | `interests` | text[] | At most 6 |
 | `compatibility` | jsonb | The 10 "life you'd share" answers, by question id |
 | `eligibility` | jsonb | The sign-up eligibility answers (private) |
-| `pledge_accepted_at` | timestamptz | Set when the pledge is accepted |
+| `pledge_accepted_at` | timestamptz (read only) | Server timestamp from `accept_agreements`; omit from member patches |
 
 **Read-only for the app:** `status`, `submitted_at`, `reviewed_at`, `review_note`.
 

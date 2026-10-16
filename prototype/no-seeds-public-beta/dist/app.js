@@ -1,5 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 import { profilePatch, startAccount, startGoogle, saveDraftToServer, submitProfile, mergeDrafts, hasUnsavedAnswers, resumeStep, accountLanding, draftForAccount, friendlyAuthError } from "./onboarding-sync.js";
+import { ensureAgreements } from "./agreements.js";
 
 const SUPABASE_URL = "https://btnrophnyfuwnqzwiooh.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7bUb95CMiZ7AVoXqJWsE5Q_TZZDlxBw";
@@ -211,6 +212,7 @@ async function init() {
     // Token refreshes and tab refocus keep the same person signed in: don't redraw and wipe what they're typing.
     if (sameUser && event !== "USER_UPDATED") return;
     if (!sameUser) {
+      state.saving = false;
       state.publicProfile = loadPublicDraft(state.user);
       state.publicGateOpen = false;
       state.signInOpen = false;
@@ -691,9 +693,30 @@ async function savePublicApplication(form, { submit = false, advance = false } =
       renderAuth();
       return;
     }
+    const submitUserId = state.user.id;
+    const submittedDraft = structuredClone(state.publicProfile);
     state.saving = true;
     renderAuth();
-    const error = await submitProfile(supabase, state.user.id, state.publicProfile);
+    try {
+      const draftError = await saveDraftToServer(supabase, submitUserId, submittedDraft);
+      if (draftError) throw new Error(draftError.message);
+      if (state.user?.id !== submitUserId) return;
+      if (!await ensureAgreements(supabase, app, { userId: submitUserId, url: SUPABASE_URL, key: SUPABASE_ANON_KEY })) {
+        if (state.user?.id !== submitUserId) return;
+        state.saving = false;
+        renderAuth();
+        return;
+      }
+    } catch (error) {
+      if (state.user?.id !== submitUserId) return;
+      state.saving = false;
+      state.error = error.message;
+      renderAuth();
+      return;
+    }
+    if (state.user?.id !== submitUserId) return;
+    const error = await submitProfile(supabase, submitUserId, submittedDraft);
+    if (state.user?.id !== submitUserId) return;
     state.saving = false;
     if (error) {
       state.error = error.message;

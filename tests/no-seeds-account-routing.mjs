@@ -167,10 +167,12 @@ await check('pre-signup answers survive for their intended account, including Go
 await check('session expiry or sign-out in another tab closes the previous account editor', async () => {
   const h = harness(); await h.init(); h.click('#continue-setup');
   assert.match(h.html(), /editor:9/);
+  h.state.saving = true;
   await h.authChange('SIGNED_OUT', null);
   assert.equal(h.html(), 'welcome'); assert.equal(h.state.user, null);
   assert.equal(h.state.publicProfile.first_name, undefined); assert.equal(h.state.publicGateOpen, false);
   assert.equal(h.state.setupOverview, false); assert.equal(h.state.signInOpen, false);
+  assert.equal(h.state.saving, false, 'abandoned consent/submission cannot keep a new session busy');
 });
 await check('same-account token refresh preserves unsaved edits and the current screen', async () => {
   const h = harness(); await h.init(); h.click('#continue-setup'); h.state.publicStep = 3;

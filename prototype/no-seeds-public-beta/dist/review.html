@@ -14,12 +14,17 @@
   <body class="ns-legal-body">
     <main class="ns-review" id="review"></main>
     <script type="module">
-      // Founder review. Everything goes through the admin-review Edge Function, which checks the
-      // passcode on the server. The passcode is kept only in this tab (sessionStorage) and never in code.
+      import { founderClient, renderFounderLogin } from "./founder-auth.js";
+      // Every request requires a verified founder session with TOTP MFA on the server.
       const FUNCTION_URL = "https://btnrophnyfuwnqzwiooh.supabase.co/functions/v1/admin-review";
-      const KEY = "noSeedsReviewPasscode";
       const root = document.querySelector("#review");
-      const state = { passcode: read(), tab: "applicants", profiles: [], reports: [], photos: {}, busy: "", note: {}, open: {}, error: "", toast: "" };
+      const state = { unlocked: false, tab: "applicants", profiles: [], reports: [], invitations: [], photos: {}, busy: "", note: {}, open: {}, error: "", toast: "" };
+      let authEpoch = 0;
+      let founderId = null;
+      function lockReview() {
+        authEpoch++; founderId = null;
+        Object.assign(state, { unlocked: false, profiles: [], reports: [], invitations: [], photos: {}, note: {}, open: {}, busy: "", toast: "" });
+      }
 
       const PLEDGE = {
         black: "Joining a community built for Black singles",
@@ -30,30 +35,41 @@
         respect: "Won't pressure anyone to change their choice",
       };
 
-      function read() { try { return sessionStorage.getItem(KEY) || ""; } catch { return ""; } }
-      function save(v) { try { v ? sessionStorage.setItem(KEY, v) : sessionStorage.removeItem(KEY); } catch { /* private mode */ } }
       const esc = (v = "") => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
       const age = (dob) => { if (!dob) return ""; const d = new Date(`${dob}T00:00:00`), n = new Date(); let a = n.getFullYear() - d.getFullYear(); if (n < new Date(n.getFullYear(), d.getMonth(), d.getDate())) a--; return a; };
       const when = (ts) => ts ? new Date(ts).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
 
       async function call(action, extra = {}) {
+        const epoch = authEpoch;
+        const actor = founderId;
+        const { data: auth, error } = await founderClient.auth.getSession();
+        if (error || !actor || !auth.session || auth.session.user.id !== actor || epoch !== authEpoch) {
+          lockReview(); throw new Error("Sign in to your founder account again.");
+        }
         const res = await fetch(FUNCTION_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-admin-passcode": state.passcode },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${auth.session.access_token}` },
           body: JSON.stringify({ action, ...extra }),
         });
         const data = await res.json().catch(() => ({}));
-        if (res.status === 401) { state.passcode = ""; save(""); throw new Error("That passcode didn't work."); }
+        if (epoch !== authEpoch || actor !== founderId) throw new Error("Founder session changed. Sign in again.");
+        if (res.status === 401 || res.status === 403) {
+          lockReview();
+          throw new Error(data.error || "Sign in again and verify your authenticator.");
+        }
         if (!res.ok) throw new Error(data.error || `Something went wrong (${res.status}).`);
         return data;
       }
 
       async function load() {
+        const epoch = authEpoch;
         state.busy = "load"; state.error = ""; render();
         try {
-          const [q, r] = await Promise.all([call("queue"), call("reports")]);
+          const [q, r, i] = await Promise.all([call("queue"), call("reports"), call("invitations")]);
+          if (!state.unlocked || epoch !== authEpoch) return;
           state.profiles = q.profiles || [];
           state.reports = r.reports || [];
+          state.invitations = i.invitations || [];
         } catch (e) { state.error = e.message; }
         state.busy = ""; render();
       }
@@ -61,11 +77,13 @@
       function toast(text) { state.toast = text; render(); setTimeout(() => { if (state.toast === text) { state.toast = ""; render(); } }, 3000); }
 
       async function decide(id, decision) {
+        const epoch = authEpoch;
         const note = (state.note[id] || "").trim();
         if (decision === "changes_requested" && !note) { state.open[id] = "changes"; state.error = "Write what they should change."; return render(); }
         state.busy = id; state.error = ""; render();
         try {
           await call("decide", { profile_id: id, decision, note: note || null });
+          if (epoch !== authEpoch) return;
           const person = state.profiles.find((p) => p.id === id);
           state.profiles = state.profiles.filter((p) => p.id !== id);
           toast(`${person?.first_name || "Member"} ${decision === "approved" ? "approved" : decision === "removed" ? "declined" : "asked for changes"}.`);
@@ -75,9 +93,11 @@
 
       async function removePhoto(photoId, ownerId) {
         if (!confirm("Remove this photo permanently? This can't be undone.")) return;
+        const epoch = authEpoch;
         state.busy = photoId; render();
         try {
           await call("remove_photo", { photo_id: photoId });
+          if (epoch !== authEpoch) return;
           state.profiles.forEach((p) => { p.profile_photos = (p.profile_photos || []).filter((ph) => ph.id !== photoId); });
           if (state.photos[ownerId]) state.photos[ownerId] = state.photos[ownerId].filter((ph) => ph.id !== photoId);
           toast("Photo removed.");
@@ -86,16 +106,19 @@
       }
 
       async function showPhotos(profileId) {
+        const epoch = authEpoch;
         state.busy = `photos-${profileId}`; render();
-        try { state.photos[profileId] = (await call("member_photos", { profile_id: profileId })).photos || []; }
+        try { const data = await call("member_photos", { profile_id: profileId }); if (epoch === authEpoch) state.photos[profileId] = data.photos || []; }
         catch (e) { state.error = e.message; }
         state.busy = ""; render();
       }
 
       async function resolve(id, status) {
+        const epoch = authEpoch;
         state.busy = id; render();
         try {
           await call("resolve_report", { report_id: id, status, note: (state.note[id] || "").trim() || null });
+          if (epoch !== authEpoch) return;
           state.reports = state.reports.filter((r) => r.id !== id);
           toast(status === "actioned" ? "Report closed: action taken." : "Report closed: reviewed.");
         } catch (e) { state.error = e.message; }
@@ -177,22 +200,8 @@
       }
 
       function render() {
-        if (!state.passcode) {
-          root.innerHTML = `
-            <section class="ns-rv-hero"><p class="ns-rv-brand"><img src="./assets/no-seeds-emblem.png" alt="" /> No Seeds</p><h1>Review</h1><p>Founder access only.</p></section>
-            <form class="ns-rv-sheet ns-rv-login" id="login">
-              ${state.error ? `<p class="ns-rv-error">${esc(state.error)}</p>` : ""}
-              <label for="passcode">Admin passcode</label>
-              <input id="passcode" type="password" autocomplete="current-password" required />
-              <button type="submit" class="ns-btn-primary">Unlock</button>
-              <p class="ns-rv-muted">Remembered only until you close this tab.</p>
-            </form>`;
-          root.querySelector("#login").addEventListener("submit", (e) => {
-            e.preventDefault();
-            state.passcode = root.querySelector("#passcode").value.trim();
-            save(state.passcode);
-            load();
-          });
+        if (!state.unlocked) {
+          renderFounderLogin(root, state.error, async (userId) => { founderId = userId; authEpoch++; state.unlocked = true; await load(); });
           return;
         }
         const list = state.tab === "applicants" ? state.profiles : state.reports;
@@ -209,6 +218,11 @@
           </section>
           <section class="ns-rv-sheet">
             ${state.error ? `<p class="ns-rv-error">${esc(state.error)}</p>` : ""}
+            <details><summary>Beta invitations (${state.invitations.filter((i) => !i.revoked_at).length} active)</summary>
+              <p>Only invited, confirmed accounts may be approved. Maximum 50 approved members. Adding an invitation does not send an email.</p>
+              <form id="invite-member"><label>Email<input name="email" type="email" maxlength="254" required></label><button type="submit">Add invitation</button></form>
+              ${state.invitations.map((i) => `<p>${esc(i.email)} · ${i.revoked_at ? "Revoked" : "Active"}${!i.revoked_at ? ` <button type="button" data-revoke-invite="${esc(i.email)}">Revoke</button>` : ""}</p>`).join("")}
+            </details>
             ${state.busy === "load" ? "" : list.length ? list.map(state.tab === "applicants" ? applicant : report).join("")
               : `<div class="ns-empty"><h2>${state.tab === "applicants" ? "No one waiting" : "No open reports"}</h2><p>${state.tab === "applicants" ? "New applicants appear here when they submit." : "Member reports appear here."}</p></div>`}
           </section>
@@ -218,7 +232,16 @@
 
       function bind() {
         root.querySelector("#refresh")?.addEventListener("click", load);
-        root.querySelector("#lock")?.addEventListener("click", () => { state.passcode = ""; save(""); render(); });
+        root.querySelector("#lock")?.addEventListener("click", async () => { await founderClient.auth.signOut({ scope: "local" }); window.location.reload(); });
+        root.querySelector("#invite-member")?.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = e.currentTarget.elements.email.value.trim();
+          try { await call("invite", { email }); await load(); } catch (error) { state.error = error.message; render(); }
+        });
+        root.querySelectorAll("[data-revoke-invite]").forEach((b) => b.addEventListener("click", async () => {
+          if (!confirm(`Revoke beta access for ${b.dataset.revokeInvite}?`)) return;
+          try { await call("revoke_invite", { email: b.dataset.revokeInvite }); await load(); } catch (error) { state.error = error.message; render(); }
+        }));
         root.querySelectorAll("[data-tab]").forEach((b) => b.addEventListener("click", () => { state.tab = b.dataset.tab; state.error = ""; render(); }));
         root.querySelectorAll("[data-approve]").forEach((b) => b.addEventListener("click", () => decide(b.dataset.approve, "approved")));
         root.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => { state.open[b.dataset.open] = b.dataset.kind; state.error = ""; render(); }));
@@ -230,7 +253,15 @@
         root.querySelectorAll("[data-resolve]").forEach((b) => b.addEventListener("click", () => resolve(b.dataset.resolve, b.dataset.status)));
       }
 
-      state.passcode ? load() : render();
+      founderClient.auth.onAuthStateChange((event, session) => {
+        // Decoding here can only LOCK the UI. Server verification alone authorizes requests.
+        let aal = "";
+        try { aal = JSON.parse(atob(session?.access_token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).aal; } catch { /* lock on malformed token */ }
+        if (event === "SIGNED_OUT" || (founderId && (session?.user.id !== founderId || aal !== "aal2"))) {
+          lockReview(); root.replaceChildren(); setTimeout(render, 0);
+        }
+      });
+      render();
     </script>
   </body>
 </html>

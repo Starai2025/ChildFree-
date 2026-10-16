@@ -48,7 +48,6 @@ export function profilePatch(draft = {}) {
     interests: (Array.isArray(draft.interests) ? draft.interests : []).map((i) => String(i).trim()).filter(Boolean).slice(0, 6),
     compatibility: { ...(draft.compatibility || {}) },
     eligibility: { ...(draft.eligibility || {}) },
-    pledge_accepted_at: draft.pledge_accepted_at || null,
   };
 }
 

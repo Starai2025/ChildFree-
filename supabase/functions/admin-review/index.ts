@@ -1,21 +1,11 @@
-// Founder review for the public web beta. The service-role key and ADMIN_PASSCODE stay in
-// Supabase secrets; the browser only ever sends the passcode in a header over HTTPS.
-//
-// POST { "action": "queue" }                                         -> submitted profiles + signed photo URLs
-// POST { "action": "decide", "profile_id": "...", "decision": "approved" | "changes_requested" | "removed", "note": "..." }
-// POST { "action": "reports" }                                       -> open safety reports (after migration 0003)
-// POST { "action": "resolve_report", "report_id": "...", "status": "reviewed" | "actioned", "note": "..." }
-// POST { "action": "member_photos", "profile_id": "..." }              -> one member's photos (signed URLs)
-// POST { "action": "remove_photo", "photo_id": "..." }                 -> deletes the file and its record (TAKE IT DOWN Act removals)
-// Header: x-admin-passcode: <ADMIN_PASSCODE>
+// Founder-only review: verified JWT + confirmed Auth user + live database role/session/TOTP gate.
+// No shared-passcode fallback. Browser-visible keys cannot grant founder privileges.
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
-const passcode = Deno.env.get("ADMIN_PASSCODE") ?? "";
 const allowedOrigins = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((o) => o.trim()).filter(Boolean);
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
-const DECISIONS = new Set(["approved", "changes_requested", "removed"]);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function cors(origin: string | null): Record<string, string> {
@@ -23,30 +13,50 @@ function cors(origin: string | null): Record<string, string> {
   return {
     ...(allow ? { "Access-Control-Allow-Origin": allow, Vary: "Origin" } : {}),
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "content-type, x-admin-passcode",
+    "Access-Control-Allow-Headers": "content-type, authorization, apikey, x-client-info",
   };
 }
 
-// Constant-time comparison so response timing does not reveal how much of a guess was right.
-function samePasscode(given: string): boolean {
-  const a = new TextEncoder().encode(given), b = new TextEncoder().encode(passcode);
-  let diff = a.length ^ b.length;
-  for (let i = 0; i < Math.max(a.length, b.length); i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);
-  return passcode.length >= 24 && diff === 0;
-}
-
 function reply(status: number, body: unknown, origin: string | null): Response {
-  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...cors(origin) } });
+  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...cors(origin) } });
 }
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin");
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors(origin) });
   if (req.method !== "POST") return reply(405, { error: "Use POST." }, origin);
-  if (!samePasscode(req.headers.get("x-admin-passcode") ?? "")) return reply(401, { error: "Not authorized." }, origin);
+  if (origin && !allowedOrigins.includes(origin)) return reply(403, { error: "Origin not allowed." }, origin);
+  const authorization = req.headers.get("authorization") ?? "";
+  const token = /^Bearer\s+(\S+)$/i.exec(authorization)?.[1];
+  if (!token) return reply(401, { error: "Founder sign-in required." }, origin);
+  const member = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    global: { headers: { Authorization: authorization } },
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  // getClaims verifies the JWT signature; getUser also checks the current Auth account.
+  const { data: claims, error: claimsError } = await member.auth.getClaims(token);
+  if (claimsError || claims?.claims?.role !== "authenticated" || claims.claims.aal !== "aal2") {
+    return reply(401, { error: "Founder sign-in with MFA required." }, origin);
+  }
+  const { data: identity, error: userError } = await member.auth.getUser(token);
+  if (userError || !identity?.user?.email_confirmed_at || identity.user.id !== claims.claims.sub) {
+    return reply(401, { error: "Confirmed founder sign-in required." }, origin);
+  }
+  const { data: access, error: accessError } = await member.rpc("founder_access");
+  if (accessError || access?.founder !== true || access?.mfa !== true) {
+    return reply(403, { error: "Founder access and an active MFA session are required." }, origin);
+  }
 
   let body: { action?: string; profile_id?: string; decision?: string; note?: string };
   try { body = await req.json(); } catch { return reply(400, { error: "Send JSON." }, origin); }
+  if (!body || typeof body !== "object" || Array.isArray(body)) return reply(400, { error: "Send a JSON object." }, origin);
+  const actions = new Set(["queue", "reports", "member_photos", "decide", "resolve_report", "remove_photo", "invitations", "invite", "revoke_invite"]);
+  if (!body.action || !actions.has(body.action)) return reply(400, { error: "Unknown action." }, origin);
+  // Every action rechecks the database authorization and records the verified actor.
+  const rpcAction = body.action === "remove_photo" ? "authorize_photo_removal" : body.action;
+  const { data: authorized, error: actionError } = await member.rpc("founder_action", { p_action: rpcAction, p_payload: body });
+  if (actionError) return reply(actionError.code === "42501" ? 403 : 409, { error: actionError.message }, origin);
+  if (["decide", "resolve_report", "invitations", "invite", "revoke_invite"].includes(body.action)) return reply(200, authorized, origin);
 
   if (body.action === "queue") {
     const { data: profiles, error } = await admin
@@ -73,17 +83,6 @@ Deno.serve(async (req) => {
     }, origin);
   }
 
-  if (body.action === "decide") {
-    if (!body.profile_id || !UUID.test(body.profile_id)) return reply(400, { error: "profile_id must be a UUID." }, origin);
-    if (!body.decision || !DECISIONS.has(body.decision)) return reply(400, { error: "decision must be approved, changes_requested or removed." }, origin);
-    const note = typeof body.note === "string" ? body.note.trim().slice(0, 1000) : null;
-    if (body.decision === "changes_requested" && !note) return reply(400, { error: "Say what needs to change." }, origin);
-    // One insert; the admin_reviews trigger applies the decision to the profile in the same transaction.
-    const { error } = await admin.from("admin_reviews").insert({ profile_id: body.profile_id, decision: body.decision, note });
-    if (error) return reply(409, { error: error.message }, origin);
-    return reply(200, { ok: true }, origin);
-  }
-
   if (body.action === "reports") {
     const { data, error } = await admin
       .from("reports")
@@ -93,17 +92,6 @@ Deno.serve(async (req) => {
       .limit(100);
     if (error) return reply(500, { error: error.message }, origin);
     return reply(200, { reports: data }, origin);
-  }
-
-  if (body.action === "resolve_report") {
-    const { report_id, status, note } = body as { report_id?: string; status?: string; note?: string };
-    if (!report_id || !UUID.test(report_id)) return reply(400, { error: "report_id must be a UUID." }, origin);
-    if (status !== "reviewed" && status !== "actioned") return reply(400, { error: "status must be reviewed or actioned." }, origin);
-    const { error } = await admin.from("reports")
-      .update({ status, resolved_at: new Date().toISOString(), resolution_note: typeof note === "string" ? note.trim().slice(0, 1000) : null })
-      .eq("id", report_id);
-    if (error) return reply(409, { error: error.message }, origin);
-    return reply(200, { ok: true }, origin);
   }
 
   if (body.action === "member_photos") {
@@ -118,12 +106,10 @@ Deno.serve(async (req) => {
   if (body.action === "remove_photo") {
     const { photo_id } = body as { photo_id?: string };
     if (!photo_id || !UUID.test(photo_id)) return reply(400, { error: "photo_id must be a UUID." }, origin);
-    const { data: photo, error: findError } = await admin.from("profile_photos").select("id, storage_path").eq("id", photo_id).maybeSingle();
-    if (findError) return reply(500, { error: findError.message }, origin);
-    if (!photo) return reply(404, { error: "That photo is already gone." }, origin);
-    const { error: storageError } = await admin.storage.from("profile-photos").remove([photo.storage_path]);
+    if (!authorized?.storage_path) return reply(404, { error: "That photo is already gone." }, origin);
+    const { error: storageError } = await admin.storage.from("profile-photos").remove([authorized.storage_path]);
     if (storageError) return reply(500, { error: storageError.message }, origin);
-    const { error: rowError } = await admin.from("profile_photos").delete().eq("id", photo.id);
+    const { error: rowError } = await member.rpc("founder_action", { p_action: "finish_photo_removal", p_payload: { photo_id } });
     if (rowError) return reply(500, { error: rowError.message }, origin);
     return reply(200, { ok: true }, origin);
   }

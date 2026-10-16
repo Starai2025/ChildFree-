@@ -36,7 +36,7 @@ await check('profilePatch only sends member-writable columns and cleans bad valu
   assert.deepEqual([patch.age_min, patch.age_max], [30, 70], 'inverted range is swapped');
   assert.equal(patch.zip, '30303');
   assert.deepEqual(patch.prompts, [{id: 'a', answer: 'yes'}]);
-  for (const key of ['email', 'status', 'link_sent_to', 'id']) assert.ok(!(key in patch), `${key} must never be written`);
+  for (const key of ['email', 'status', 'link_sent_to', 'id', 'pledge_accepted_at']) assert.ok(!(key in patch), `${key} must never be written`);
 });
 
 await check('mergeDrafts keeps saved answers and fills gaps from the phone', () => {

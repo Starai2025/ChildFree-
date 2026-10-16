@@ -8,4 +8,4 @@ Do not deploy to ChatGPT Sites. Any retained `.openai` hosting metadata is histo
 
 Before each push, run `git pull --rebase`, account-routing, onboarding-sync, photo-upload and all public-beta SQL suites in `tests/`, plus focused tests for the change. Never force push or change main. Every push goes live; coordinate changes accordingly. Claude owns `dist/app.js` and `dist/styles.css`; keep necessary backend integration edits small and describe them in the commit.
 
-See [account routing](../../docs/NO_SEEDS_ACCOUNT_ENTRY.md), [backend](../../docs/PUBLIC_BETA_BACKEND.md), [SMTP setup](../../docs/NO_SEEDS_SMTP_SETUP.md) and [Google Places rollout](../../docs/NO_SEEDS_GOOGLE_PLACES.md). Service-role keys and the admin passcode must never enter frontend files.
+See [account routing](../../docs/NO_SEEDS_ACCOUNT_ENTRY.md), [backend](../../docs/PUBLIC_BETA_BACKEND.md), [SMTP setup](../../docs/NO_SEEDS_SMTP_SETUP.md), [Google Places rollout](../../docs/NO_SEEDS_GOOGLE_PLACES.md) and [founder MFA / invitation security](../../docs/NO_SEEDS_SECURITY_20261016.md). Service-role keys must never enter frontend files; shared admin passcodes are retired.
