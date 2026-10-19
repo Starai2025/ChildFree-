@@ -4837,3 +4837,16 @@ body:has(.ns-step), .auth-journey:has(.ns-step) { background: #f3ece2; }
 .ns-preview-tags span.is-promise svg { color: #b8892a; }
 .ns-preview-tags span:not(.is-promise) { border: 1px solid rgba(15, 92, 77, 0.22); background: transparent; }
 .ns-review-ready { border-color: rgba(184, 137, 42, 0.4); background: rgba(243, 213, 143, 0.16); color: #4a3510; }
+
+/* ---------- Community agreements (shown when a member submits) ---------- */
+.ns-agree { display: grid; align-content: start; gap: 14px; padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
+.ns-agree h1 { margin: 18px 0 0; font-family: var(--font-display); font-size: 34px; font-weight: 600; line-height: 1.1; color: var(--emerald); }
+.ns-agree h1 em { font-style: italic; font-weight: 500; color: #b8892a; }
+.ns-agree .account-tagline { margin: 0; }
+.ns-agree .clause-card a { color: var(--emerald); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.ns-agree .pledge-card a { color: #f3d58f; }
+.ns-agree-error:empty { display: none; }
+.ns-agree-error { margin: 0; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(138, 51, 36, 0.3); background: rgba(138, 51, 36, 0.08); color: #6e2116; font-size: 14px; }
+.ns-agree .ns-btn-quiet { justify-self: center; min-height: 44px; color: rgba(25, 21, 18, 0.65); }
+/* Keep the pledge strip emerald when it's ticked (the generic checked-card style was overriding it). */
+.ns-pledge-step .clause-card.pledge-card:has(input:checked) { border-bottom: 0; background: linear-gradient(160deg, #13604f, #0a3a30); }

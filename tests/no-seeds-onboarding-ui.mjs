@@ -15,6 +15,7 @@ let row = null;
 const otpRequests = [];
 const googleRequests = [];
 const patches = [];
+let agreementsAccepted = false;
 const newRow = (first_name, birth_date) => ({id: USER.id, status: 'draft', first_name, birth_date, gender: null, seeking: [], age_min: 25, age_max: 60,
   city: null, zip: null, relationship_goal: null, marriage_view: null, bio: null, prompts: [], basics: {}, interests: [], compatibility: {}, eligibility: {},
   pledge_accepted_at: null, review_note: null, profile_photos: []});
@@ -42,6 +43,15 @@ async function fakeSupabase(route) {
   }
   if (url.pathname === '/auth/v1/token') return json(200, JSON.parse(fakeSession()));
   if (url.pathname === '/auth/v1/user') return json(200, USER);
+  // Agreements: nothing is accepted until the member accepts on the agreements screen.
+  if (url.pathname === '/rest/v1/rpc/agreement_status') return json(200, {version: '2026-10-16.1', accepted: agreementsAccepted});
+  if (url.pathname === '/rest/v1/rpc/accept_agreements') {
+    const body = request.postDataJSON();
+    assert.equal(body.p_version, '2026-10-16.1');
+    assert.ok(Object.values(body.p_answers).every((v) => v === true) && body.p_terms && body.p_privacy && body.p_pledge, 'every agreement is explicitly accepted');
+    agreementsAccepted = true;
+    return json(200, {accepted: true});
+  }
   if (url.pathname === '/rest/v1/profiles' && request.method() === 'GET') return json(200, row ? [row] : []);
   if (url.pathname === '/rest/v1/profiles' && request.method() === 'PATCH') {
     assert.equal(url.searchParams.get('id'), `eq.${USER.id}`, 'only the member\'s own row is written');
@@ -165,7 +175,11 @@ try {
     await page.click('#continue-setup');
     await page.waitForSelector('text=Submit for review');
     await page.click('button[data-action=submit]');
-    await page.waitForFunction(() => !document.querySelector('#intake-form'));
+    await page.waitForSelector('#agreement-consent');
+    assert.equal(row.status, 'draft', 'nothing is submitted before the agreements are accepted');
+    for (const box of await page.$$('#agreement-consent input[type=checkbox]')) await box.check();
+    await page.click('#agreement-consent button[type=submit]');
+    await page.waitForFunction(() => !document.querySelector('#intake-form') && !document.querySelector('#agreement-consent'));
     assert.equal(patches.at(-1).status, 'submitted');
     assert.equal(row.status, 'submitted');
     await page.reload();
