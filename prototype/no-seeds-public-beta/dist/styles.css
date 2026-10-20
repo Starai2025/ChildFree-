@@ -4850,3 +4850,4 @@ body:has(.ns-step), .auth-journey:has(.ns-step) { background: #f3ece2; }
 .ns-agree .ns-btn-quiet { justify-self: center; min-height: 44px; color: rgba(25, 21, 18, 0.65); }
 /* Keep the pledge strip emerald when it's ticked (the generic checked-card style was overriding it). */
 .ns-pledge-step .clause-card.pledge-card:has(input:checked) { border-bottom: 0; background: linear-gradient(160deg, #13604f, #0a3a30); }
+.ns-save-later { justify-self: center; min-height: 44px; margin-top: 2px; color: rgba(25, 21, 18, 0.62); }

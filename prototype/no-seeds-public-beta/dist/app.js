@@ -1669,6 +1669,7 @@ function renderGenderLookingForStep(p) {
         </div>
       </div>
       <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      ${state.user ? `<button class="ns-btn-quiet ns-save-later" type="submit" data-action="save" formnovalidate ${state.saving ? "disabled" : ""}>Save and finish later</button>` : ""}
       </div>
     </form>
   `;
@@ -1728,6 +1729,7 @@ function renderLocationAgeStep(p) {
       </div>
       <button class="ns-btn-quiet ns-location-button" type="button" data-use-current-location ${state.saving ? "disabled" : ""}>Use my current area once</button>
       <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      ${state.user ? `<button class="ns-btn-quiet ns-save-later" type="submit" data-action="save" formnovalidate ${state.saving ? "disabled" : ""}>Save and finish later</button>` : ""}
     </form>
   `;
 }
@@ -1760,6 +1762,7 @@ function renderRelationshipIntentionsStep(p) {
       </div>
       ${intentSelect("spendingStyle", "Spending style", p.basics?.spendingStyle, SPENDING_OPTIONS, false)}
       <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>Continue</span><svg class="ns-cta-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      ${state.user ? `<button class="ns-btn-quiet ns-save-later" type="submit" data-action="save" formnovalidate ${state.saving ? "disabled" : ""}>Save and finish later</button>` : ""}
     </form>
   `;
 }
@@ -1799,6 +1802,7 @@ function renderNoKidsClauseStep(p) {
         </section>
       </div>
       <button class="ns-btn-primary account-continue" type="submit" data-action="next" ${state.saving ? "disabled" : ""}><span>I agree to the pledge</span>${CTA_ARROW}</button>
+      ${state.user ? `<button class="ns-btn-quiet ns-save-later" type="submit" data-action="save" formnovalidate ${state.saving ? "disabled" : ""}>Save and finish later</button>` : ""}
     </form>
   `;
 }
